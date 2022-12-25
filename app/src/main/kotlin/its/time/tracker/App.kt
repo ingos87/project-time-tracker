@@ -3,13 +3,10 @@
  */
 package its.time.tracker
 
-class App {
-    val greeting: String
-        get() {
-            return "Hello World!"
-        }
+object App {
+    const val appName = "DBS CLI App"
+    const val version = "0.0.1"
 }
-
-fun main() {
-    println(App().greeting)
+fun main(args: Array<String>) {
+    println("${App.appName}:: ${App.version}")
 }
