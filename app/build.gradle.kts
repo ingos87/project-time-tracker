@@ -21,8 +21,8 @@ plugins {
 }
 
 repositories {
-    // Use Maven Central for resolving dependencies.
     mavenCentral()
+    maven("https://dl.bintray.com/kotlin/kotlinx/")
 }
 
 dependencies {
@@ -37,6 +37,7 @@ dependencies {
 
     // This dependency is used by the application.
     implementation("com.google.guava:guava:31.1-jre")
+    implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.5")
 }
 
 application {
