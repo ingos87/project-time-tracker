@@ -26,11 +26,14 @@ repositories {
 }
 
 dependencies {
+    implementation("io.kotest:kotest-runner-junit5-jvm:4.6.0")
+
     // Use the Kotlin JUnit 5 integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 
     // Use the JUnit 5 integration.
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.1")
+    testImplementation("com.github.stefanbirkner:system-lambda:1.2.0")
 
     // This dependency is used by the application.
     implementation("com.google.guava:guava:31.1-jre")
