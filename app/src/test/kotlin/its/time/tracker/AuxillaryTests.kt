@@ -8,23 +8,7 @@ class AuxillaryTests : FunSpec({
 
     test("getVersion") {
         val output = tapSystemOut {
-            main(arrayOf<String>("-v"))
-        }
-
-        output shouldBe "ITS TimeTracker App:: 0.0.1\n"
-    }
-
-    test("getConfig") {
-        val output = tapSystemOut {
-            main(arrayOf<String>("-c"))
-        }
-
-        output shouldBe "some day, I will list the config params here\n"
-    }
-
-    test("getVersion will overwrite getConfig") {
-        val output = tapSystemOut {
-            main(arrayOf<String>("-v", "-c"))
+            main(arrayOf<String>("version"))
         }
 
         output shouldBe "ITS TimeTracker App:: 0.0.1\n"

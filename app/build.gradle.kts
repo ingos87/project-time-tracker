@@ -37,7 +37,7 @@ dependencies {
 
     // This dependency is used by the application.
     implementation("com.google.guava:guava:31.1-jre")
-    implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.5")
+    implementation("com.github.ajalt.clikt:clikt:3.5.0")
 }
 
 application {

@@ -8,6 +8,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -17,7 +18,7 @@ import java.time.format.DateTimeFormatter
 
 private const val TEST_CSV_PATH = "/Users/tollpatsch/its_times.csv"
 
-class ClockOutTests : FunSpec({
+class ClockInTests : FunSpec({
 
     beforeEach {
         val path = Paths.get(TEST_CSV_PATH)
@@ -32,58 +33,61 @@ class ClockOutTests : FunSpec({
         }
     }
 
-    test("clock-out is saved with current time") {
+    test("clock-in is saved with current time") {
         val output = tapSystemOut {
-            main(arrayOf<String>("feierabend"))
+            main(arrayOf<String>("clock-in", "-tEPP-007"))
         }
 
-        output shouldStartWith "clock-out saved: 20"
-        output.length shouldBeExactly 31
+        output shouldStartWith "clock-in for topic 'EPP-007' saved: 20"
+        output.length shouldBeExactly 50
     }
 
-    test("clock-out is saved with manual time") {
+    test("clock-in is saved with manual time") {
         val output = tapSystemOut {
-            main(arrayOf<String>("feierabend", "--datetime=20221223_1730"))
+            main(arrayOf<String>("clock-in", "-tEPP-007", "--datetime=20221223_1730"))
         }
 
-        output shouldBe "clock-out saved: 20221223_1730\n"
+        output shouldBe "clock-in for topic 'EPP-007' saved: 20221223_1730\n"
+        getTimesCsvContent() shouldBe emptyList() // FIXME implement
     }
 
-    test("clock-out is saved with today's date if only time is given") {
+    test("clock-in is saved with today's date if only time is given") {
         val output = tapSystemOut {
-            main(arrayOf<String>("feierabend", "-d1645"))
+            main(arrayOf<String>("clock-in", "-tEPP-007", "-d0534"))
         }
 
         val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
             .withZone(ZoneId.systemDefault())
         val today = formatter.format(Instant.now())
 
-        output shouldBe "clock-out saved: ${today}_1645\n"
+        output shouldBe "clock-in for topic 'EPP-007' saved: ${today}_0534\n"
     }
 
-    test("clock-out is discarded if date is invalid") {
+    test("clock-in is discarded if date is invalid") {
         val output = tapSystemErrAndOut {
-            main(arrayOf<String>("feierabend", "-d20200132"))
+            main(arrayOf<String>("clock-in", "-tEPP-007", "-d20200132"))
         }
 
         output shouldBe "invalid datetime input '20200132'\n"
     }
 
-    test("clock-out is discarded if time is invalid") {
+    test("clock-in is discarded if time is invalid") {
         val output = tapSystemErrAndOut {
-            main(arrayOf<String>("feierabend", "-d1961"))
+            main(arrayOf<String>("clock-in", "-tEPP-007", "-d1961"))
         }
 
         output shouldBe "invalid datetime input '1961'\n"
     }
-
-    test("clock-out is saved empty csv") {
-        val output = tapSystemOut {
-            main(arrayOf<String>("feierabend", "-v", "--datetime=20221223_1730"))
-        }
-
-        output shouldBe "nothing found at /Users/tollpatsch/its_times.csv. Will create new csv file in the process\n" +
-                "wrote 1 events to /Users/tollpatsch/its_times.csv\n" +
-                "clock-out saved: 20221223_1730\n"
-    }
 })
+
+fun getTimesCsvContent(): List<String> {
+    if (!File(TEST_CSV_PATH).exists()) {
+        return emptyList()
+    }
+
+    val reader = File(TEST_CSV_PATH).inputStream().bufferedReader()
+    reader.readLine()
+    return reader.lineSequence()
+        .filter { it.isNotBlank() }
+        .toList()
+}
