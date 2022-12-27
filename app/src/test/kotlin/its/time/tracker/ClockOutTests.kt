@@ -15,7 +15,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-private const val TEST_CSV_PATH = "/Users/tollpatsch/its_times.csv"
+private const val TEST_CSV_PATH = "/Users/tollpatsch/test_its_times.csv"
 
 class ClockOutTests : FunSpec({
 
@@ -34,7 +34,7 @@ class ClockOutTests : FunSpec({
 
     test("clock-out is saved with current time") {
         val output = tapSystemOut {
-            main(arrayOf<String>("feierabend"))
+            executeClockOutWitArgs(emptyArray())
         }
 
         output shouldStartWith "clock-out saved: 20"
@@ -43,7 +43,7 @@ class ClockOutTests : FunSpec({
 
     test("clock-out is saved with manual time") {
         val output = tapSystemOut {
-            main(arrayOf<String>("feierabend", "--datetime=20221223_1730"))
+            executeClockOutWitArgs(arrayOf<String>("--datetime=20221223_1730"))
         }
 
         output shouldBe "clock-out saved: 20221223_1730\n"
@@ -51,7 +51,7 @@ class ClockOutTests : FunSpec({
 
     test("clock-out is saved with today's date if only time is given") {
         val output = tapSystemOut {
-            main(arrayOf<String>("feierabend", "-d1645"))
+            executeClockOutWitArgs(arrayOf<String>("-d1645"))
         }
 
         val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
@@ -63,7 +63,7 @@ class ClockOutTests : FunSpec({
 
     test("clock-out is discarded if date is invalid") {
         val output = tapSystemErrAndOut {
-            main(arrayOf<String>("feierabend", "-d20200132"))
+            executeClockOutWitArgs(arrayOf<String>("-d20200132"))
         }
 
         output shouldBe "invalid datetime input '20200132'\n"
@@ -71,7 +71,7 @@ class ClockOutTests : FunSpec({
 
     test("clock-out is discarded if time is invalid") {
         val output = tapSystemErrAndOut {
-            main(arrayOf<String>("feierabend", "-d1961"))
+            executeClockOutWitArgs(arrayOf<String>("-d1961"))
         }
 
         output shouldBe "invalid datetime input '1961'\n"
@@ -79,11 +79,15 @@ class ClockOutTests : FunSpec({
 
     test("clock-out is saved empty csv") {
         val output = tapSystemOut {
-            main(arrayOf<String>("feierabend", "-v", "--datetime=20221223_1730"))
+            executeClockOutWitArgs(arrayOf<String>("-v", "--datetime=20221223_1730"))
         }
 
-        output shouldBe "nothing found at /Users/tollpatsch/its_times.csv. Will create new csv file in the process\n" +
-                "wrote 1 events to /Users/tollpatsch/its_times.csv\n" +
+        output shouldBe "nothing found at /Users/tollpatsch/test_its_times.csv. Will create new csv file in the process\n" +
+                "wrote 1 events to /Users/tollpatsch/test_its_times.csv\n" +
                 "clock-out saved: 20221223_1730\n"
     }
 })
+
+fun executeClockOutWitArgs(args: Array<String>) {
+    main(arrayOf<String>("clock-out", "--csvpath=$TEST_CSV_PATH").plus(args))
+}

@@ -16,7 +16,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-private const val TEST_CSV_PATH = "/Users/tollpatsch/its_times.csv"
+private const val TEST_CSV_PATH = "/Users/tollpatsch/test_its_times.csv"
 
 class ClockInTests : FunSpec({
 
@@ -35,7 +35,7 @@ class ClockInTests : FunSpec({
 
     test("clock-in is saved with current time") {
         val output = tapSystemOut {
-            main(arrayOf<String>("clock-in", "-tEPP-007"))
+            executeClockInWitArgs(arrayOf<String>("-tEPP-007"))
         }
 
         output shouldStartWith "clock-in for topic 'EPP-007' saved: 20"
@@ -44,7 +44,7 @@ class ClockInTests : FunSpec({
 
     test("clock-in is saved with manual time") {
         val output = tapSystemOut {
-            main(arrayOf<String>("clock-in", "-tEPP-007", "--datetime=20221223_1730"))
+            executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=20221223_1730"))
         }
 
         output shouldBe "clock-in for topic 'EPP-007' saved: 20221223_1730\n"
@@ -53,7 +53,7 @@ class ClockInTests : FunSpec({
 
     test("clock-in is saved with today's date if only time is given") {
         val output = tapSystemOut {
-            main(arrayOf<String>("clock-in", "-tEPP-007", "-d0534"))
+            executeClockInWitArgs(arrayOf<String>("-tEPP-007", "-d0534"))
         }
 
         val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
@@ -65,7 +65,7 @@ class ClockInTests : FunSpec({
 
     test("clock-in is discarded if date is invalid") {
         val output = tapSystemErrAndOut {
-            main(arrayOf<String>("clock-in", "-tEPP-007", "-d20200132"))
+            executeClockInWitArgs(arrayOf<String>("-tEPP-007", "-d20200132"))
         }
 
         output shouldBe "invalid datetime input '20200132'\n"
@@ -73,12 +73,16 @@ class ClockInTests : FunSpec({
 
     test("clock-in is discarded if time is invalid") {
         val output = tapSystemErrAndOut {
-            main(arrayOf<String>("clock-in", "-tEPP-007", "-d1961"))
+            executeClockInWitArgs(arrayOf<String>("-tEPP-007", "-d1961"))
         }
 
         output shouldBe "invalid datetime input '1961'\n"
     }
 })
+
+fun executeClockInWitArgs(args: Array<String>) {
+    main(arrayOf<String>("clock-in", "--csvpath=$TEST_CSV_PATH").plus(args))
+}
 
 fun getTimesCsvContent(): List<String> {
     if (!File(TEST_CSV_PATH).exists()) {

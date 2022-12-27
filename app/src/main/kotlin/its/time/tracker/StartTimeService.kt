@@ -4,10 +4,11 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 
-const val CSV_PATH = "/Users/tollpatsch/its_times.csv"
-const val TMP_CSV_PATH = "/Users/tollpatsch/its_times_tmp.csv"
+const val TMP_CSV_PATH = "/tmp/its_times_tmp.csv"
 class StartTimeService(
-    private val verbose: Boolean) {
+    private val verbose: Boolean,
+    private val csvPath: String,
+) {
 
     fun addClockOut(dateTime: String) {
         addClockEvent(ClockEvent(dateTime, EventType.CLOCK_OUT, "", ""))
@@ -29,7 +30,7 @@ class StartTimeService(
         saveClockEvents(clockEvents)
     }
 
-    private fun loadClockEvents(fileName: String = CSV_PATH): MutableList<ClockEvent> {
+    private fun loadClockEvents(fileName: String = csvPath): MutableList<ClockEvent> {
         if (!File(fileName).exists()) {
             if (verbose) println("nothing found at $fileName. Will create new csv file in the process")
             return ArrayList()
@@ -55,10 +56,10 @@ class StartTimeService(
         File(TMP_CSV_PATH).createNewFile()
         FileOutputStream(TMP_CSV_PATH).apply { writeCsv(clockEvents) }
 
-        File(CSV_PATH).delete()
-        File(TMP_CSV_PATH).renameTo(File(CSV_PATH))
+        File(csvPath).delete()
+        File(TMP_CSV_PATH).renameTo(File(csvPath))
 
-        if (verbose) println("wrote ${clockEvents.size} events to $CSV_PATH")
+        if (verbose) println("wrote ${clockEvents.size} events to $csvPath")
     }
 
     private fun OutputStream.writeCsv(clockEvents: List<ClockEvent>) {
