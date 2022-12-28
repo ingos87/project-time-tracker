@@ -34,7 +34,6 @@ fun getTimesCsvContent(): List<String> {
     }
 
     val reader = File(TEST_CSV_PATH).inputStream().bufferedReader()
-    reader.readLine()
     return reader.lineSequence()
         .filter { it.isNotBlank() }
         .toList()

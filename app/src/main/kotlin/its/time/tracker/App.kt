@@ -32,8 +32,8 @@ class ClockIn: CliktCommand(help="Start working on something") {
     override fun run() {
         val dateTime = DateTimeUtil.toValidDateTime(dateTimeInput)
         if (dateTime != null) {
-            StartTimeService(v, csvPath).addClockIn(topic, dateTime)
-            echo("clock-in for topic '$topic' saved: $dateTime")
+            val success = StartTimeService(v, csvPath).addClockIn(topic, dateTime)
+            if (success) echo("clock-in for topic '$topic' saved: $dateTime")
         }
     }
 }
@@ -45,8 +45,8 @@ class ClockOut: CliktCommand(help="End work day") {
     override fun run() {
         val dateTime = DateTimeUtil.toValidDateTime(dateTimeInput)
         if (dateTime != null) {
-            StartTimeService(v, csvPath).addClockOut(dateTime)
-            echo("clock-out saved: $dateTime")
+            val success = StartTimeService(v, csvPath).addClockOut(dateTime)
+            if (success) echo("clock-out saved: $dateTime")
         }
     }
 }

@@ -10,24 +10,35 @@ class StartTimeService(
     private val csvPath: String,
 ) {
 
-    fun addClockOut(dateTime: String) {
-        addClockEvent(ClockEvent(dateTime, EventType.CLOCK_OUT, "", ""))
+    fun addClockOut(dateTime: String, clockOutType: ClockOutType = ClockOutType.MANUAL_CLOCK_OUT): Boolean {
+        return addClockEvent(ClockEvent(dateTime, EventType.CLOCK_OUT, clockOutType.name, ""))
     }
 
-    fun addClockIn(topic: String, dateTime: String) {
-        addClockEvent(ClockEvent(dateTime, EventType.CLOCK_IN, topic, ""))
+    fun addClockIn(topic: String, dateTime: String): Boolean {
+        return addClockEvent(ClockEvent(dateTime, EventType.CLOCK_IN, topic, ""))
     }
 
-    private fun addClockEvent(clockEvent: ClockEvent) {
+    private fun addClockEvent(clockEvent: ClockEvent): Boolean {
         val clockEvents = loadClockEvents()
 
-        if (clockEvents.any { it.dateTime == clockEvent.dateTime }) {
-            // TODO replace event (with same eventType only!) to list if datetime is present
+        val presentClockEvent = clockEvents.find { it.dateTime == clockEvent.dateTime }
+        if (presentClockEvent != null) {
+            if (presentClockEvent.eventType == clockEvent.eventType) {
+                clockEvents.remove(presentClockEvent)
+            }
+            else {
+                println("Cannot overwrite event of different type. You must remove the present event before.")
+                println("present: $presentClockEvent")
+                println("new    : $clockEvent")
+                return false
+            }
         }
 
         clockEvents.add(clockEvent)
 
         saveClockEvents(clockEvents)
+
+        return true
     }
 
     private fun loadClockEvents(fileName: String = csvPath): MutableList<ClockEvent> {
@@ -64,7 +75,7 @@ class StartTimeService(
 
     private fun OutputStream.writeCsv(clockEvents: List<ClockEvent>) {
         val writer = bufferedWriter()
-        writer.write(""""dateTime";"eventType";"topic";"bookingPosition"""")
+        writer.write("dateTime;eventType;topic;bookingPosition")
         writer.newLine()
         clockEvents.forEach {
             writer.write("${it.dateTime};${it.eventType.name};${it.topic};${it.bookingPosition}")
