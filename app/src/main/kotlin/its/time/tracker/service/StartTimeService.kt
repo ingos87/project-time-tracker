@@ -1,4 +1,8 @@
-package its.time.tracker
+package its.time.tracker.service
+
+import its.time.tracker.service.util.ClockEvent
+import its.time.tracker.service.util.ClockOutType
+import its.time.tracker.service.util.EventType
 
 class StartTimeService(
     private val verbose: Boolean,

@@ -1,4 +1,6 @@
-package its.time.tracker
+package its.time.tracker.service
+
+import its.time.tracker.service.util.WorkTimeCalculator
 
 class SummaryService(
     private val verbose: Boolean,

@@ -1,5 +1,7 @@
-package its.time.tracker
+package its.time.tracker.service
 
+import its.time.tracker.service.util.ClockEvent
+import its.time.tracker.service.util.EventType
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream

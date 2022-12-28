@@ -3,8 +3,9 @@ package its.time.tracker
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.inspectors.forAll
 import io.kotest.matchers.shouldBe
+import its.time.tracker.service.util.DateTimeUtil
 
-class DateTimeUtilTest : StringSpec({
+class DateTimeUtilTests : StringSpec({
 
     "isValidTime is true for ..." {
         listOf(

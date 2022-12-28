@@ -1,5 +1,7 @@
-package its.time.tracker
+package its.time.tracker.service.util
 
+import its.time.tracker.CLOCK_EVENT_PATTERN_FORMAT
+import its.time.tracker.DAY_PATTERN_FORMAT
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
