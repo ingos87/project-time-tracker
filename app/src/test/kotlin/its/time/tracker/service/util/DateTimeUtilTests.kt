@@ -1,9 +1,8 @@
-package its.time.tracker
+package its.time.tracker.service.util
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.inspectors.forAll
 import io.kotest.matchers.shouldBe
-import its.time.tracker.service.util.DateTimeUtil
 
 class DateTimeUtilTests : StringSpec({
 

@@ -12,8 +12,8 @@ class ScenarioTests : BehaviorSpec({
             executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=20220103_0730"))
             then("event was inserted into csv") {
                 getTimesCsvContent() shouldBe listOf(
-                    "dateTime;eventType;topic;bookingPosition",
-                    "20220103_0730;CLOCK_IN;EPP-007;")
+                    "dateTime;eventType;topic",
+                    "20220103_0730;CLOCK_IN;EPP-007")
             }
         }
 
@@ -21,9 +21,9 @@ class ScenarioTests : BehaviorSpec({
             executeClockInWitArgs(arrayOf<String>("--topic=EPP-123", "--datetime=20220103_1000"))
             then("event was inserted into csv") {
                 getTimesCsvContent() shouldBe listOf(
-                    "dateTime;eventType;topic;bookingPosition",
-                    "20220103_0730;CLOCK_IN;EPP-007;",
-                    "20220103_1000;CLOCK_IN;EPP-123;")
+                    "dateTime;eventType;topic",
+                    "20220103_0730;CLOCK_IN;EPP-007",
+                    "20220103_1000;CLOCK_IN;EPP-123")
             }
         }
 
@@ -31,10 +31,10 @@ class ScenarioTests : BehaviorSpec({
             executeClockOutWitArgs(arrayOf<String>("-d20220103_1700"))
             then("event was inserted into csv") {
                 getTimesCsvContent() shouldBe listOf(
-                    "dateTime;eventType;topic;bookingPosition",
-                    "20220103_0730;CLOCK_IN;EPP-007;",
-                    "20220103_1000;CLOCK_IN;EPP-123;",
-                    "20220103_1700;CLOCK_OUT;MANUAL_CLOCK_OUT;")
+                    "dateTime;eventType;topic",
+                    "20220103_0730;CLOCK_IN;EPP-007",
+                    "20220103_1000;CLOCK_IN;EPP-123",
+                    "20220103_1700;CLOCK_OUT;MANUAL_CLOCK_OUT")
             }
         }
     }

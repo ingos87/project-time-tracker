@@ -45,6 +45,7 @@ class WorkTimeCalculator {
 
         if (currentClockStatus != EventType.CLOCK_OUT) {
             println("No final clock-out found")
+            // TODO implement something to end the work day
         }
 
         return WorkTimeResult(extractTime(firstClockIn), extractTime(mostRecentClockOut), totalWorkTime, totalBreakTime)

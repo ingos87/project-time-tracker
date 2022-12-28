@@ -10,11 +10,11 @@ class StartTimeService(
 ) {
 
     fun addClockOut(dateTime: String, clockOutType: ClockOutType = ClockOutType.MANUAL_CLOCK_OUT): Boolean {
-        return addClockEvent(ClockEvent(dateTime, EventType.CLOCK_OUT, clockOutType.name, ""))
+        return addClockEvent(ClockEvent(dateTime, EventType.CLOCK_OUT, clockOutType.name))
     }
 
     fun addClockIn(topic: String, dateTime: String): Boolean {
-        return addClockEvent(ClockEvent(dateTime, EventType.CLOCK_IN, topic, ""))
+        return addClockEvent(ClockEvent(dateTime, EventType.CLOCK_IN, topic))
     }
 
     private fun addClockEvent(clockEvent: ClockEvent): Boolean {

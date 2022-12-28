@@ -32,8 +32,8 @@ class ClockInTests : FunSpec({
 
         output shouldBe "clock-in for topic 'EPP-007' saved: 20221223_1730\n"
         getTimesCsvContent() shouldBe listOf(
-            "dateTime;eventType;topic;bookingPosition",
-            "20221223_1730;CLOCK_IN;EPP-007;")
+            "dateTime;eventType;topic",
+            "20221223_1730;CLOCK_IN;EPP-007")
     }
 
     test("clock-in is saved with today's date if only time is given") {
@@ -47,8 +47,8 @@ class ClockInTests : FunSpec({
 
         output shouldBe "clock-in for topic 'EPP-007' saved: ${today}_0534\n"
         getTimesCsvContent() shouldBe listOf(
-            "dateTime;eventType;topic;bookingPosition",
-            "${today}_0534;CLOCK_IN;EPP-007;")
+            "dateTime;eventType;topic",
+            "${today}_0534;CLOCK_IN;EPP-007")
     }
 
     test("clock-in is discarded if date is invalid") {

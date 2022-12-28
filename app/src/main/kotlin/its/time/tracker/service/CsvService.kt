@@ -24,8 +24,8 @@ class CsvService(
         val clockEvents = reader.lineSequence()
             .filter { it.isNotBlank() }
             .map {
-                val (dateTime, eventType, topic, bookingPosition) = it.split(';', ignoreCase = false, limit = 4)
-                ClockEvent(dateTime.trim(), EventType.valueOf(eventType.trim()), topic.trim(), bookingPosition.trim())
+                val (dateTime, eventType, topic) = it.split(';', ignoreCase = false, limit = 3)
+                ClockEvent(dateTime.trim(), EventType.valueOf(eventType.trim()), topic.trim())
             }.toMutableList()
 
         if (verbose) println("loaded ${clockEvents.size} clock events from $fileName")

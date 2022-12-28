@@ -32,8 +32,8 @@ class ClockOutTests : FunSpec({
 
         output shouldBe "clock-out saved: 20221223_1730\n"
         getTimesCsvContent() shouldBe listOf(
-            "dateTime;eventType;topic;bookingPosition",
-            "20221223_1730;CLOCK_OUT;MANUAL_CLOCK_OUT;")
+            "dateTime;eventType;topic",
+            "20221223_1730;CLOCK_OUT;MANUAL_CLOCK_OUT")
     }
 
     test("clock-out is saved with today's date if only time is given") {
@@ -47,8 +47,8 @@ class ClockOutTests : FunSpec({
 
         output shouldBe "clock-out saved: ${today}_1645\n"
         getTimesCsvContent() shouldBe listOf(
-            "dateTime;eventType;topic;bookingPosition",
-            "${today}_1645;CLOCK_OUT;MANUAL_CLOCK_OUT;")
+            "dateTime;eventType;topic",
+            "${today}_1645;CLOCK_OUT;MANUAL_CLOCK_OUT")
     }
 
     test("clock-out is discarded if date is invalid") {
@@ -76,7 +76,7 @@ class ClockOutTests : FunSpec({
                 "wrote 1 events to /Users/tollpatsch/test_its_times.csv\n" +
                 "clock-out saved: 20221223_1730\n"
         getTimesCsvContent() shouldBe listOf(
-            "dateTime;eventType;topic;bookingPosition",
-            "20221223_1730;CLOCK_OUT;MANUAL_CLOCK_OUT;")
+            "dateTime;eventType;topic",
+            "20221223_1730;CLOCK_OUT;MANUAL_CLOCK_OUT")
     }
 })

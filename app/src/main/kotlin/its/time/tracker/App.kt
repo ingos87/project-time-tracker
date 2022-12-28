@@ -62,7 +62,9 @@ class DailySummary: CliktCommand(help="show summary of specified day") {
     override fun run() {
         val date = DateTimeUtil.toValidDate(dateInput)
         if (date != null) {
-            SummaryService(v, csvPath).showDailySummary(date)
+            val service = SummaryService(v, csvPath)
+            service.showDailyWorkHoursSummary(date)
+            service.showDailyProjectSummary(date)
         }
     }
 }
