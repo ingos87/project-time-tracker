@@ -1,22 +1,21 @@
 package its.time.tracker
 
-import io.kotest.core.spec.style.FreeSpec
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.inspectors.forAll
 import io.kotest.matchers.shouldBe
 
-class DateTimeUtilTest : FreeSpec({
+class DateTimeUtilTest : StringSpec({
 
-    "isValidTime is true for ..." - {
+    "isValidTime is true for ..." {
         listOf(
             "0000",
             "0730",
         ).forEach {
-            "$it should be a valid time" {
-                DateTimeUtil.isValidTime(it) shouldBe true
-            }
+            DateTimeUtil.isValidTime(it) shouldBe true
         }
     }
 
-    "isValidTime is false for ..." - {
+    "isValidTime is false for ..." {
         listOf(
             "1",
             "000",
@@ -25,26 +24,22 @@ class DateTimeUtilTest : FreeSpec({
             "1060",
             "2573",
         ).forEach {
-            "$it should not be a valid time" {
-                DateTimeUtil.isValidTime(it) shouldBe false
-            }
+            DateTimeUtil.isValidTime(it) shouldBe false
         }
     }
 
-    "isValidDate is true for ..." - {
+    "isValidDate is true for ..." {
         listOf(
             "20221224",
             "20560101",
             "20240229",
             "12341231",
         ).forEach {
-            "$it should be a valid date" {
-                DateTimeUtil.isValidDate(it) shouldBe true
-            }
+            DateTimeUtil.isValidDate(it) shouldBe true
         }
     }
 
-    "isValidDate is false for ..." - {
+    "isValidDate is false for ..." {
         listOf(
             "1",
             "12",
@@ -58,10 +53,36 @@ class DateTimeUtilTest : FreeSpec({
             "20201301",
             "20200132",
             "202001311",
-            ).forEach {
-            "$it should not be a valid date" {
-                DateTimeUtil.isValidDate(it) shouldBe false
-            }
+        ).forEach {
+            DateTimeUtil.isValidDate(it) shouldBe false
+        }
+    }
+
+    "addTimes works for ..." {
+        listOf(
+            Pair("0000", "0000") to "0000",
+            Pair("0000", "0010") to "0010",
+            Pair("1005", "1010") to "2015",
+            Pair("1555", "0110") to "1705",
+            Pair("2359", "0001") to "2400",
+            Pair("2330", "0245") to "2615",
+        ).forAll { (times, expectedSum) ->
+            DateTimeUtil.addTimes(times.first, times.second) shouldBe expectedSum
+        }
+    }
+
+    "getTimeDiff works for ..." {
+        listOf(
+            Pair("0000", "0000") to "0000",
+            Pair("0000", "0010") to "0010",
+            Pair("1005", "1010") to "0005",
+            Pair("0730", "0845") to "0115",
+            Pair("0745", "0830") to "0045",
+            Pair("0800", "2200") to "1400",
+            Pair("2200", "0100") to "0300",
+            Pair("2230", "0100") to "0230",
+        ).forAll { (times, expectedDiff) ->
+            DateTimeUtil.getTimeDiff(times.first, times.second) shouldBe expectedDiff
         }
     }
 })

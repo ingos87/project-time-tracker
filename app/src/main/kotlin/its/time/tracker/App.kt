@@ -7,7 +7,8 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 
-const val PATTERN_FORMAT = "yyyyMMdd_HHmm"
+const val CLOCK_EVENT_PATTERN_FORMAT = "yyyyMMdd_HHmm"
+const val DAY_PATTERN_FORMAT = "yyyyMMdd"
 
 const val appName = "ITS TimeTracker App"
 const val version = "0.0.1"
@@ -27,7 +28,7 @@ class Version: CliktCommand(help="Show version") {
 class ClockIn: CliktCommand(help="Start working on something") {
     val v: Boolean by option("-v", help = "enable verbose mode").flag()
     val topic by option("-t", "--topic", help = "time tracking topic - usually some Jira Ticket Id").required()
-    val dateTimeInput by option("-d", "--datetime", help="start datetime (format: $PATTERN_FORMAT) for this topic - will be NOW if left empty; today's date is prepended if only time (format: HHmm) is given")
+    val dateTimeInput by option("-d", "--datetime", help="start datetime (format: $CLOCK_EVENT_PATTERN_FORMAT) for this topic - will be NOW if left empty; today's date is prepended if only time (format: HHmm) is given")
     val csvPath by option("--csvpath", help = "defines path to persistent file").default(CSV_PATH)
     override fun run() {
         val dateTime = DateTimeUtil.toValidDateTime(dateTimeInput)
@@ -40,7 +41,7 @@ class ClockIn: CliktCommand(help="Start working on something") {
 
 class ClockOut: CliktCommand(help="End work day") {
     val v: Boolean by option("-v", help = "enable verbose mode").flag()
-    val dateTimeInput by option("-d", "--datetime", help="start datetime (format: $PATTERN_FORMAT) for this topic - will be NOW if left empty; today's date is prepended if only time (format: HHmm) is given")
+    val dateTimeInput by option("-d", "--datetime", help="start datetime (format: $CLOCK_EVENT_PATTERN_FORMAT) for this topic - will be NOW if left empty; today's date is prepended if only time (format: HHmm) is given")
     val csvPath by option("--csvpath", help = "defines path to persistent file").default(CSV_PATH)
     override fun run() {
         val dateTime = DateTimeUtil.toValidDateTime(dateTimeInput)
@@ -51,6 +52,18 @@ class ClockOut: CliktCommand(help="End work day") {
     }
 }
 
+class DailySummary: CliktCommand(help="show summary of specified day") {
+    val v: Boolean by option("-v", help = "enable verbose mode").flag()
+    val dateInput by option("-d", "--date", help="date (format: $DAY_PATTERN_FORMAT) - will be today's date if left empty")
+    val csvPath by option("--csvpath", help = "defines path to persistent file").default(CSV_PATH)
+    override fun run() {
+        val date = DateTimeUtil.toValidDate(dateInput)
+        if (date != null) {
+            SummaryService(v, csvPath).showDailySummary(date)
+        }
+    }
+}
+
 fun main(args: Array<String>) = TimeTracker()
-    .subcommands(Version(), ClockIn(), ClockOut())
+    .subcommands(Version(), ClockIn(), ClockOut(), DailySummary())
     .main(args)

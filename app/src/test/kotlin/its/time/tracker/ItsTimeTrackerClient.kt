@@ -28,6 +28,10 @@ fun executeClockOutWitArgs(args: Array<String>) {
     main(arrayOf<String>("clock-out", "--csvpath=$TEST_CSV_PATH").plus(args))
 }
 
+fun executeDailySummaryWitArgs(args: Array<String>) {
+    main(arrayOf<String>("daily-summary", "--csvpath=$TEST_CSV_PATH").plus(args))
+}
+
 fun getTimesCsvContent(): List<String> {
     if (!File(TEST_CSV_PATH).exists()) {
         return emptyList()

@@ -38,6 +38,7 @@ dependencies {
     // This dependency is used by the application.
     implementation("com.google.guava:guava:31.1-jre")
     implementation("com.github.ajalt.clikt:clikt:3.5.0")
+    implementation(kotlin("reflect"))
 }
 
 application {
