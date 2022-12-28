@@ -32,6 +32,7 @@ class ClockIn: CliktCommand(help="Start working on something") {
     override fun run() {
         val dateTime = DateTimeUtil.toValidDateTime(dateTimeInput)
         if (dateTime != null) {
+            StartTimeService(v, csvPath).addClockIn(topic, dateTime)
             echo("clock-in for topic '$topic' saved: $dateTime")
         }
     }

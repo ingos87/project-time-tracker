@@ -6,30 +6,14 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-private const val TEST_CSV_PATH = "/Users/tollpatsch/test_its_times.csv"
-
 class ClockOutTests : FunSpec({
 
     beforeEach {
-        val path = Paths.get(TEST_CSV_PATH)
-
-        try {
-            withContext(Dispatchers.IO) {
-                Files.deleteIfExists(path)
-            }
-        } catch (e: IOException) {
-            println("Deletion failed.")
-            e.printStackTrace()
-        }
+        ensureCsvEmpty()
     }
 
     test("clock-out is saved with current time") {
@@ -47,6 +31,7 @@ class ClockOutTests : FunSpec({
         }
 
         output shouldBe "clock-out saved: 20221223_1730\n"
+        getTimesCsvContent() shouldBe listOf("20221223_1730;CLOCK_OUT;;")
     }
 
     test("clock-out is saved with today's date if only time is given") {
@@ -59,6 +44,7 @@ class ClockOutTests : FunSpec({
         val today = formatter.format(Instant.now())
 
         output shouldBe "clock-out saved: ${today}_1645\n"
+        getTimesCsvContent() shouldBe listOf("${today}_1645;CLOCK_OUT;;")
     }
 
     test("clock-out is discarded if date is invalid") {
@@ -82,12 +68,9 @@ class ClockOutTests : FunSpec({
             executeClockOutWitArgs(arrayOf<String>("-v", "--datetime=20221223_1730"))
         }
 
-        output shouldBe "nothing found at /Users/tollpatsch/test_its_times.csv. Will create new csv file in the process\n" +
+        output shouldBe "loaded 0 clock events from /Users/tollpatsch/test_its_times.csv\n" +
                 "wrote 1 events to /Users/tollpatsch/test_its_times.csv\n" +
                 "clock-out saved: 20221223_1730\n"
+        getTimesCsvContent() shouldBe listOf("20221223_1730;CLOCK_OUT;;")
     }
 })
-
-fun executeClockOutWitArgs(args: Array<String>) {
-    main(arrayOf<String>("clock-out", "--csvpath=$TEST_CSV_PATH").plus(args))
-}

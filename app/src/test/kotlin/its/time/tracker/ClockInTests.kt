@@ -6,31 +6,14 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-private const val TEST_CSV_PATH = "/Users/tollpatsch/test_its_times.csv"
-
 class ClockInTests : FunSpec({
 
     beforeEach {
-        val path = Paths.get(TEST_CSV_PATH)
-
-        try {
-            withContext(Dispatchers.IO) {
-                Files.deleteIfExists(path)
-            }
-        } catch (e: IOException) {
-            println("Deletion failed.")
-            e.printStackTrace()
-        }
+        ensureCsvEmpty()
     }
 
     test("clock-in is saved with current time") {
@@ -48,7 +31,7 @@ class ClockInTests : FunSpec({
         }
 
         output shouldBe "clock-in for topic 'EPP-007' saved: 20221223_1730\n"
-        getTimesCsvContent() shouldBe emptyList() // FIXME implement
+        getTimesCsvContent() shouldBe listOf("20221223_1730;CLOCK_IN;EPP-007;")
     }
 
     test("clock-in is saved with today's date if only time is given") {
@@ -61,6 +44,7 @@ class ClockInTests : FunSpec({
         val today = formatter.format(Instant.now())
 
         output shouldBe "clock-in for topic 'EPP-007' saved: ${today}_0534\n"
+        getTimesCsvContent() shouldBe listOf("${today}_0534;CLOCK_IN;EPP-007;")
     }
 
     test("clock-in is discarded if date is invalid") {
@@ -80,18 +64,3 @@ class ClockInTests : FunSpec({
     }
 })
 
-fun executeClockInWitArgs(args: Array<String>) {
-    main(arrayOf<String>("clock-in", "--csvpath=$TEST_CSV_PATH").plus(args))
-}
-
-fun getTimesCsvContent(): List<String> {
-    if (!File(TEST_CSV_PATH).exists()) {
-        return emptyList()
-    }
-
-    val reader = File(TEST_CSV_PATH).inputStream().bufferedReader()
-    reader.readLine()
-    return reader.lineSequence()
-        .filter { it.isNotBlank() }
-        .toList()
-}
