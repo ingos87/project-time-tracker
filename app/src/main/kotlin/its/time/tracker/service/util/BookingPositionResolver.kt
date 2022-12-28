@@ -2,7 +2,7 @@ package its.time.tracker.service.util
 
 class BookingPositionResolver {
     companion object {
-        val BOOKING_POSITIONS_MAP = mapOf(
+        private val BOOKING_POSITIONS_MAP = mapOf(
             "ITS meetings" to   listOf("f2f", "allhands", "townhall", "jourfixe", "jourfixe"),
             "DoD" to            listOf("cow"),
             "ProjectA" to       listOf("EPP-007", "EPP-008"),

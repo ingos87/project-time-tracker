@@ -4,7 +4,7 @@ import com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 
-class AuxillaryTests : FunSpec({
+class AuxiliaryTests : FunSpec({
 
     test("getVersion") {
         val output = tapSystemOut {

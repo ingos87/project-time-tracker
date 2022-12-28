@@ -58,6 +58,16 @@ class DateTimeUtilTests : StringSpec({
         }
     }
 
+    "extractTimeFromDateTime works for ..." {
+        listOf(
+            "20221224_1800" to "1800",
+            "20221224_1" to "1",
+            "nonesense_0930" to "0930",
+        ).forAll { (dateTime, expectedTime) ->
+            DateTimeUtil.extractTimeFromDateTime(dateTime) shouldBe expectedTime
+        }
+    }
+
     "addTimes works for ..." {
         listOf(
             Pair("0000", "0000") to "0000",

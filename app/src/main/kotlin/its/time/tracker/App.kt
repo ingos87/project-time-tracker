@@ -6,7 +6,7 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
-import its.time.tracker.service.StartTimeService
+import its.time.tracker.service.ClockEventService
 import its.time.tracker.service.SummaryService
 import its.time.tracker.service.util.DateTimeUtil
 
@@ -36,7 +36,7 @@ class ClockIn: CliktCommand(help="Start working on something") {
     override fun run() {
         val dateTime = DateTimeUtil.toValidDateTime(dateTimeInput)
         if (dateTime != null) {
-            val success = StartTimeService(v, csvPath).addClockIn(topic, dateTime)
+            val success = ClockEventService(v, csvPath).addClockIn(topic, dateTime)
             if (success) echo("clock-in for topic '$topic' saved: $dateTime")
         }
     }
@@ -49,13 +49,13 @@ class ClockOut: CliktCommand(help="End work day") {
     override fun run() {
         val dateTime = DateTimeUtil.toValidDateTime(dateTimeInput)
         if (dateTime != null) {
-            val success = StartTimeService(v, csvPath).addClockOut(dateTime)
+            val success = ClockEventService(v, csvPath).addClockOut(dateTime)
             if (success) echo("clock-out saved: $dateTime")
         }
     }
 }
 
-class DailySummary: CliktCommand(help="show summary of specified day") {
+class DailySummary: CliktCommand(help="show summary of a specific day") {
     val v: Boolean by option("-v", help = "enable verbose mode").flag()
     val dateInput by option("-d", "--date", help="date (format: $DAY_PATTERN_FORMAT) - will be today's date if left empty")
     val csvPath by option("--csvpath", help = "defines path to persistent file").default(CSV_PATH)

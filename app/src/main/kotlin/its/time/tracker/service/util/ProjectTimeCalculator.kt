@@ -1,5 +1,9 @@
 package its.time.tracker.service.util
 
+import its.time.tracker.service.util.DateTimeUtil.Companion.addTimes
+import its.time.tracker.service.util.DateTimeUtil.Companion.extractTimeFromDateTime
+import its.time.tracker.service.util.DateTimeUtil.Companion.getTimeDiff
+
 class ProjectTimeCalculator {
 
     fun calculateProjectTime(clockEvents: List<ClockEvent>): List<BookingPositionItem> {
@@ -12,9 +16,9 @@ class ProjectTimeCalculator {
         clockEvents.forEach {
             if (it.eventType == EventType.CLOCK_IN) {
                 if (currentClockStatus == EventType.CLOCK_IN) {
-                    val workTime = DateTimeUtil.getTimeDiff(
-                        extractTime(mostRecentClockIn),
-                        extractTime(it.dateTime)
+                    val workTime = getTimeDiff(
+                        extractTimeFromDateTime(mostRecentClockIn),
+                        extractTimeFromDateTime(it.dateTime)
                     )
                     topicTimes.add(Pair(currentTopic, workTime))
                 }
@@ -25,9 +29,9 @@ class ProjectTimeCalculator {
             }
             else if (it.eventType == EventType.CLOCK_OUT) {
                 if (currentClockStatus == EventType.CLOCK_IN) {
-                    val workTime = DateTimeUtil.getTimeDiff(
-                        extractTime(mostRecentClockIn),
-                        extractTime(it.dateTime)
+                    val workTime = getTimeDiff(
+                        extractTimeFromDateTime(mostRecentClockIn),
+                        extractTimeFromDateTime(it.dateTime)
                     )
                     topicTimes.add(Pair(currentTopic, workTime))
                 }
@@ -41,6 +45,10 @@ class ProjectTimeCalculator {
             // TODO implement something to end the work day
         }
 
+        return topicTimes2BookingList(topicTimes)
+    }
+
+    private fun topicTimes2BookingList(topicTimes: ArrayList<Pair<String, String>>): List<BookingPositionItem> {
         val bookingPositionItems = ArrayList<BookingPositionItem>()
         topicTimes.forEach {
             val topic = it.first
@@ -52,7 +60,7 @@ class ProjectTimeCalculator {
                 bookingPositionItems.remove(presentItem)
                 val newItem = BookingPositionItem(
                     bookingKey = bookingKey,
-                    totalWorkTime = DateTimeUtil.addTimes(presentItem.totalWorkTime, workTime),
+                    totalWorkTime = addTimes(presentItem.totalWorkTime, workTime),
                     topics = presentItem.topics.plus(topic)
                 )
                 bookingPositionItems.add(newItem)
@@ -68,12 +76,6 @@ class ProjectTimeCalculator {
         }
 
         return bookingPositionItems
-    }
-
-    companion object {
-        fun extractTime(dateTime: String): String {
-            return dateTime.split("_")[1]
-        }
     }
 }
 

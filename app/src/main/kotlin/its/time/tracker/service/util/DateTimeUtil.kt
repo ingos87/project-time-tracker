@@ -9,16 +9,16 @@ import java.time.format.DateTimeParseException
 import java.time.format.ResolverStyle
 import java.util.*
 
-
 class DateTimeUtil {
     companion object {
-        fun getNow(pattern: String = CLOCK_EVENT_PATTERN_FORMAT) : String {
+        private fun getNow(pattern: String = CLOCK_EVENT_PATTERN_FORMAT) : String {
             val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern(pattern)
                 .withZone(ZoneId.systemDefault())
 
             return formatter.format(Instant.now())
         }
 
+        // TODO test
         fun toValidDate(dateInput: String?): String? {
             if (dateInput.isNullOrBlank()) return getNow(DAY_PATTERN_FORMAT)
             else if (isValidDate(dateInput)) {
@@ -29,6 +29,7 @@ class DateTimeUtil {
             return null
         }
 
+        // TODO test
         fun toValidDateTime(dateTimeInput: String?): String? {
             if (dateTimeInput.isNullOrBlank()) return getNow()
             else if (isValidTime(dateTimeInput)) {
@@ -52,7 +53,7 @@ class DateTimeUtil {
         }
 
         fun isValidTime(time: String): Boolean {
-            val regex = "([01]?[0-9]|2[0-3])[0-5][0-9]".toRegex()
+            val regex = "([01]?\\d|2[0-3])[0-5]\\d".toRegex()
             return time.length == 4 && time.matches(regex)
         }
 
@@ -66,6 +67,10 @@ class DateTimeUtil {
             } catch (e: DateTimeParseException) {
                 false
             }
+        }
+
+        fun extractTimeFromDateTime(dateTime: String): String {
+            return dateTime.split("_")[1]
         }
 
         fun addTimes(time1: String, time2: String): String {

@@ -17,6 +17,7 @@ class BookingPositionResolverTest : StringSpec({
             "EDF-" to "EDF-",
             "EDF-1234" to "EDF-1234",
             "EDF-2022" to "EDF-2022",
+            "DVR-" to "Recruiting",
             "DVR-7" to "Recruiting",
             "DVR-42" to "Recruiting",
         ).forAll { (topic, expectedBookingPosition) ->

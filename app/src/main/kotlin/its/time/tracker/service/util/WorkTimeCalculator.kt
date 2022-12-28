@@ -1,5 +1,9 @@
 package its.time.tracker.service.util
 
+import its.time.tracker.service.util.DateTimeUtil.Companion.addTimes
+import its.time.tracker.service.util.DateTimeUtil.Companion.extractTimeFromDateTime
+import its.time.tracker.service.util.DateTimeUtil.Companion.getTimeDiff
+
 class WorkTimeCalculator {
 
     fun calculateWorkTime(clockEvents: List<ClockEvent>): WorkTimeResult {
@@ -19,11 +23,11 @@ class WorkTimeCalculator {
                     mostRecentClockIn = it.dateTime
                 }
                 else if (currentClockStatus == EventType.CLOCK_OUT) {
-                    val breakTime = DateTimeUtil.getTimeDiff(
-                        extractTime(mostRecentClockOut),
-                        extractTime(it.dateTime)
+                    val breakTime = getTimeDiff(
+                        extractTimeFromDateTime(mostRecentClockOut),
+                        extractTimeFromDateTime(it.dateTime)
                     )
-                    totalBreakTime = DateTimeUtil.addTimes(totalBreakTime, breakTime)
+                    totalBreakTime = addTimes(totalBreakTime, breakTime)
                     mostRecentClockIn = it.dateTime
                 }
 
@@ -31,11 +35,11 @@ class WorkTimeCalculator {
             }
             else if (it.eventType == EventType.CLOCK_OUT) {
                 if (currentClockStatus == EventType.CLOCK_IN) {
-                    val workTime = DateTimeUtil.getTimeDiff(
-                        extractTime(mostRecentClockIn),
-                        extractTime(it.dateTime)
+                    val workTime = getTimeDiff(
+                        extractTimeFromDateTime(mostRecentClockIn),
+                        extractTimeFromDateTime(it.dateTime)
                     )
-                    totalWorkTime = DateTimeUtil.addTimes(totalWorkTime, workTime)
+                    totalWorkTime = addTimes(totalWorkTime, workTime)
                     mostRecentClockOut = it.dateTime
                 }
 
@@ -48,13 +52,11 @@ class WorkTimeCalculator {
             // TODO implement something to end the work day
         }
 
-        return WorkTimeResult(extractTime(firstClockIn), extractTime(mostRecentClockOut), totalWorkTime, totalBreakTime)
-    }
-
-    companion object {
-        fun extractTime(dateTime: String): String {
-            return dateTime.split("_")[1]
-        }
+        return WorkTimeResult(
+            firstClockIn = extractTimeFromDateTime(firstClockIn),
+            lastClockOut = extractTimeFromDateTime(mostRecentClockOut),
+            totalWorkTime = totalWorkTime,
+            totalBreakTime = totalBreakTime)
     }
 }
 

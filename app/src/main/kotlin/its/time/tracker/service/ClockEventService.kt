@@ -4,7 +4,7 @@ import its.time.tracker.service.util.ClockEvent
 import its.time.tracker.service.util.ClockOutType
 import its.time.tracker.service.util.EventType
 
-class StartTimeService(
+class ClockEventService(
     private val verbose: Boolean,
     private val csvPath: String,
 ) {
@@ -22,6 +22,7 @@ class StartTimeService(
         val clockEvents = csvService.loadClockEvents()
 
         val presentClockEvent = clockEvents.find { it.dateTime == clockEvent.dateTime }
+        // TODO test
         if (presentClockEvent != null) {
             if (presentClockEvent.eventType == clockEvent.eventType) {
                 clockEvents.remove(presentClockEvent)
