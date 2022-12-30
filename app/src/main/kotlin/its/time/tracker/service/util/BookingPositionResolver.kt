@@ -1,5 +1,7 @@
 package its.time.tracker.service.util
 
+import kotlin.math.max
+
 class BookingPositionResolver {
     companion object {
         private val BOOKING_POSITIONS_MAP = mapOf(
@@ -25,6 +27,10 @@ class BookingPositionResolver {
 
             println("Found no fitting booking position for work topic '$topic'")
             return "UNKNOWN"
+        }
+
+        fun getMaxBookingPosNameLength(): Int {
+            return max(10, BOOKING_POSITIONS_MAP.keys.maxOf { it.length })
         }
     }
 }

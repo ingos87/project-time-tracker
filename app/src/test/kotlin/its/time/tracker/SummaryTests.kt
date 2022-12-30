@@ -19,21 +19,19 @@ class SummaryTests : FunSpec({
         }
 
         output shouldBe
+                "=== SUMMARY for 2022-01-03 ===\n" +
                 "+---------------------------------------+\n" +
-                "| work hours summary for day 2022-01-03 |\n" +
                 "| clock-in:  07:30                      |\n" +
                 "| clock-out: 16:30                      |\n" +
-                "|_____________                          |\n" +
+                "|_________________                      |\n" +
                 "| total work time:  09:00               |\n" +
                 "| total break time: 00:00               |\n" +
-                "+---------------------------------------+\n" +
-                "+---------------------------------------+\n" +
-                "| project summary for day 2022-01-03\n" +
+                "+=======================================+\n" +
                 "| ProjectA: 09:00  (EPP-007)\n" +
                 "+---------------------------------------+\n"
     }
 
-    test("day with breaksand several projects") {
+    test("day with breaks and several projects") {
         executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=2022-01-03 07:30"))
         executeClockInWitArgs(arrayOf<String>("-tEPP-008", "--datetime=2022-01-03 09:00")) // worktime 1:30
         executeClockOutWitArgs(arrayOf<String>("--datetime=2022-01-03 11:25")) // worktime 3:55
@@ -48,16 +46,14 @@ class SummaryTests : FunSpec({
         }
 
         output shouldBe
+                "=== SUMMARY for 2022-01-03 ===\n" +
                 "+---------------------------------------+\n" +
-                "| work hours summary for day 2022-01-03 |\n" +
                 "| clock-in:  07:30                      |\n" +
                 "| clock-out: 20:52                      |\n" +
-                "|_____________                          |\n" +
+                "|_________________                      |\n" +
                 "| total work time:  09:42               |\n" +
                 "| total break time: 03:40               |\n" +
-                "+---------------------------------------+\n" +
-                "+---------------------------------------+\n" +
-                "| project summary for day 2022-01-03\n" +
+                "+=======================================+\n" +
                 "| ProjectA: 03:55  (EPP-007,EPP-008)\n" +
                 "| ProjectB: 02:00  (EPP-123)\n" +
                 "| ITS meetings: 01:00  (allhands)\n" +
@@ -76,16 +72,14 @@ class SummaryTests : FunSpec({
 
         output shouldBe
                 "No final clock-out found. Will insert one to fill up working time to 09:30 hours.\n" +
+                "=== SUMMARY for 2022-01-03 ===\n" +
                 "+---------------------------------------+\n" +
-                "| work hours summary for day 2022-01-03 |\n" +
                 "| clock-in:  07:30                      |\n" +
                 "| clock-out: 18:00                      |\n" +
-                "|_____________                          |\n" +
+                "|_________________                      |\n" +
                 "| total work time:  09:30               |\n" +
                 "| total break time: 01:00               |\n" +
-                "+---------------------------------------+\n" +
-                "+---------------------------------------+\n" +
-                "| project summary for day 2022-01-03\n" +
+                "+=======================================+\n" +
                 "| ProjectA: 09:30  (EPP-007)\n" +
                 "+---------------------------------------+\n"
     }
@@ -101,18 +95,70 @@ class SummaryTests : FunSpec({
 
         output shouldBe
                 "No final clock-out found. Will insert one to fill up working time to 09:00 hours.\n" +
+                "=== SUMMARY for 2022-01-03 ===\n" +
                 "+---------------------------------------+\n" +
-                "| work hours summary for day 2022-01-03 |\n" +
                 "| clock-in:  09:30                      |\n" +
                 "| clock-out: 19:30                      |\n" +
-                "|_____________                          |\n" +
+                "|_________________                      |\n" +
                 "| total work time:  09:00               |\n" +
                 "| total break time: 01:00               |\n" +
-                "+---------------------------------------+\n" +
-                "+---------------------------------------+\n" +
-                "| project summary for day 2022-01-03\n" +
+                "+=======================================+\n" +
                 "| ProjectA: 09:00  (EPP-007)\n" +
                 "+---------------------------------------+\n"
+    }
+
+    xtest("monthly summary for one day") {
+        // TODO write clock-ins and outs
+
+        val output = tapSystemOut {
+            executeMonthlySummaryWitArgs(arrayOf<String>("-d2022-11"))
+        }
+
+        output shouldBe
+                "=== SUMMARAY for 2022-11 ===\n" +
+                "+--------------+------+\n" +
+                "| day of month |    2 |\n" +
+                "| weekday      |  WED |\n" +
+                "+--------------+------+\n" +
+                "| clock-in     | 07:45|\n" +
+                "| clock-out    | 17:30|\n" +
+                "+--------------+------+\n" +
+                "| projectA     | 09:00|\n" +
+                "| projectB     | 02:00|\n" +
+                "| DoD          | 02:00|\n" +
+                "| ITS meetings | 02:00|\n" +
+                "| EDF-0815     | 02:00|\n" +
+                "| EDF-2223     | 02:00|\n" +
+                "| Recruiting   | 02:00|\n" +
+                "+--------------+------+\n" +
+                "| total        | 11:00|\n"
+    }
+
+    xtest("monthly summary") {
+        // TODO write clock-ins and outs
+
+        val output = tapSystemOut {
+            executeMonthlySummaryWitArgs(arrayOf<String>("-d2022-11"))
+        }
+
+        output shouldBe
+                "=== SUMMARAY for 2022-11 ===\n" +
+                "+--------------+------+------+------+------++------+------+------++------++------+------+\n" +
+                "| day of month |    1 |    2 |    3 |    4 ||    7 |    8 |    9 ||   25 ||   29 |   30 |\n" +
+                "| weekday      |  TUE |  WED |  THU |  FRI ||  MON |  TUE |  WED ||  FRI ||  TUE |  WED |\n" +
+                "+--------------+------+------+------+------++------+------+------++------++------+------+\n" +
+                "| clock-in     | 07:30| 07:45| 07:45| 08:30|| 09:30| 08:30| 09:00|| 09:30|| 08:30| 09:00|\n" +
+                "| clock-out    | 17:30| 17:30| 17:30| 17:30|| 11:00| 15:30| 22:00|| 11:00|| 15:30| 22:00|\n" +
+                "+--------------+------+------+------+------++------+------+------++------++------+------+\n" +
+                "| projectA     | 10:30| 09:00| 02:00|      ||      | 03:33|      ||      || 03:33|      |\n" +
+                "| projectB     |      | 02:00| 02:00|      ||      | 03:33|      ||      || 03:33|      |\n" +
+                "| DoD          |      | 02:00| 02:00| 04:56||      |      |      ||      ||      |      |\n" +
+                "| ITS meetings |      | 02:00| 02:00| 04:56||      |      |      ||      ||      |      |\n" +
+                "| EDF-0815     |      | 02:00| 02:00| 04:56||      |      |      ||      ||      |      |\n" +
+                "| EDF-2223     |      | 02:00| 02:00| 04:56||      |      |      ||      ||      |      |\n" +
+                "| Recruiting   |      | 02:00| 02:00| 04:56||      |      |      ||      ||      |      |\n" +
+                "+--------------+------+------+------+------++------+------+------++------++------+------+\n" +
+                "| total        | 10:30| 11:00| 06:00| 04:56||      | 07:06|      ||      || 07:06|      |\n"
     }
 })
 

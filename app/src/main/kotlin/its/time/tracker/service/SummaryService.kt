@@ -19,14 +19,13 @@ class SummaryService(
 
         val workTimeResult = WorkTimeCalculator().calculateWorkTime(daysEvents)
 
+        println("=== SUMMARY for $date ===")
         println("+---------------------------------------+")
-        println("| work hours summary for day $date |")
         println("| clock-in:  ${workTimeResult.firstClockIn}                      |")
         println("| clock-out: ${workTimeResult.lastClockOut}                      |")
-        println("|_____________                          |")
+        println("|_________________                      |")
         println("| total work time:  ${workTimeResult.totalWorkTime}               |")
         println("| total break time: ${workTimeResult.totalBreakTime}               |")
-        println("+---------------------------------------+")
     }
 
     fun showDailyProjectSummary(date: LocalDate) {
@@ -37,11 +36,24 @@ class SummaryService(
 
         val workTimeResult = ProjectTimeCalculator().calculateProjectTime(daysEvents)
 
-        println("+---------------------------------------+")
-        println("| project summary for day $date")
+        println("+=======================================+")
         workTimeResult.forEach {
             println("| ${it.bookingKey}: ${DateTimeUtil.durationToString(it.totalWorkTime)}  (${it.topics.joinToString(",")})")
         }
         println("+---------------------------------------+")
+    }
+
+    fun showMonthlyWorkHoursSummary(date: LocalDate) {
+        val csvService = CsvService(verbose, csvPath)
+        val clockEvents = csvService.loadClockEvents()
+
+        // TODO implement
+    }
+
+    fun showMonthlyProjectSummary(date: LocalDate) {
+        val csvService = CsvService(verbose, csvPath)
+        val clockEvents = csvService.loadClockEvents()
+
+        // TODO implement
     }
 }

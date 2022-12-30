@@ -97,6 +97,39 @@ class DateTimeUtilTests : StringSpec({
         }
     }
 
+    "toValidMonth returns same string for valid date" {
+        listOf(
+            "2022-12" to "2022-12-01",
+            "2020-02" to "2020-02-01",
+            "2045-01" to "2045-01-01",
+        ).forAll { (inputDateTimeString, expectedDateTimeString) ->
+            DateTimeUtil.toValidMonth(inputDateTimeString).toString() shouldBe expectedDateTimeString
+        }
+    }
+
+    "toValidMonth returns today if input is empty" {
+        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+            .withZone(ZoneId.systemDefault())
+        val today = formatter.format(Instant.now())
+
+        formatter.format(DateTimeUtil.toValidMonth("")) shouldBe today
+        formatter.format(DateTimeUtil.toValidMonth(null)) shouldBe today
+    }
+
+    "toValidMonth returns null if input is invalid" {
+        listOf(
+            "1",
+            "12",
+            "2022-13-01",
+            "2022-02-29",
+            "0000-00-00",
+            "2000-00-15",
+            "not_a_date",
+        ).forAll {
+            DateTimeUtil.toValidMonth(it) shouldBe null
+        }
+    }
+
     "isSameDay works for ..." {
         val dtFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm")
             .withZone(ZoneId.systemDefault())
@@ -111,6 +144,32 @@ class DateTimeUtilTests : StringSpec({
                 LocalDate.parse("2020-12-01", dFormatter)) to false,
         ).forAll { (input, expectedResult) ->
             DateTimeUtil.isSameDay(input.first, input.second) shouldBe expectedResult
+        }
+    }
+
+    "isSameMonth works for ..." {
+        val dtFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm")
+            .withZone(ZoneId.systemDefault())
+        val dFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd")
+            .withZone(ZoneId.systemDefault())
+        listOf(
+            Pair(
+                LocalDateTime.parse("2020-12-01 10:00", dtFormatter),
+                LocalDate.parse("2020-12-05", dFormatter)) to true,
+            Pair(
+                LocalDateTime.parse("2020-12-01 10:00", dtFormatter),
+                LocalDate.parse("2020-12-31", dFormatter)) to true,
+            Pair(
+                LocalDateTime.parse("2020-12-01 10:00", dtFormatter),
+                LocalDate.parse("2020-12-01", dFormatter)) to true,
+            Pair(
+                LocalDateTime.parse("2020-12-01 10:00", dtFormatter),
+                LocalDate.parse("2020-11-01", dFormatter)) to false,
+            Pair(
+                LocalDateTime.parse("2020-12-01 10:00", dtFormatter),
+                LocalDate.parse("2020-01-01", dFormatter)) to false,
+        ).forAll { (input, expectedResult) ->
+            DateTimeUtil.isSameMonth(input.first, input.second) shouldBe expectedResult
         }
     }
 

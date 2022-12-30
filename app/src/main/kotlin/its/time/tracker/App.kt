@@ -81,11 +81,11 @@ class MonthlySummary: CliktCommand(help="show summary of a specific month") {
     val dateInput by option("-m", "--month", help="date (format: $MONTH_PATTERN) - will be current month if left empty")
     val csvPath by option("--csvpath", help = "defines path to persistent file").default(CSV_PATH)
     override fun run() {
-        val date = DateTimeUtil.toValidDate(dateInput)
+        val date = DateTimeUtil.toValidMonth(dateInput)
         if (date != null) {
             val service = SummaryService(v, csvPath)
-            service.showDailyWorkHoursSummary(date as LocalDate)
-            service.showDailyProjectSummary(date)
+            service.showMonthlyWorkHoursSummary(date as LocalDate)
+            service.showMonthlyProjectSummary(date)
         }
     }
 }

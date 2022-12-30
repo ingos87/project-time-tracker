@@ -32,6 +32,10 @@ fun executeDailySummaryWitArgs(args: Array<String>) {
     main(arrayOf<String>("daily-summary", "--csvpath=$TEST_CSV_PATH").plus(args))
 }
 
+fun executeMonthlySummaryWitArgs(args: Array<String>) {
+    main(arrayOf<String>("monthly-summary", "--csvpath=$TEST_CSV_PATH").plus(args))
+}
+
 fun getTimesCsvContent(): List<String> {
     if (!File(TEST_CSV_PATH).exists()) {
         return emptyList()

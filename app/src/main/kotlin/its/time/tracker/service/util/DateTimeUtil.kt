@@ -2,6 +2,7 @@ package its.time.tracker.service.util
 
 import its.time.tracker.DATE_TIME_PATTERN
 import its.time.tracker.DATE_PATTERN
+import its.time.tracker.MONTH_PATTERN
 import its.time.tracker.TIME_PATTERN
 import java.time.*
 import java.time.format.DateTimeFormatter
@@ -15,7 +16,7 @@ class DateTimeUtil {
     companion object {
 
         fun toValidDate(dateInput: String?): Temporal? {
-            if (dateInput.isNullOrBlank()) return LocalDateTime.now()
+            if (dateInput.isNullOrBlank()) return LocalDate.now()
             return parseStringWithPattern(dateInput, DATE_PATTERN)
         }
 
@@ -30,6 +31,16 @@ class DateTimeUtil {
             }
 
             return parseStringWithPattern(dateTimeInput, DATE_TIME_PATTERN)
+        }
+
+        fun toValidMonth(dateInput: String?): Temporal? {
+            if (dateInput.isNullOrBlank()) return LocalDate.now()
+            val regex = "^\\d{4}-(0?[1-9]|1[012])$".toRegex()
+            if (!dateInput.matches(regex)) {
+                System.err.println("unable to parse '$dateInput' for pattern 'uuuu-MM'")
+                return null
+            }
+            return parseStringWithPattern("$dateInput-01", DATE_PATTERN)
         }
 
         private fun parseStringWithPattern(string: String, pattern: String, verbose: Boolean = true): Temporal? {
@@ -54,6 +65,10 @@ class DateTimeUtil {
 
         fun isSameDay(dateTime1: LocalDateTime, dateTime2: LocalDate): Boolean {
             return dateTimeToString(dateTime1, DATE_PATTERN) == dateTimeToString(dateTime2, DATE_PATTERN)
+        }
+
+        fun isSameMonth(dateTime1: LocalDateTime, dateTime2: LocalDate): Boolean {
+            return dateTimeToString(dateTime1, MONTH_PATTERN) == dateTimeToString(dateTime2, MONTH_PATTERN)
         }
 
         fun dateTimeToString(dateTime: Temporal, pattern: String = DATE_TIME_PATTERN): String {
