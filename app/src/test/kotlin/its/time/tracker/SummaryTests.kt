@@ -64,5 +64,29 @@ class SummaryTests : FunSpec({
                 "| EDF-99: 0247  (EDF-99)\n" +
                 "+-------------------------------------+\n"
     }
+
+    test("missing clock-out is set for max working hours per day") {
+        executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=20220103_0730"))
+        executeClockOutWitArgs(arrayOf<String>("--datetime=20220103_1630"))
+        executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=20220103_1730"))
+
+        val output = tapSystemOut {
+            executeDailySummaryWitArgs(arrayOf<String>("-d20220103"))
+        }
+
+        output shouldBe
+                "+-------------------------------------+\n" +
+                "| work hours summary for day 20220103 |\n" +
+                "| clock-in:  0730                     |\n" +
+                "| clock-out: 1630                     |\n" +
+                "|_____________                        |\n" +
+                "| total work time:  0900              |\n" +
+                "| total break time: 0000              |\n" +
+                "+-------------------------------------+\n" +
+                "+-------------------------------------+\n" +
+                "| project summary for day 20220103\n" +
+                "| ProjectA: 0900  (EPP-007)\n" +
+                "+-------------------------------------+\n"
+    }
 })
 

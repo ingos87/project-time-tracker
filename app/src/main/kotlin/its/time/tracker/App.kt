@@ -10,8 +10,10 @@ import its.time.tracker.service.ClockEventService
 import its.time.tracker.service.SummaryService
 import its.time.tracker.service.util.DateTimeUtil
 
-const val CLOCK_EVENT_PATTERN_FORMAT = "yyyyMMdd_HHmm"
-const val DAY_PATTERN_FORMAT = "yyyyMMdd"
+const val DATE_TIME_PATTERN = "yyyy-MM-ddTHH:mm"
+const val DATE_PATTERN = "yyyy-MM-dd"
+const val TIME_PATTERN = "HH:mm"
+const val MONTH_PATTERN = "yyyy-MM"
 
 const val appName = "ITS TimeTracker App"
 const val version = "0.0.1"
@@ -31,7 +33,7 @@ class Version: CliktCommand(help="Show version") {
 class ClockIn: CliktCommand(help="Start working on something") {
     val v: Boolean by option("-v", help = "enable verbose mode").flag()
     val topic by option("-t", "--topic", help = "time tracking topic - usually some Jira Ticket Id").required()
-    val dateTimeInput by option("-d", "--datetime", help="start datetime (format: $CLOCK_EVENT_PATTERN_FORMAT) for this topic - will be NOW if left empty; today's date is prepended if only time (format: HHmm) is given")
+    val dateTimeInput by option("-d", "--datetime", help="start datetime (format: $DATE_TIME_PATTERN) for this topic - will be NOW if left empty; today's date is prepended if only time (format: HHmm) is given")
     val csvPath by option("--csvpath", help = "defines path to persistent file").default(CSV_PATH)
     override fun run() {
         val dateTime = DateTimeUtil.toValidDateTime(dateTimeInput)
@@ -44,7 +46,7 @@ class ClockIn: CliktCommand(help="Start working on something") {
 
 class ClockOut: CliktCommand(help="End work day") {
     val v: Boolean by option("-v", help = "enable verbose mode").flag()
-    val dateTimeInput by option("-d", "--datetime", help="start datetime (format: $CLOCK_EVENT_PATTERN_FORMAT) for this topic - will be NOW if left empty; today's date is prepended if only time (format: HHmm) is given")
+    val dateTimeInput by option("-d", "--datetime", help="start datetime (format: $DATE_TIME_PATTERN) for this topic - will be NOW if left empty; today's date is prepended if only time (format: HHmm) is given")
     val csvPath by option("--csvpath", help = "defines path to persistent file").default(CSV_PATH)
     override fun run() {
         val dateTime = DateTimeUtil.toValidDateTime(dateTimeInput)
@@ -57,7 +59,21 @@ class ClockOut: CliktCommand(help="End work day") {
 
 class DailySummary: CliktCommand(help="show summary of a specific day") {
     val v: Boolean by option("-v", help = "enable verbose mode").flag()
-    val dateInput by option("-d", "--date", help="date (format: $DAY_PATTERN_FORMAT) - will be today's date if left empty")
+    val dateInput by option("-d", "--date", help="date (format: $DATE_PATTERN) - will be today's date if left empty")
+    val csvPath by option("--csvpath", help = "defines path to persistent file").default(CSV_PATH)
+    override fun run() {
+        val date = DateTimeUtil.toValidDate(dateInput)
+        if (date != null) {
+            val service = SummaryService(v, csvPath)
+            service.showDailyWorkHoursSummary(date)
+            service.showDailyProjectSummary(date)
+        }
+    }
+}
+
+class MonthlySummary: CliktCommand(help="show summary of a specific month") {
+    val v: Boolean by option("-v", help = "enable verbose mode").flag()
+    val dateInput by option("-m", "--month", help="date (format: $MONTH_PATTERN) - will be current month if left empty")
     val csvPath by option("--csvpath", help = "defines path to persistent file").default(CSV_PATH)
     override fun run() {
         val date = DateTimeUtil.toValidDate(dateInput)
@@ -70,5 +86,5 @@ class DailySummary: CliktCommand(help="show summary of a specific day") {
 }
 
 fun main(args: Array<String>) = TimeTracker()
-    .subcommands(Version(), ClockIn(), ClockOut(), DailySummary())
+    .subcommands(Version(), ClockIn(), ClockOut(), DailySummary(), MonthlySummary())
     .main(args)

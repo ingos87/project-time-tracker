@@ -3,13 +3,16 @@ package its.time.tracker.service.util
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.inspectors.forAll
 import io.kotest.matchers.shouldBe
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 class DateTimeUtilTests : StringSpec({
 
     "isValidTime is true for ..." {
         listOf(
-            "0000",
-            "0730",
+            "00:00",
+            "07:30",
         ).forEach {
             DateTimeUtil.isValidTime(it) shouldBe true
         }
@@ -18,11 +21,12 @@ class DateTimeUtilTests : StringSpec({
     "isValidTime is false for ..." {
         listOf(
             "1",
-            "000",
-            "930",
-            "2400",
-            "1060",
-            "2573",
+            "0900",
+            "0:00",
+            "9:30",
+            "24:00",
+            "10:60",
+            "25:73",
         ).forEach {
             DateTimeUtil.isValidTime(it) shouldBe false
         }
@@ -30,10 +34,10 @@ class DateTimeUtilTests : StringSpec({
 
     "isValidDate is true for ..." {
         listOf(
-            "20221224",
-            "20560101",
-            "20240229",
-            "12341231",
+            "2022-12-24",
+            "2056-01-01",
+            "2024-02-29",
+            "1234-12-31",
         ).forEach {
             DateTimeUtil.isValidDate(it) shouldBe true
         }
@@ -45,14 +49,14 @@ class DateTimeUtilTests : StringSpec({
             "12",
             "123",
             "1234",
-            "12345",
-            "123456",
-            "1234567",
-            "20240230",
-            "20200001",
-            "20201301",
-            "20200132",
-            "202001311",
+            "1234-5",
+            "1234-56",
+            "1234-56-7",
+            "2024-02-30",
+            "2020-00-01",
+            "2020-13-01",
+            "2020-01-32",
+            "2020-01-311",
         ).forEach {
             DateTimeUtil.isValidDate(it) shouldBe false
         }
@@ -93,6 +97,95 @@ class DateTimeUtilTests : StringSpec({
             Pair("2230", "0100") to "0230",
         ).forAll { (times, expectedDiff) ->
             DateTimeUtil.getTimeDiff(times.first, times.second) shouldBe expectedDiff
+        }
+    }
+
+    "toValidDate returns same string for valid date" {
+        listOf(
+            "20221201" to "20221201",
+            "20200229" to "20200229",
+            "20450101" to "20450101",
+        ).forAll { (inputDateTimeString, expectedDateTimeString) ->
+            DateTimeUtil.toValidDate(inputDateTimeString) shouldBe expectedDateTimeString
+        }
+    }
+
+    "toValidDate returns today if input is empty" {
+        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
+                .withZone(ZoneId.systemDefault())
+        val today = formatter.format(Instant.now())
+
+        DateTimeUtil.toValidDate("") shouldBe today
+        DateTimeUtil.toValidDate(null) shouldBe today
+    }
+
+    "toValidDate returns null if input is invalid" {
+        listOf(
+            "1",
+            "12",
+            "20221301",
+            "20220229",
+            "00000000",
+            "not_a_date",
+        ).forAll {
+            DateTimeUtil.toValidDate(it) shouldBe null
+        }
+    }
+
+    "toValidDateTime returns same string for valid datetime" {
+        listOf(
+            "20221201_1000" to "20221201_1000",
+            "20200229_2359" to "20200229_2359",
+            "20450101_0000" to "20450101_0000",
+        ).forAll { (inputDateTimeString, expectedDateTimeString) ->
+            DateTimeUtil.toValidDateTime(inputDateTimeString) shouldBe expectedDateTimeString
+        }
+    }
+
+    "toValidDateTime returns now if input is empty" {
+        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmm")
+            .withZone(ZoneId.systemDefault())
+        val now = formatter.format(Instant.now())
+
+        DateTimeUtil.toValidDateTime("") shouldBe now
+        DateTimeUtil.toValidDateTime(null) shouldBe now
+    }
+
+    "toValidDateTime returns now and adds date if input only time is given" {
+        listOf(
+            "0000",
+            "1234",
+            "2359",
+        ).forAll {
+            val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
+                .withZone(ZoneId.systemDefault())
+            val today = formatter.format(Instant.now())
+
+            DateTimeUtil.toValidDateTime(it) shouldBe "${today}_$it"
+        }
+    }
+
+    "toValidDateTime returns null if input is invalid" {
+        listOf(
+            "1",
+            "12",
+            "20221301_0700",
+            "20220229_1245",
+            "00000000_0000",
+            "not_a_date",
+            "20200101_2360",
+        ).forAll {
+            DateTimeUtil.toValidDateTime(it) shouldBe null
+        }
+    }
+
+    "addTimeToDatetime works for ..." {
+        listOf(
+            Pair("20200101_1800", "0100") to "20200101_1900",
+            Pair("20200101_1000", "1000") to "20200101_2000",
+            Pair("20200101_2300", "0100") to "20200102_0000",
+        ).forAll { (times, expectedDateTime) ->
+            DateTimeUtil.addTimeToDateTime(times.first, times.second) shouldBe expectedDateTime
         }
     }
 })

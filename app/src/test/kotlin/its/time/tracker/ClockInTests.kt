@@ -66,5 +66,32 @@ class ClockInTests : FunSpec({
 
         output shouldBe "invalid datetime input '1961'\n"
     }
+
+    test("clock-in can be overwritten") {
+        executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=20221223_1730"))
+        val output = tapSystemOut {
+            executeClockInWitArgs(arrayOf<String>("-tEPP-123", "--datetime=20221223_1730"))
+        }
+
+        output shouldBe "Will overwrite current event with identical time stamp: ClockEvent(dateTime=20221223_1730, eventType=CLOCK_IN, topic=EPP-007)\n" +
+                "clock-in for topic 'EPP-123' saved: 20221223_1730\n"
+        getTimesCsvContent() shouldBe listOf(
+            "dateTime;eventType;topic",
+            "20221223_1730;CLOCK_IN;EPP-123")
+    }
+
+    test("cannot overwrite clock-out with clock-in") {
+        executeClockOutWitArgs(arrayOf<String>("--datetime=20221223_1730"))
+        val output = tapSystemOut {
+            executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=20221223_1730"))
+        }
+
+        output shouldBe "Cannot overwrite event of different type. You must remove the present event before.\n" +
+                "present: ClockEvent(dateTime=20221223_1730, eventType=CLOCK_OUT, topic=MANUAL_CLOCK_OUT)\n" +
+                "new    : ClockEvent(dateTime=20221223_1730, eventType=CLOCK_IN, topic=EPP-007)\n"
+        getTimesCsvContent() shouldBe listOf(
+            "dateTime;eventType;topic",
+            "20221223_1730;CLOCK_OUT;MANUAL_CLOCK_OUT")
+    }
 })
 

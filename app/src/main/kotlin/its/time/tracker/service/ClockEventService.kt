@@ -22,9 +22,9 @@ class ClockEventService(
         val clockEvents = csvService.loadClockEvents()
 
         val presentClockEvent = clockEvents.find { it.dateTime == clockEvent.dateTime }
-        // TODO test
         if (presentClockEvent != null) {
             if (presentClockEvent.eventType == clockEvent.eventType) {
+                println("Will overwrite current event with identical time stamp: $presentClockEvent")
                 clockEvents.remove(presentClockEvent)
             }
             else {

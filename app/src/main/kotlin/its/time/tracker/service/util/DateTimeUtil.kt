@@ -1,26 +1,28 @@
 package its.time.tracker.service.util
 
-import its.time.tracker.CLOCK_EVENT_PATTERN_FORMAT
-import its.time.tracker.DAY_PATTERN_FORMAT
+import its.time.tracker.DATE_TIME_PATTERN
+import its.time.tracker.DATE_PATTERN
+import its.time.tracker.TIME_PATTERN
 import java.time.Instant
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.time.format.ResolverStyle
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 class DateTimeUtil {
     companion object {
-        private fun getNow(pattern: String = CLOCK_EVENT_PATTERN_FORMAT) : String {
+        private fun getNow(pattern: String = DATE_TIME_PATTERN): String {
             val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern(pattern)
                 .withZone(ZoneId.systemDefault())
 
-            return formatter.format(Instant.now())
+            return formatter.format(LocalDateTime.now())
         }
 
-        // TODO test
         fun toValidDate(dateInput: String?): String? {
-            if (dateInput.isNullOrBlank()) return getNow(DAY_PATTERN_FORMAT)
+            if (dateInput.isNullOrBlank()) return LocalDateTime.now()
             else if (isValidDate(dateInput)) {
                 return dateInput
             }
@@ -29,11 +31,10 @@ class DateTimeUtil {
             return null
         }
 
-        // TODO test
         fun toValidDateTime(dateTimeInput: String?): String? {
             if (dateTimeInput.isNullOrBlank()) return getNow()
             else if (isValidTime(dateTimeInput)) {
-                return getNow("yyyyMMdd") + "_" + dateTimeInput
+                return getNow("yyyy-MM-dd") + "T" + dateTimeInput
             }
             else if (isValidDateTime(dateTimeInput)) {
                 return dateTimeInput
@@ -44,28 +45,26 @@ class DateTimeUtil {
         }
 
         private fun isValidDateTime(dateTimeInput: String): Boolean {
-            if (dateTimeInput.length != 13 || dateTimeInput[8] != '_') {
-                return false
-            }
-            val split = dateTimeInput.split("_")
-
-            return split.size == 2 && isValidDate(split[0]) && isValidTime(split[1])
+            return checkDateTimeStringAgainstPattern(dateTimeInput, DATE_TIME_PATTERN)
         }
 
         fun isValidTime(time: String): Boolean {
-            val regex = "([01]?\\d|2[0-3])[0-5]\\d".toRegex()
-            return time.length == 4 && time.matches(regex)
+            return checkDateTimeStringAgainstPattern(time, TIME_PATTERN)
         }
 
         fun isValidDate(date: String): Boolean {
-            val dateFormatter = DateTimeFormatter.ofPattern("uuuuMMdd", Locale.getDefault())
+            return checkDateTimeStringAgainstPattern(date, DATE_PATTERN)
+        }
+
+        private fun checkDateTimeStringAgainstPattern(string: String, pattern: String): LocalDateTime? {
+            val dateFormatter = DateTimeFormatter.ofPattern(pattern, Locale.getDefault())
                 .withResolverStyle(ResolverStyle.STRICT)
 
             return try {
-                dateFormatter.parse(date)
-                true
+                return dateFormatter.parse(string)
             } catch (e: DateTimeParseException) {
-                false
+                System.err.println("unable to parse '$string' for pattern '$pattern'")
+                return null
             }
         }
 
@@ -73,15 +72,37 @@ class DateTimeUtil {
             return dateTime.split("_")[1]
         }
 
-        fun addTimes(time1: String, time2: String): String {
+        fun addTimeToDateTime(dateTime: String, time: String): String? {
+            if (!isValidDateTime(dateTime) || !isValidTime(time)) {
+                System.err.println("Unable to add time '$time' to datetime '$dateTime'")
+                return null
+            }
+
+            val dateTimeSplit = dateTime.split("_")
+            val newTime = addTimes(dateTimeSplit[1], time, true)
+            if (newTime.toInt() >= dateTimeSplit[1].toInt()) {
+                return "${dateTimeSplit[0]}_$newTime"
+            }
+            else {
+                val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
+                    .withZone(ZoneId.systemDefault())
+                val localDateTime = LocalDateTime.parse(dateTimeSplit[0], formatter)
+                localDateTime.plus(1, ChronoUnit.DAYS)
+
+                return "${formatter.format(localDateTime)}_$newTime"
+            }
+        }
+
+        fun addTimes(time1: String, time2: String, resetTimeAtNextDay: Boolean = false): String {
             val hours1: Int = time1.subSequence(0, 2).toString().toInt()
             val minutes1: Int = time1.subSequence(2, 4).toString().toInt()
             val hours2: Int = time2.subSequence(0, 2).toString().toInt()
             val minutes2: Int = time2.subSequence(2, 4).toString().toInt()
 
             var minutesSum = minutes1 + minutes2
-            val hoursSum = Integer.sum(hours1 + hours2, if (minutesSum > 59) 1 else 0)
+            var hoursSum = Integer.sum(hours1 + hours2, if (minutesSum > 59) 1 else 0)
             minutesSum = if(minutesSum > 59) (minutesSum-60) else minutesSum
+            if (resetTimeAtNextDay && hoursSum >= 24) hoursSum-=24
 
             return to4CharTimeFormat(hoursSum, minutesSum)
         }
