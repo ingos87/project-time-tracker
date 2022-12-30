@@ -3,136 +3,69 @@ package its.time.tracker.service.util
 import its.time.tracker.DATE_TIME_PATTERN
 import its.time.tracker.DATE_PATTERN
 import its.time.tracker.TIME_PATTERN
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.*
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.time.format.ResolverStyle
 import java.time.temporal.ChronoUnit
+import java.time.temporal.Temporal
 import java.util.*
 
 class DateTimeUtil {
     companion object {
-        private fun getNow(pattern: String = DATE_TIME_PATTERN): String {
-            val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern(pattern)
-                .withZone(ZoneId.systemDefault())
 
-            return formatter.format(LocalDateTime.now())
-        }
-
-        fun toValidDate(dateInput: String?): String? {
+        fun toValidDate(dateInput: String?): Temporal? {
             if (dateInput.isNullOrBlank()) return LocalDateTime.now()
-            else if (isValidDate(dateInput)) {
-                return dateInput
+            return parseStringWithPattern(dateInput, DATE_PATTERN)
+        }
+
+        fun toValidDateTime(dateTimeInput: String?): Temporal? {
+            if (dateTimeInput.isNullOrBlank()) return LocalDateTime.now()
+
+            val time = parseStringWithPattern(dateTimeInput, TIME_PATTERN, false)
+            if (time != null) {
+                val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.getDefault())
+                    .withZone(ZoneId.systemDefault())
+                return parseStringWithPattern(formatter.format(LocalDateTime.now()) + " " + dateTimeInput, DATE_TIME_PATTERN)
             }
 
-            System.err.println("invalid date input '$dateInput'")
-            return null
+            return parseStringWithPattern(dateTimeInput, DATE_TIME_PATTERN)
         }
 
-        fun toValidDateTime(dateTimeInput: String?): String? {
-            if (dateTimeInput.isNullOrBlank()) return getNow()
-            else if (isValidTime(dateTimeInput)) {
-                return getNow("yyyy-MM-dd") + "T" + dateTimeInput
-            }
-            else if (isValidDateTime(dateTimeInput)) {
-                return dateTimeInput
-            }
-
-            System.err.println("invalid datetime input '$dateTimeInput'")
-            return null
-        }
-
-        private fun isValidDateTime(dateTimeInput: String): Boolean {
-            return checkDateTimeStringAgainstPattern(dateTimeInput, DATE_TIME_PATTERN)
-        }
-
-        fun isValidTime(time: String): Boolean {
-            return checkDateTimeStringAgainstPattern(time, TIME_PATTERN)
-        }
-
-        fun isValidDate(date: String): Boolean {
-            return checkDateTimeStringAgainstPattern(date, DATE_PATTERN)
-        }
-
-        private fun checkDateTimeStringAgainstPattern(string: String, pattern: String): LocalDateTime? {
+        private fun parseStringWithPattern(string: String, pattern: String, verbose: Boolean = true): Temporal? {
             val dateFormatter = DateTimeFormatter.ofPattern(pattern, Locale.getDefault())
                 .withResolverStyle(ResolverStyle.STRICT)
 
             return try {
-                return dateFormatter.parse(string)
+                if (pattern == TIME_PATTERN) {
+                    LocalTime.parse(string, dateFormatter)
+                }
+                else if (pattern == DATE_PATTERN) {
+                    LocalDate.parse(string, dateFormatter)
+                }
+                else {
+                    LocalDateTime.parse(string, dateFormatter)
+                }
             } catch (e: DateTimeParseException) {
-                System.err.println("unable to parse '$string' for pattern '$pattern'")
-                return null
+                if (verbose) System.err.println("unable to parse '$string' for pattern '$pattern'")
+                null
             }
         }
 
-        fun extractTimeFromDateTime(dateTime: String): String {
-            return dateTime.split("_")[1]
+        fun isSameDay(dateTime1: LocalDateTime, dateTime2: LocalDate): Boolean {
+            return dateTimeToString(dateTime1, DATE_PATTERN) == dateTimeToString(dateTime2, DATE_PATTERN)
         }
 
-        fun addTimeToDateTime(dateTime: String, time: String): String? {
-            if (!isValidDateTime(dateTime) || !isValidTime(time)) {
-                System.err.println("Unable to add time '$time' to datetime '$dateTime'")
-                return null
-            }
+        fun dateTimeToString(dateTime: Temporal, pattern: String = DATE_TIME_PATTERN): String {
+            val formatter = DateTimeFormatter.ofPattern(pattern, Locale.getDefault())
+                .withZone(ZoneId.systemDefault())
 
-            val dateTimeSplit = dateTime.split("_")
-            val newTime = addTimes(dateTimeSplit[1], time, true)
-            if (newTime.toInt() >= dateTimeSplit[1].toInt()) {
-                return "${dateTimeSplit[0]}_$newTime"
-            }
-            else {
-                val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
-                    .withZone(ZoneId.systemDefault())
-                val localDateTime = LocalDateTime.parse(dateTimeSplit[0], formatter)
-                localDateTime.plus(1, ChronoUnit.DAYS)
-
-                return "${formatter.format(localDateTime)}_$newTime"
-            }
+            return formatter.format(dateTime)
         }
 
-        fun addTimes(time1: String, time2: String, resetTimeAtNextDay: Boolean = false): String {
-            val hours1: Int = time1.subSequence(0, 2).toString().toInt()
-            val minutes1: Int = time1.subSequence(2, 4).toString().toInt()
-            val hours2: Int = time2.subSequence(0, 2).toString().toInt()
-            val minutes2: Int = time2.subSequence(2, 4).toString().toInt()
-
-            var minutesSum = minutes1 + minutes2
-            var hoursSum = Integer.sum(hours1 + hours2, if (minutesSum > 59) 1 else 0)
-            minutesSum = if(minutesSum > 59) (minutesSum-60) else minutesSum
-            if (resetTimeAtNextDay && hoursSum >= 24) hoursSum-=24
-
-            return to4CharTimeFormat(hoursSum, minutesSum)
-        }
-
-        fun getTimeDiff(time1: String, time2: String): String {
-            val hours1: Int = time1.subSequence(0, 2).toString().toInt()
-            val minutes1: Int = time1.subSequence(2, 4).toString().toInt()
-            var hours2: Int = time2.subSequence(0, 2).toString().toInt()
-            var minutes2: Int = time2.subSequence(2, 4).toString().toInt()
-
-            var hoursDecr = 0
-            if (minutes1 > minutes2) {
-                minutes2+=60
-                hoursDecr = 1
-            }
-            val minutesDiff = minutes2 - minutes1
-
-            if (hours1 > hours2) {
-                hours2+=24
-            }
-            val hoursDiff = hours2 - hours1 - hoursDecr
-
-            return to4CharTimeFormat(hoursDiff, minutesDiff)
-        }
-
-        private fun to4CharTimeFormat(hours: Int, minutes: Int): String {
-            val hoursString: String = if(hours > 9) hours.toString() else "0$hours"
-            val minutesString: String = if(minutes > 9) minutes.toString() else "0$minutes"
-
-            return "$hoursString$minutesString"
+        fun durationToString(duration: Duration): String {
+            return (if (duration.toHours() < 10) "0" else "") + duration.toHours() + ":" +
+                    (if (duration.toMinutesPart() < 10) "0" else "") + duration.toMinutesPart()
         }
     }
 }

@@ -22,88 +22,88 @@ class ClockOutTests : FunSpec({
         }
 
         output shouldStartWith "clock-out saved: 20"
-        output.length shouldBeExactly 31
+        output.length shouldBeExactly 34
     }
 
     test("clock-out is saved with manual time") {
         val output = tapSystemOut {
-            executeClockOutWitArgs(arrayOf<String>("--datetime=20221223_1730"))
+            executeClockOutWitArgs(arrayOf<String>("--datetime=2022-12-23 17:30"))
         }
 
-        output shouldBe "clock-out saved: 20221223_1730\n"
+        output shouldBe "clock-out saved: 2022-12-23 17:30\n"
         getTimesCsvContent() shouldBe listOf(
             "dateTime;eventType;topic",
-            "20221223_1730;CLOCK_OUT;MANUAL_CLOCK_OUT")
+            "2022-12-23 17:30;CLOCK_OUT;MANUAL_CLOCK_OUT")
     }
 
     test("clock-out is saved with today's date if only time is given") {
         val output = tapSystemOut {
-            executeClockOutWitArgs(arrayOf<String>("-d1645"))
+            executeClockOutWitArgs(arrayOf<String>("-d16:45"))
         }
 
-        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
+        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
             .withZone(ZoneId.systemDefault())
         val today = formatter.format(Instant.now())
 
-        output shouldBe "clock-out saved: ${today}_1645\n"
+        output shouldBe "clock-out saved: ${today} 16:45\n"
         getTimesCsvContent() shouldBe listOf(
             "dateTime;eventType;topic",
-            "${today}_1645;CLOCK_OUT;MANUAL_CLOCK_OUT")
+            "${today} 16:45;CLOCK_OUT;MANUAL_CLOCK_OUT")
     }
 
     test("clock-out is discarded if date is invalid") {
         val output = tapSystemErrAndOut {
-            executeClockOutWitArgs(arrayOf<String>("-d20200132"))
+            executeClockOutWitArgs(arrayOf<String>("-d2020-01-32"))
         }
 
-        output shouldBe "invalid datetime input '20200132'\n"
+        output shouldBe "unable to parse '2020-01-32' for pattern 'uuuu-MM-dd HH:mm'\n"
     }
 
     test("clock-out is discarded if time is invalid") {
         val output = tapSystemErrAndOut {
-            executeClockOutWitArgs(arrayOf<String>("-d1961"))
+            executeClockOutWitArgs(arrayOf<String>("-d19:61"))
         }
 
-        output shouldBe "invalid datetime input '1961'\n"
+        output shouldBe "unable to parse '19:61' for pattern 'uuuu-MM-dd HH:mm'\n"
     }
 
     test("clock-out is saved empty csv") {
         val output = tapSystemOut {
-            executeClockOutWitArgs(arrayOf<String>("-v", "--datetime=20221223_1730"))
+            executeClockOutWitArgs(arrayOf<String>("-v", "--datetime=2022-12-23 17:30"))
         }
 
         output shouldBe "loaded 0 clock events from /Users/tollpatsch/test_its_times.csv\n" +
                 "wrote 1 events to /Users/tollpatsch/test_its_times.csv\n" +
-                "clock-out saved: 20221223_1730\n"
+                "clock-out saved: 2022-12-23 17:30\n"
         getTimesCsvContent() shouldBe listOf(
             "dateTime;eventType;topic",
-            "20221223_1730;CLOCK_OUT;MANUAL_CLOCK_OUT")
+            "2022-12-23 17:30;CLOCK_OUT;MANUAL_CLOCK_OUT")
     }
 
     test("clock-out can be overwritten") {
-        executeClockOutWitArgs(arrayOf<String>("--datetime=20221223_1730"))
+        executeClockOutWitArgs(arrayOf<String>("--datetime=2022-12-23 17:30"))
         val output = tapSystemOut {
-            executeClockOutWitArgs(arrayOf<String>("--datetime=20221223_1730"))
+            executeClockOutWitArgs(arrayOf<String>("--datetime=2022-12-23 17:30"))
         }
 
-        output shouldBe "Will overwrite current event with identical time stamp: ClockEvent(dateTime=20221223_1730, eventType=CLOCK_OUT, topic=MANUAL_CLOCK_OUT)\n" +
-                "clock-out saved: 20221223_1730\n"
+        output shouldBe "Will overwrite current event with identical time stamp: ClockEvent(dateTime=2022-12-23T17:30, eventType=CLOCK_OUT, topic=MANUAL_CLOCK_OUT)\n" +
+                "clock-out saved: 2022-12-23 17:30\n"
         getTimesCsvContent() shouldBe listOf(
             "dateTime;eventType;topic",
-            "20221223_1730;CLOCK_OUT;MANUAL_CLOCK_OUT")
+            "2022-12-23 17:30;CLOCK_OUT;MANUAL_CLOCK_OUT")
     }
 
     test("cannot overwrite clock-in with clock-out") {
-        executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=20221223_1730"))
+        executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=2022-12-23 17:30"))
         val output = tapSystemOut {
-            executeClockOutWitArgs(arrayOf<String>("--datetime=20221223_1730"))
+            executeClockOutWitArgs(arrayOf<String>("--datetime=2022-12-23 17:30"))
         }
 
         output shouldBe "Cannot overwrite event of different type. You must remove the present event before.\n" +
-                "present: ClockEvent(dateTime=20221223_1730, eventType=CLOCK_IN, topic=EPP-007)\n" +
-                "new    : ClockEvent(dateTime=20221223_1730, eventType=CLOCK_OUT, topic=MANUAL_CLOCK_OUT)\n"
+                "present: ClockEvent(dateTime=2022-12-23T17:30, eventType=CLOCK_IN, topic=EPP-007)\n" +
+                "new    : ClockEvent(dateTime=2022-12-23T17:30, eventType=CLOCK_OUT, topic=MANUAL_CLOCK_OUT)\n"
         getTimesCsvContent() shouldBe listOf(
             "dateTime;eventType;topic",
-            "20221223_1730;CLOCK_IN;EPP-007")
+            "2022-12-23 17:30;CLOCK_IN;EPP-007")
     }
 })

@@ -1,7 +1,9 @@
 package its.time.tracker.service.util
 
+import java.time.LocalDateTime
+
 data class ClockEvent(
-    val dateTime: String,
+    val dateTime: LocalDateTime,
     val eventType: EventType,
     val topic: String,
 ) {
@@ -11,6 +13,6 @@ data class ClockEvent(
         }
     }
     fun toCsvLine(): String {
-        return "$dateTime;${eventType.name};$topic"
+        return "${DateTimeUtil.dateTimeToString(dateTime)};${eventType.name};$topic"
     }
 }

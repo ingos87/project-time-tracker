@@ -1,26 +1,26 @@
 package its.time.tracker.service.util
 
-import its.time.tracker.service.util.DateTimeUtil.Companion.addTimes
-import its.time.tracker.service.util.DateTimeUtil.Companion.extractTimeFromDateTime
-import its.time.tracker.service.util.DateTimeUtil.Companion.getTimeDiff
+import its.time.tracker.MAX_WORK_HOURS_PER_DAY
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 class ProjectTimeCalculator {
 
     fun calculateProjectTime(clockEvents: List<ClockEvent>): List<BookingPositionItem> {
-        val topicTimes = ArrayList<Pair<String, String>>()
+        val topicTimes = ArrayList<Pair<String, Duration>>()
+        var totalWorkingTime: Duration = Duration.ZERO
 
-        var mostRecentClockIn = ""
+        var mostRecentClockIn: LocalDateTime? = null
         var currentClockStatus = EventType.CLOCK_OUT
         var currentTopic = ""
 
         clockEvents.forEach {
             if (it.eventType == EventType.CLOCK_IN) {
                 if (currentClockStatus == EventType.CLOCK_IN) {
-                    val workTime = getTimeDiff(
-                        extractTimeFromDateTime(mostRecentClockIn),
-                        extractTimeFromDateTime(it.dateTime)
-                    )
-                    topicTimes.add(Pair(currentTopic, workTime))
+                    val taskTime = Duration.between(mostRecentClockIn, it.dateTime)
+                    topicTimes.add(Pair(currentTopic, taskTime))
+                    totalWorkingTime = totalWorkingTime.plus(taskTime)
                 }
 
                 currentTopic = it.topic
@@ -29,11 +29,9 @@ class ProjectTimeCalculator {
             }
             else if (it.eventType == EventType.CLOCK_OUT) {
                 if (currentClockStatus == EventType.CLOCK_IN) {
-                    val workTime = getTimeDiff(
-                        extractTimeFromDateTime(mostRecentClockIn),
-                        extractTimeFromDateTime(it.dateTime)
-                    )
-                    topicTimes.add(Pair(currentTopic, workTime))
+                    val taskTime = Duration.between(mostRecentClockIn, it.dateTime)
+                    topicTimes.add(Pair(currentTopic, taskTime))
+                    totalWorkingTime = totalWorkingTime.plus(taskTime)
                 }
 
                 currentClockStatus = EventType.CLOCK_OUT
@@ -41,14 +39,21 @@ class ProjectTimeCalculator {
         }
 
         if (currentClockStatus != EventType.CLOCK_OUT) {
-            println("No final clock-out found")
-            // TODO implement something to end the work day
+            if (totalWorkingTime.toHours() >= MAX_WORK_HOURS_PER_DAY) {
+                // although, this is beyond the max hours per day, any new tasks will take at least half an hour
+                val imaginaryTaskTime = Duration.ofMinutes(30)
+                topicTimes.add(Pair(currentTopic, imaginaryTaskTime))
+            }
+            else {
+                val imaginaryTaskMinutes = MAX_WORK_HOURS_PER_DAY * 60 - totalWorkingTime.toMinutes()
+                topicTimes.add(Pair(currentTopic, Duration.ofMinutes(imaginaryTaskMinutes)))
+            }
         }
 
         return topicTimes2BookingList(topicTimes)
     }
 
-    private fun topicTimes2BookingList(topicTimes: ArrayList<Pair<String, String>>): List<BookingPositionItem> {
+    private fun topicTimes2BookingList(topicTimes: ArrayList<Pair<String, Duration>>): List<BookingPositionItem> {
         val bookingPositionItems = ArrayList<BookingPositionItem>()
         topicTimes.forEach {
             val topic = it.first
@@ -60,7 +65,7 @@ class ProjectTimeCalculator {
                 bookingPositionItems.remove(presentItem)
                 val newItem = BookingPositionItem(
                     bookingKey = bookingKey,
-                    totalWorkTime = addTimes(presentItem.totalWorkTime, workTime),
+                    totalWorkTime = presentItem.totalWorkTime.plus(workTime),
                     topics = presentItem.topics.plus(topic)
                 )
                 bookingPositionItems.add(newItem)
@@ -81,6 +86,6 @@ class ProjectTimeCalculator {
 
 data class BookingPositionItem(
     val bookingKey: String,
-    val totalWorkTime: String,
+    val totalWorkTime: Duration,
     val topics: Set<String>,
 )

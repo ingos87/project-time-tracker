@@ -9,16 +9,21 @@ import com.github.ajalt.clikt.parameters.options.required
 import its.time.tracker.service.ClockEventService
 import its.time.tracker.service.SummaryService
 import its.time.tracker.service.util.DateTimeUtil
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-const val DATE_TIME_PATTERN = "yyyy-MM-ddTHH:mm"
-const val DATE_PATTERN = "yyyy-MM-dd"
+const val CSV_PATH = "/Users/tollpatsch/its_times.csv"
+
+const val DATE_TIME_PATTERN = "uuuu-MM-dd HH:mm"
+const val DATE_PATTERN = "uuuu-MM-dd"
 const val TIME_PATTERN = "HH:mm"
-const val MONTH_PATTERN = "yyyy-MM"
+const val MONTH_PATTERN = "uuuu-MM"
 
 const val appName = "ITS TimeTracker App"
 const val version = "0.0.1"
 
-const val CSV_PATH = "/Users/tollpatsch/its_times.csv"
+const val MAX_WORK_HOURS_PER_DAY = 9
 
 class TimeTracker: CliktCommand() {
     override fun run() = Unit
@@ -38,8 +43,8 @@ class ClockIn: CliktCommand(help="Start working on something") {
     override fun run() {
         val dateTime = DateTimeUtil.toValidDateTime(dateTimeInput)
         if (dateTime != null) {
-            val success = ClockEventService(v, csvPath).addClockIn(topic, dateTime)
-            if (success) echo("clock-in for topic '$topic' saved: $dateTime")
+            val success = ClockEventService(v, csvPath).addClockIn(topic, dateTime as LocalDateTime)
+            if (success) echo("clock-in for topic '$topic' saved: ${DateTimeUtil.dateTimeToString(dateTime)}")
         }
     }
 }
@@ -51,8 +56,8 @@ class ClockOut: CliktCommand(help="End work day") {
     override fun run() {
         val dateTime = DateTimeUtil.toValidDateTime(dateTimeInput)
         if (dateTime != null) {
-            val success = ClockEventService(v, csvPath).addClockOut(dateTime)
-            if (success) echo("clock-out saved: $dateTime")
+            val success = ClockEventService(v, csvPath).addClockOut(dateTime as LocalDateTime)
+            if (success) echo("clock-out saved: ${DateTimeUtil.dateTimeToString(dateTime)}")
         }
     }
 }
@@ -65,7 +70,7 @@ class DailySummary: CliktCommand(help="show summary of a specific day") {
         val date = DateTimeUtil.toValidDate(dateInput)
         if (date != null) {
             val service = SummaryService(v, csvPath)
-            service.showDailyWorkHoursSummary(date)
+            service.showDailyWorkHoursSummary(date as LocalDate)
             service.showDailyProjectSummary(date)
         }
     }
@@ -79,7 +84,7 @@ class MonthlySummary: CliktCommand(help="show summary of a specific month") {
         val date = DateTimeUtil.toValidDate(dateInput)
         if (date != null) {
             val service = SummaryService(v, csvPath)
-            service.showDailyWorkHoursSummary(date)
+            service.showDailyWorkHoursSummary(date as LocalDate)
             service.showDailyProjectSummary(date)
         }
     }

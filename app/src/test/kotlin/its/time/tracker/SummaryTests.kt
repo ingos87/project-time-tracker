@@ -11,82 +11,108 @@ class SummaryTests : FunSpec({
     }
 
     test("simple clock-in and clock-out") {
-        executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=20220103_0730"))
-        executeClockOutWitArgs(arrayOf<String>("--datetime=20220103_1630"))
+        executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=2022-01-03 07:30"))
+        executeClockOutWitArgs(arrayOf<String>("--datetime=2022-01-03 16:30"))
 
         val output = tapSystemOut {
-            executeDailySummaryWitArgs(arrayOf<String>("-d20220103"))
+            executeDailySummaryWitArgs(arrayOf<String>("-d2022-01-03"))
         }
 
         output shouldBe
-                "+-------------------------------------+\n" +
-                "| work hours summary for day 20220103 |\n" +
-                "| clock-in:  0730                     |\n" +
-                "| clock-out: 1630                     |\n" +
-                "|_____________                        |\n" +
-                "| total work time:  0900              |\n" +
-                "| total break time: 0000              |\n" +
-                "+-------------------------------------+\n" +
-                "+-------------------------------------+\n" +
-                "| project summary for day 20220103\n" +
-                "| ProjectA: 0900  (EPP-007)\n" +
-                "+-------------------------------------+\n"
+                "+---------------------------------------+\n" +
+                "| work hours summary for day 2022-01-03 |\n" +
+                "| clock-in:  07:30                      |\n" +
+                "| clock-out: 16:30                      |\n" +
+                "|_____________                          |\n" +
+                "| total work time:  09:00               |\n" +
+                "| total break time: 00:00               |\n" +
+                "+---------------------------------------+\n" +
+                "+---------------------------------------+\n" +
+                "| project summary for day 2022-01-03\n" +
+                "| ProjectA: 09:00  (EPP-007)\n" +
+                "+---------------------------------------+\n"
     }
 
     test("day with breaksand several projects") {
-        executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=20220103_0730"))
-        executeClockInWitArgs(arrayOf<String>("-tEPP-008", "--datetime=20220103_0900")) // worktime 1:30
-        executeClockOutWitArgs(arrayOf<String>("--datetime=20220103_1125")) // worktime 3:55
-        executeClockInWitArgs(arrayOf<String>("-tEPP-123", "--datetime=20220103_1330")) // break 2:05
-        executeClockOutWitArgs(arrayOf<String>("--datetime=20220103_1530")) // worktime 2:00
-        executeClockInWitArgs(arrayOf<String>("-tallhands", "--datetime=20220103_1705")) // break 1:35
-        executeClockInWitArgs(arrayOf<String>("-tEDF-99", "--datetime=20220103_1805")) // worktime 1:00
-        executeClockOutWitArgs(arrayOf<String>("--datetime=20220103_2052")) // worktime 2:47
+        executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=2022-01-03 07:30"))
+        executeClockInWitArgs(arrayOf<String>("-tEPP-008", "--datetime=2022-01-03 09:00")) // worktime 1:30
+        executeClockOutWitArgs(arrayOf<String>("--datetime=2022-01-03 11:25")) // worktime 3:55
+        executeClockInWitArgs(arrayOf<String>("-tEPP-123", "--datetime=2022-01-03 13:30")) // break 2:05
+        executeClockOutWitArgs(arrayOf<String>("--datetime=2022-01-03 15:30")) // worktime 2:00
+        executeClockInWitArgs(arrayOf<String>("-tallhands", "--datetime=2022-01-03 17:05")) // break 1:35
+        executeClockInWitArgs(arrayOf<String>("-tEDF-99", "--datetime=2022-01-03 18:05")) // worktime 1:00
+        executeClockOutWitArgs(arrayOf<String>("--datetime=2022-01-03 20:52")) // worktime 2:47
 
         val output = tapSystemOut {
-            executeDailySummaryWitArgs(arrayOf<String>("-d20220103"))
+            executeDailySummaryWitArgs(arrayOf<String>("-d2022-01-03"))
         }
 
         output shouldBe
-                "+-------------------------------------+\n" +
-                "| work hours summary for day 20220103 |\n" +
-                "| clock-in:  0730                     |\n" +
-                "| clock-out: 2052                     |\n" +
-                "|_____________                        |\n" +
-                "| total work time:  0942              |\n" +
-                "| total break time: 0340              |\n" +
-                "+-------------------------------------+\n" +
-                "+-------------------------------------+\n" +
-                "| project summary for day 20220103\n" +
-                "| ProjectA: 0355  (EPP-007,EPP-008)\n" +
-                "| ProjectB: 0200  (EPP-123)\n" +
-                "| ITS meetings: 0100  (allhands)\n" +
-                "| EDF-99: 0247  (EDF-99)\n" +
-                "+-------------------------------------+\n"
+                "+---------------------------------------+\n" +
+                "| work hours summary for day 2022-01-03 |\n" +
+                "| clock-in:  07:30                      |\n" +
+                "| clock-out: 20:52                      |\n" +
+                "|_____________                          |\n" +
+                "| total work time:  09:42               |\n" +
+                "| total break time: 03:40               |\n" +
+                "+---------------------------------------+\n" +
+                "+---------------------------------------+\n" +
+                "| project summary for day 2022-01-03\n" +
+                "| ProjectA: 03:55  (EPP-007,EPP-008)\n" +
+                "| ProjectB: 02:00  (EPP-123)\n" +
+                "| ITS meetings: 01:00  (allhands)\n" +
+                "| EDF-99: 02:47  (EDF-99)\n" +
+                "+---------------------------------------+\n"
     }
 
-    test("missing clock-out is set for max working hours per day") {
-        executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=20220103_0730"))
-        executeClockOutWitArgs(arrayOf<String>("--datetime=20220103_1630"))
-        executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=20220103_1730"))
+    test("missing clock-out is set beyond max working hours per day") {
+        executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=2022-01-03 07:30"))
+        executeClockOutWitArgs(arrayOf<String>("--datetime=2022-01-03 16:30"))
+        executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=2022-01-03 17:30"))
 
         val output = tapSystemOut {
-            executeDailySummaryWitArgs(arrayOf<String>("-d20220103"))
+            executeDailySummaryWitArgs(arrayOf<String>("-d2022-01-03"))
         }
 
         output shouldBe
-                "+-------------------------------------+\n" +
-                "| work hours summary for day 20220103 |\n" +
-                "| clock-in:  0730                     |\n" +
-                "| clock-out: 1630                     |\n" +
-                "|_____________                        |\n" +
-                "| total work time:  0900              |\n" +
-                "| total break time: 0000              |\n" +
-                "+-------------------------------------+\n" +
-                "+-------------------------------------+\n" +
-                "| project summary for day 20220103\n" +
-                "| ProjectA: 0900  (EPP-007)\n" +
-                "+-------------------------------------+\n"
+                "No final clock-out found. Will insert one to fill up working time to 09:30 hours.\n" +
+                "+---------------------------------------+\n" +
+                "| work hours summary for day 2022-01-03 |\n" +
+                "| clock-in:  07:30                      |\n" +
+                "| clock-out: 18:00                      |\n" +
+                "|_____________                          |\n" +
+                "| total work time:  09:30               |\n" +
+                "| total break time: 01:00               |\n" +
+                "+---------------------------------------+\n" +
+                "+---------------------------------------+\n" +
+                "| project summary for day 2022-01-03\n" +
+                "| ProjectA: 09:30  (EPP-007)\n" +
+                "+---------------------------------------+\n"
+    }
+
+    test("missing clock-out is set to max working hours per day") {
+        executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=2022-01-03 09:30"))
+        executeClockOutWitArgs(arrayOf<String>("--datetime=2022-01-03 16:30"))
+        executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=2022-01-03 17:30"))
+
+        val output = tapSystemOut {
+            executeDailySummaryWitArgs(arrayOf<String>("-d2022-01-03"))
+        }
+
+        output shouldBe
+                "No final clock-out found. Will insert one to fill up working time to 09:00 hours.\n" +
+                "+---------------------------------------+\n" +
+                "| work hours summary for day 2022-01-03 |\n" +
+                "| clock-in:  09:30                      |\n" +
+                "| clock-out: 19:30                      |\n" +
+                "|_____________                          |\n" +
+                "| total work time:  09:00               |\n" +
+                "| total break time: 01:00               |\n" +
+                "+---------------------------------------+\n" +
+                "+---------------------------------------+\n" +
+                "| project summary for day 2022-01-03\n" +
+                "| ProjectA: 09:00  (EPP-007)\n" +
+                "+---------------------------------------+\n"
     }
 })
 

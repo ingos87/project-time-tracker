@@ -1,37 +1,35 @@
 package its.time.tracker.service.util
 
-import its.time.tracker.service.util.DateTimeUtil.Companion.addTimes
-import its.time.tracker.service.util.DateTimeUtil.Companion.extractTimeFromDateTime
-import its.time.tracker.service.util.DateTimeUtil.Companion.getTimeDiff
+import its.time.tracker.MAX_WORK_HOURS_PER_DAY
+import its.time.tracker.TIME_PATTERN
+import its.time.tracker.service.util.DateTimeUtil.Companion.dateTimeToString
+import its.time.tracker.service.util.DateTimeUtil.Companion.durationToString
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+import java.time.Duration
+
 
 class WorkTimeCalculator {
 
-    companion object {
-        private const val MAX_WORK_HOURS_PER_DAY = "0900"
-    }
-
     fun calculateWorkTime(clockEvents: List<ClockEvent>): WorkTimeResult {
-        var firstClockIn = ""
-        var totalWorkTime = "0000"
-        var totalBreakTime = "0000"
+        var firstClockIn: LocalDateTime? = null
+        var totalWorkDuration: Duration = Duration.ZERO
+        var totalBreakDuration: Duration = Duration.ZERO
 
-        var mostRecentClockIn = ""
-        var mostRecentClockOut = ""
+        var mostRecentClockIn: LocalDateTime? = null
+        var mostRecentClockOut: LocalDateTime? = null
 
         var currentClockStatus = EventType.CLOCK_OUT
 
         clockEvents.forEach {
             if (it.eventType == EventType.CLOCK_IN) {
-                if (firstClockIn == "") {
+                if (firstClockIn == null) {
                     firstClockIn = it.dateTime
                     mostRecentClockIn = it.dateTime
                 }
                 else if (currentClockStatus == EventType.CLOCK_OUT) {
-                    val breakTime = getTimeDiff(
-                        extractTimeFromDateTime(mostRecentClockOut),
-                        extractTimeFromDateTime(it.dateTime)
-                    )
-                    totalBreakTime = addTimes(totalBreakTime, breakTime)
+                    val breakDuration = Duration.between(mostRecentClockOut!!, it.dateTime)
+                    totalBreakDuration = totalBreakDuration.plus(breakDuration)
                     mostRecentClockIn = it.dateTime
                 }
 
@@ -39,11 +37,8 @@ class WorkTimeCalculator {
             }
             else if (it.eventType == EventType.CLOCK_OUT) {
                 if (currentClockStatus == EventType.CLOCK_IN) {
-                    val workTime = getTimeDiff(
-                        extractTimeFromDateTime(mostRecentClockIn),
-                        extractTimeFromDateTime(it.dateTime)
-                    )
-                    totalWorkTime = addTimes(totalWorkTime, workTime)
+                    val workDuration = Duration.between(mostRecentClockIn!!, it.dateTime)
+                    totalWorkDuration = totalWorkDuration.plus(workDuration)
                     mostRecentClockOut = it.dateTime
                 }
 
@@ -52,28 +47,25 @@ class WorkTimeCalculator {
         }
 
         if (currentClockStatus != EventType.CLOCK_OUT) {
-            if (totalWorkTime.toInt() >= MAX_WORK_HOURS_PER_DAY.toInt()) {
-                val thirtyMinutes = "0030" // although, this is beyond the max hours per day, any new tasks will take at least half an hour
-
-                totalWorkTime = addTimes(totalWorkTime, thirtyMinutes)
-                val mostRecentClockInSplit = mostRecentClockIn.split("_")
-                val newEndTime = addTimes(mostRecentClockInSplit[1], thirtyMinutes)
-                mostRecentClockOut = "${mostRecentClockInSplit[0]}_$newEndTime"
+            if (totalWorkDuration.toHours() >= MAX_WORK_HOURS_PER_DAY) {
+                // although, this is beyond the max hours per day, any new tasks will take at least half an hour
+                totalWorkDuration = totalWorkDuration.plus(30, ChronoUnit.MINUTES)
+                mostRecentClockOut = mostRecentClockIn!!.plus(30, ChronoUnit.MINUTES)
             }
             else {
-                val timeTillMax = getTimeDiff(totalWorkTime, MAX_WORK_HOURS_PER_DAY)
+                val minutesTillMax = MAX_WORK_HOURS_PER_DAY * 60 - totalWorkDuration.toMinutes()
 
-                totalWorkTime = MAX_WORK_HOURS_PER_DAY
-                mostRecentClockOut = addTimes(mostRecentClockIn, timeTillMax)
+                totalWorkDuration = Duration.ofHours(MAX_WORK_HOURS_PER_DAY.toLong())
+                mostRecentClockOut = mostRecentClockIn!!.plus(minutesTillMax, ChronoUnit.MINUTES)
             }
-            println("No final clock-out found. Will insert one to fill up working time to $totalWorkTime hours.")
+            println("No final clock-out found. Will insert one to fill up working time to ${durationToString(totalWorkDuration)} hours.")
         }
 
         return WorkTimeResult(
-            firstClockIn = extractTimeFromDateTime(firstClockIn),
-            lastClockOut = extractTimeFromDateTime(mostRecentClockOut),
-            totalWorkTime = totalWorkTime,
-            totalBreakTime = totalBreakTime)
+            firstClockIn = dateTimeToString(firstClockIn!!, TIME_PATTERN),
+            lastClockOut = dateTimeToString(mostRecentClockOut!!, TIME_PATTERN),
+            totalWorkTime = durationToString(totalWorkDuration),
+            totalBreakTime = durationToString(totalBreakDuration))
     }
 }
 

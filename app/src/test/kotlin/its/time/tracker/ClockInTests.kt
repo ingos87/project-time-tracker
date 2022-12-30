@@ -22,41 +22,41 @@ class ClockInTests : FunSpec({
         }
 
         output shouldStartWith "clock-in for topic 'EPP-007' saved: 20"
-        output.length shouldBeExactly 50
+        output.length shouldBeExactly 53
     }
 
     test("clock-in is saved with manual time") {
         val output = tapSystemOut {
-            executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=20221223_1730"))
+            executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=2022-12-23 17:30"))
         }
 
-        output shouldBe "clock-in for topic 'EPP-007' saved: 20221223_1730\n"
+        output shouldBe "clock-in for topic 'EPP-007' saved: 2022-12-23 17:30\n"
         getTimesCsvContent() shouldBe listOf(
             "dateTime;eventType;topic",
-            "20221223_1730;CLOCK_IN;EPP-007")
+            "2022-12-23 17:30;CLOCK_IN;EPP-007")
     }
 
     test("clock-in is saved with today's date if only time is given") {
         val output = tapSystemOut {
-            executeClockInWitArgs(arrayOf<String>("-tEPP-007", "-d0534"))
+            executeClockInWitArgs(arrayOf<String>("-tEPP-007", "-d05:34"))
         }
 
-        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
+        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
             .withZone(ZoneId.systemDefault())
         val today = formatter.format(Instant.now())
 
-        output shouldBe "clock-in for topic 'EPP-007' saved: ${today}_0534\n"
+        output shouldBe "clock-in for topic 'EPP-007' saved: ${today} 05:34\n"
         getTimesCsvContent() shouldBe listOf(
             "dateTime;eventType;topic",
-            "${today}_0534;CLOCK_IN;EPP-007")
+            "${today} 05:34;CLOCK_IN;EPP-007")
     }
 
     test("clock-in is discarded if date is invalid") {
         val output = tapSystemErrAndOut {
-            executeClockInWitArgs(arrayOf<String>("-tEPP-007", "-d20200132"))
+            executeClockInWitArgs(arrayOf<String>("-tEPP-007", "-d2020-01-32"))
         }
 
-        output shouldBe "invalid datetime input '20200132'\n"
+        output shouldBe "unable to parse '2020-01-32' for pattern 'uuuu-MM-dd HH:mm'\n"
     }
 
     test("clock-in is discarded if time is invalid") {
@@ -64,34 +64,34 @@ class ClockInTests : FunSpec({
             executeClockInWitArgs(arrayOf<String>("-tEPP-007", "-d1961"))
         }
 
-        output shouldBe "invalid datetime input '1961'\n"
+        output shouldBe "unable to parse '1961' for pattern 'uuuu-MM-dd HH:mm'\n"
     }
 
     test("clock-in can be overwritten") {
-        executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=20221223_1730"))
+        executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=2022-12-23 17:30"))
         val output = tapSystemOut {
-            executeClockInWitArgs(arrayOf<String>("-tEPP-123", "--datetime=20221223_1730"))
+            executeClockInWitArgs(arrayOf<String>("-tEPP-123", "--datetime=2022-12-23 17:30"))
         }
 
-        output shouldBe "Will overwrite current event with identical time stamp: ClockEvent(dateTime=20221223_1730, eventType=CLOCK_IN, topic=EPP-007)\n" +
-                "clock-in for topic 'EPP-123' saved: 20221223_1730\n"
+        output shouldBe "Will overwrite current event with identical time stamp: ClockEvent(dateTime=2022-12-23T17:30, eventType=CLOCK_IN, topic=EPP-007)\n" +
+                "clock-in for topic 'EPP-123' saved: 2022-12-23 17:30\n"
         getTimesCsvContent() shouldBe listOf(
             "dateTime;eventType;topic",
-            "20221223_1730;CLOCK_IN;EPP-123")
+            "2022-12-23 17:30;CLOCK_IN;EPP-123")
     }
 
     test("cannot overwrite clock-out with clock-in") {
-        executeClockOutWitArgs(arrayOf<String>("--datetime=20221223_1730"))
+        executeClockOutWitArgs(arrayOf<String>("--datetime=2022-12-23 17:30"))
         val output = tapSystemOut {
-            executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=20221223_1730"))
+            executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=2022-12-23 17:30"))
         }
 
         output shouldBe "Cannot overwrite event of different type. You must remove the present event before.\n" +
-                "present: ClockEvent(dateTime=20221223_1730, eventType=CLOCK_OUT, topic=MANUAL_CLOCK_OUT)\n" +
-                "new    : ClockEvent(dateTime=20221223_1730, eventType=CLOCK_IN, topic=EPP-007)\n"
+                "present: ClockEvent(dateTime=2022-12-23T17:30, eventType=CLOCK_OUT, topic=MANUAL_CLOCK_OUT)\n" +
+                "new    : ClockEvent(dateTime=2022-12-23T17:30, eventType=CLOCK_IN, topic=EPP-007)\n"
         getTimesCsvContent() shouldBe listOf(
             "dateTime;eventType;topic",
-            "20221223_1730;CLOCK_OUT;MANUAL_CLOCK_OUT")
+            "2022-12-23 17:30;CLOCK_OUT;MANUAL_CLOCK_OUT")
     }
 })
 

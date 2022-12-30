@@ -1,10 +1,13 @@
 package its.time.tracker.service
 
 import its.time.tracker.service.util.ClockEvent
+import its.time.tracker.service.util.DateTimeUtil
 import its.time.tracker.service.util.EventType
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
+import java.time.LocalDateTime
+import java.util.Date
 
 const val TMP_CSV_PATH = "/tmp/its_times_tmp.csv"
 
@@ -25,7 +28,7 @@ class CsvService(
             .filter { it.isNotBlank() }
             .map {
                 val (dateTime, eventType, topic) = it.split(';', ignoreCase = false, limit = 3)
-                ClockEvent(dateTime.trim(), EventType.valueOf(eventType.trim()), topic.trim())
+                ClockEvent(DateTimeUtil.toValidDateTime(dateTime.trim()) as LocalDateTime, EventType.valueOf(eventType.trim()), topic.trim())
             }.toMutableList()
 
         if (verbose) println("loaded ${clockEvents.size} clock events from $fileName")
