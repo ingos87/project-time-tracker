@@ -3,6 +3,7 @@ package its.time.tracker
 import com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
+import org.junit.platform.commons.util.StringUtils
 
 class SummaryTests : FunSpec({
 
@@ -107,38 +108,48 @@ class SummaryTests : FunSpec({
                 "+---------------------------------------+\n"
     }
 
-    xtest("monthly summary for one day") {
-        // TODO write clock-ins and outs
+    test("monthly summary for one day with lunch break") {
+        executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=2022-11-02 07:30"))
+        executeClockInWitArgs(arrayOf<String>("-tEPP-009", "--datetime=2022-11-02 08:20"))
+        executeClockInWitArgs(arrayOf<String>("-tcow", "--datetime=2022-11-02 09:45"))
+        executeClockOutWitArgs(arrayOf<String>("--datetime=2022-11-02 12:00"))
+        executeClockInWitArgs(arrayOf<String>("-tEDF-0815", "--datetime=2022-11-02 13:15"))
+        executeClockInWitArgs(arrayOf<String>("-tEDF-1234", "--datetime=2022-11-02 13:30"))
+        executeClockInWitArgs(arrayOf<String>("-tDVR-7", "--datetime=2022-11-02 14:00"))
+        executeClockInWitArgs(arrayOf<String>("-tf2f", "--datetime=2022-11-02 16:00"))
+        executeClockOutWitArgs(arrayOf<String>("--datetime=2022-11-02 16:45"))
 
         val output = tapSystemOut {
-            executeMonthlySummaryWitArgs(arrayOf<String>("-d2022-11"))
+            executeMonthlySummaryWitArgs(arrayOf<String>("-m2022-11"))
         }
 
-        output shouldBe
-                "=== SUMMARAY for 2022-11 ===\n" +
-                "+--------------+------+\n" +
-                "| day of month |    2 |\n" +
-                "| weekday      |  WED |\n" +
-                "+--------------+------+\n" +
-                "| clock-in     | 07:45|\n" +
-                "| clock-out    | 17:30|\n" +
-                "+--------------+------+\n" +
-                "| projectA     | 09:00|\n" +
-                "| projectB     | 02:00|\n" +
-                "| DoD          | 02:00|\n" +
-                "| ITS meetings | 02:00|\n" +
-                "| EDF-0815     | 02:00|\n" +
-                "| EDF-2223     | 02:00|\n" +
-                "| Recruiting   | 02:00|\n" +
-                "+--------------+------+\n" +
-                "| total        | 11:00|\n"
+        val expectedLines = listOf(
+                "=== SUMMARAY for 2022-11 ===",
+                "+--------------+------+",
+                "| day of month |    2 |",
+                "| weekday      |  WED |",
+                "+--------------+------+",
+                "| clock-in     | 07:30|",
+                "| clock-out    | 16:45|",
+                "+--------------+------+",
+                "| ProjectA     | 00:50|",
+                "| ProjectB     | 01:25|",
+                "| DoD          | 02:15|",
+                "| EDF-0815     | 00:15|",
+                "| EDF-1234     | 00:30|",
+                "| Recruiting   | 02:00|",
+                "| ITS meetings | 00:45|",
+                "+--------------+------+",
+                "| total        | 08:00|")
+
+        output.split("\n").filter { StringUtils.isNotBlank(it) } shouldBe expectedLines
     }
 
     xtest("monthly summary") {
         // TODO write clock-ins and outs
 
         val output = tapSystemOut {
-            executeMonthlySummaryWitArgs(arrayOf<String>("-d2022-11"))
+            executeMonthlySummaryWitArgs(arrayOf<String>("-m2022-11"))
         }
 
         output shouldBe

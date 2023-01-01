@@ -30,7 +30,7 @@ class BookingPositionResolver {
         }
 
         fun getMaxBookingPosNameLength(): Int {
-            return max(10, BOOKING_POSITIONS_MAP.keys.maxOf { it.length })
+            return max(12, BOOKING_POSITIONS_MAP.keys.maxOf { it.length })
         }
     }
 }

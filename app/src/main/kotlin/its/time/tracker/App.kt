@@ -11,7 +11,6 @@ import its.time.tracker.service.SummaryService
 import its.time.tracker.service.util.DateTimeUtil
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 const val CSV_PATH = "/Users/tollpatsch/its_times.csv"
 
@@ -84,8 +83,7 @@ class MonthlySummary: CliktCommand(help="show summary of a specific month") {
         val date = DateTimeUtil.toValidMonth(dateInput)
         if (date != null) {
             val service = SummaryService(v, csvPath)
-            service.showMonthlyWorkHoursSummary(date as LocalDate)
-            service.showMonthlyProjectSummary(date)
+            service.showMonthlySummary(date as LocalDate)
         }
     }
 }
