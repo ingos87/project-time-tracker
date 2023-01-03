@@ -6,13 +6,13 @@ import its.time.tracker.TIME_PATTERN
 import its.time.tracker.service.util.DateTimeUtil.Companion.dateTimeToString
 import its.time.tracker.service.util.DateTimeUtil.Companion.durationToString
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
+import java.time.temporal.ChronoUnit.MINUTES
 import java.time.Duration
 
 
 class WorkTimeCalculator {
 
-    fun calculateWorkTime(clockEvents: List<ClockEvent>): WorkTimeResult {
+    fun calculateWorkTime(clockEvents: List<ClockEvent>, useNowAsCLockOut: Boolean = false): WorkTimeResult {
         if (clockEvents.isEmpty()) {
             return WorkTimeResult(
                 firstClockIn = "00:00",
@@ -56,18 +56,25 @@ class WorkTimeCalculator {
         }
 
         if (currentClockStatus != EventType.CLOCK_OUT) {
-            if (totalWorkDuration.toHours() >= MAX_WORK_HOURS_PER_DAY) {
+            if (useNowAsCLockOut) {
+                val now = LocalDateTime.now()
+                totalWorkDuration = totalWorkDuration.plusMinutes(MINUTES.between(mostRecentClockIn, now))
+                mostRecentClockOut = now
+            }
+            else if (totalWorkDuration.toHours() >= MAX_WORK_HOURS_PER_DAY) {
                 // although, this is beyond the max hours per day, any new tasks will take at least half an hour
-                totalWorkDuration = totalWorkDuration.plus(30, ChronoUnit.MINUTES)
-                mostRecentClockOut = mostRecentClockIn!!.plus(30, ChronoUnit.MINUTES)
+                totalWorkDuration = totalWorkDuration.plusMinutes(30)
+                mostRecentClockOut = mostRecentClockIn!!.plusMinutes(30)
+
+                println(dateTimeToString(clockEvents[0].dateTime, DATE_PATTERN) + ": No final clock-out found. Will insert one. Work time will be ${durationToString(totalWorkDuration)} hours.")
             }
             else {
                 val minutesTillMax = MAX_WORK_HOURS_PER_DAY * 60 - totalWorkDuration.toMinutes()
 
                 totalWorkDuration = Duration.ofHours(MAX_WORK_HOURS_PER_DAY.toLong())
-                mostRecentClockOut = mostRecentClockIn!!.plus(minutesTillMax, ChronoUnit.MINUTES)
+                mostRecentClockOut = mostRecentClockIn!!.plusMinutes(minutesTillMax)
+                println(dateTimeToString(clockEvents[0].dateTime, DATE_PATTERN) + ": No final clock-out found. Will insert one to fill up working time to maximum (${durationToString(totalWorkDuration)} hours).")
             }
-            println(dateTimeToString(clockEvents[0].dateTime, DATE_PATTERN) + ": No final clock-out found. Will insert one to fill up working time to ${durationToString(totalWorkDuration)} hours.")
         }
 
         return WorkTimeResult(

@@ -20,18 +20,31 @@ class SummaryService(
 
         val daysEvents = clockEvents.filter { DateTimeUtil.isSameDay(it.dateTime, date) }.toList()
 
-        val workTimeResult = WorkTimeCalculator().calculateWorkTime(daysEvents)
-        val bookingPositionsList = ProjectTimeCalculator().calculateProjectTime(daysEvents)
+        val showWorkInProgress = DAYS.between(date, LocalDate.now()) == 0L
+
+        val workTimeResult = WorkTimeCalculator().calculateWorkTime(daysEvents, showWorkInProgress)
+        val bookingPositionsList = ProjectTimeCalculator().calculateProjectTime(daysEvents, showWorkInProgress)
 
         val cellWidth = 48
         val bookingPosLength = BookingPositionResolver.getMaxBookingPosNameLength()
-        println("[SUMMARY for $date]")
-        println("┌" + "─".repeat(cellWidth) + "┐")
-        println("│ " + "clock-in:".padEnd(18) + workTimeResult.firstClockIn.padEnd(cellWidth-19) + "│")
-        println("│ " + "clock-out:".padEnd(18) + workTimeResult.lastClockOut.padEnd(cellWidth-19) + "│")
-        println("├" + "─".repeat(cellWidth) + "┤")
-        println("│ " + "total work time:".padEnd(18) + workTimeResult.totalWorkTime.padEnd(cellWidth-19) + "│")
-        println("│ " + "total break time:".padEnd(18) + workTimeResult.totalBreakTime.padEnd(cellWidth-19) + "│")
+        if (showWorkInProgress) {
+            println("[today's work in progress]")
+            println("┌" + "─".repeat(cellWidth) + "┐")
+            println("│ " + "clock-in:".padEnd(20) + workTimeResult.firstClockIn.padEnd(cellWidth-21) + "│")
+            println("├" + "─".repeat(cellWidth) + "┤")
+            println("│ " + "current work time:".padEnd(20) + workTimeResult.totalWorkTime.padEnd(cellWidth-21) + "│")
+            println("│ " + "current break time:".padEnd(20) + workTimeResult.totalBreakTime.padEnd(cellWidth-21) + "│")
+        }
+        else {
+            println("[SUMMARY for $date]")
+            println("┌" + "─".repeat(cellWidth) + "┐")
+            println("│ " + "clock-in:".padEnd(18) + workTimeResult.firstClockIn.padEnd(cellWidth-19) + "│")
+            println("│ " + "clock-out:".padEnd(18) + workTimeResult.lastClockOut.padEnd(cellWidth-19) + "│")
+            println("├" + "─".repeat(cellWidth) + "┤")
+            println("│ " + "total work time:".padEnd(18) + workTimeResult.totalWorkTime.padEnd(cellWidth-19) + "│")
+            println("│ " + "total break time:".padEnd(18) + workTimeResult.totalBreakTime.padEnd(cellWidth-19) + "│")
+        }
+
         println("├" + "═".repeat(cellWidth) + "┤")
         bookingPositionsList.forEach {
             // total width - white space - bookingPosLength - ": " - time - "  " - 1parenthesis
