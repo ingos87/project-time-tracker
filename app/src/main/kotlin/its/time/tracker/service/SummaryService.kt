@@ -19,8 +19,12 @@ class SummaryService(
         val clockEvents = csvService.loadClockEvents()
 
         val daysEvents = clockEvents.filter { DateTimeUtil.isSameDay(it.dateTime, date) }.toList()
+        if (daysEvents.find { it.eventType == EventType.CLOCK_IN } == null) {
+            println("[NO SUMMARY for $date because there are no clock-in events]")
+            return
+        }
 
-        val showWorkInProgress = DAYS.between(date, LocalDate.now()) == 0L
+        val showWorkInProgress = DAYS.between(date, LocalDate.now()) == 0L && daysEvents.last().eventType != EventType.CLOCK_OUT
 
         val workTimeResult = WorkTimeCalculator().calculateWorkTime(daysEvents, showWorkInProgress)
         val bookingPositionsList = ProjectTimeCalculator().calculateProjectTime(daysEvents, showWorkInProgress)
@@ -57,13 +61,19 @@ class SummaryService(
     }
 
     fun showMonthlySummary(date: LocalDate) {
+        val dateFormatter = DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.getDefault())
+            .withResolverStyle(ResolverStyle.STRICT)
+        val yearMonthString = dateFormatter.format(date).substring(0, 7)
+
         val csvService = CsvService(verbose, csvPath)
         val clockEvents = csvService.loadClockEvents()
 
         val monthsEvents = clockEvents.filter { DateTimeUtil.isSameMonth(it.dateTime, date) }.toList()
+        if (monthsEvents.find { it.eventType == EventType.CLOCK_IN } == null) {
+            println("[NO SUMMARY for $yearMonthString because there are no clock-in events]")
+            return
+        }
 
-        val dateFormatter = DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.getDefault())
-            .withResolverStyle(ResolverStyle.STRICT)
         val uniqueDays: List<LocalDate> = monthsEvents.map { DateTimeUtil.toValidDate(dateFormatter.format(it.dateTime)) as LocalDate }.toList().distinct()
 
         val summaryData = MonthlySummary()
@@ -76,7 +86,7 @@ class SummaryService(
 
         val firstColWidth = BookingPositionResolver.getMaxBookingPosNameLength()+2
 
-        println("[SUMMARY for ${dateFormatter.format(date).substring(0, 7)}]")
+        println("[SUMMARY for $yearMonthString]")
 
         println(getHorizontalSeparator(uniqueDays, SeparatorPosition.TOP, firstColWidth, false))
         println(getContentLine(

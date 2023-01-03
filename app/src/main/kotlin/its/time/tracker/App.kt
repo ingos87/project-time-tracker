@@ -38,7 +38,7 @@ class ClockIn: CliktCommand(help="Start working on something") {
     val v: Boolean by option("-v", help = "enable verbose mode").flag()
     val topic by option("-t", "--topic", help = "time tracking topic - usually some Jira Ticket Id").required()
     val dateTimeInput by option("-d", "--datetime", help="start datetime (format: $DATE_TIME_PATTERN) for this topic - will be NOW if left empty; today's date is prepended if only time (format: HHmm) is given")
-    val csvPath by option("--csvpath", help = "defines path to persistent file").default(CSV_PATH)
+    val csvPath by option("--csvpath", help = "defines path to persistent file. default: $CSV_PATH").default(CSV_PATH)
     override fun run() {
         val dateTime = DateTimeUtil.toValidDateTime(dateTimeInput)
         if (dateTime != null) {
@@ -48,10 +48,10 @@ class ClockIn: CliktCommand(help="Start working on something") {
     }
 }
 
-class ClockOut: CliktCommand(help="End work day") {
+class ClockOut: CliktCommand(help="Interrupt or end work day") {
     val v: Boolean by option("-v", help = "enable verbose mode").flag()
     val dateTimeInput by option("-d", "--datetime", help="start datetime (format: $DATE_TIME_PATTERN) for this topic - will be NOW if left empty; today's date is prepended if only time (format: HHmm) is given")
-    val csvPath by option("--csvpath", help = "defines path to persistent file").default(CSV_PATH)
+    val csvPath by option("--csvpath", help = "defines path to persistent file. default: $CSV_PATH").default(CSV_PATH)
     override fun run() {
         val dateTime = DateTimeUtil.toValidDateTime(dateTimeInput)
         if (dateTime != null) {
@@ -61,10 +61,10 @@ class ClockOut: CliktCommand(help="End work day") {
     }
 }
 
-class DailySummary: CliktCommand(help="show summary of a specific day") {
+class DailySummary: CliktCommand(help="show work time an project summary of a specific day") {
     val v: Boolean by option("-v", help = "enable verbose mode").flag()
     val dateInput by option("-d", "--date", help="date (format: $DATE_PATTERN) - will be today's date if left empty")
-    val csvPath by option("--csvpath", help = "defines path to persistent file").default(CSV_PATH)
+    val csvPath by option("--csvpath", help = "defines path to persistent file. default: $CSV_PATH").default(CSV_PATH)
     override fun run() {
         val date = DateTimeUtil.toValidDate(dateInput)
         if (date != null) {
@@ -74,10 +74,10 @@ class DailySummary: CliktCommand(help="show summary of a specific day") {
     }
 }
 
-class MonthlySummary: CliktCommand(help="show summary of a specific month") {
+class MonthlySummary: CliktCommand(help="show work time an project summary of a specific month") {
     val v: Boolean by option("-v", help = "enable verbose mode").flag()
     val dateInput by option("-m", "--month", help="date (format: $MONTH_PATTERN) - will be current month if left empty")
-    val csvPath by option("--csvpath", help = "defines path to persistent file").default(CSV_PATH)
+    val csvPath by option("--csvpath", help = "defines path to persistent file. default: $CSV_PATH").default(CSV_PATH)
     override fun run() {
         val date = DateTimeUtil.toValidMonth(dateInput)
         if (date != null) {

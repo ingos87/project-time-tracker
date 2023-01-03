@@ -16,6 +16,17 @@ class SummaryTests : FunSpec({
         ensureCsvEmpty()
     }
 
+    test("today's summary shows err message if there are not clock-in events") {
+        executeClockOutWitArgs(arrayOf<String>(             "--datetime=2023-01-02 14:30"))
+
+        val output = tapSystemOut {
+            executeDailySummaryWitArgs(arrayOf<String>("-d2023-01-02"))
+        }
+
+        splitIgnoreBlank(output) shouldBe listOf(
+            "[NO SUMMARY for 2023-01-02 because there are no clock-in events]")
+    }
+
     test("simple clock-in and clock-out") {
         executeClockInWitArgs(arrayOf<String>("-tEPP-007",  "--datetime=2022-01-03 07:30"))
         executeClockOutWitArgs(arrayOf<String>(             "--datetime=2022-01-03 16:30"))
@@ -65,6 +76,31 @@ class SummaryTests : FunSpec({
             "│ ProjectA:     02:15  (EPP-007)                 │",
             "│ ProjectB:     01:55  (EPP-123)                 │",
             "│ EDF-777:      ${DateTimeUtil.durationToString(currentEdfDuration)}  (EDF-777)                 │",
+            "└────────────────────────────────────────────────┘")
+    }
+
+    test("today's summary if working day is ended") {
+        val today = LocalDate.now()
+        val todayString = DateTimeUtil.dateTimeToString(today, DATE_PATTERN)
+        executeClockInWitArgs(arrayOf<String>("-tEPP-007",  "--datetime=$todayString 01:30"))
+        executeClockInWitArgs(arrayOf<String>("-tEPP-123",  "--datetime=$todayString 03:45"))
+        executeClockOutWitArgs(arrayOf<String>(             "--datetime=$todayString 04:30"))
+
+        val output = tapSystemOut {
+            executeDailySummaryWitArgs(emptyArray())
+        }
+
+        splitIgnoreBlank(output) shouldBe listOf(
+            "[SUMMARY for $todayString]",
+            "┌────────────────────────────────────────────────┐",
+            "│ clock-in:         01:30                        │",
+            "│ clock-out:        04:30                        │",
+            "├────────────────────────────────────────────────┤",
+            "│ total work time:  03:00                        │",
+            "│ total break time: 00:00                        │",
+            "├════════════════════════════════════════════════┤",
+            "│ ProjectA:     02:15  (EPP-007)                 │",
+            "│ ProjectB:     00:45  (EPP-123)                 │",
             "└────────────────────────────────────────────────┘")
     }
 
@@ -145,6 +181,17 @@ class SummaryTests : FunSpec({
             "├════════════════════════════════════════════════┤",
             "│ ProjectA:     09:00  (EPP-007)                 │",
             "└────────────────────────────────────────────────┘")
+    }
+
+    test("month's summary shows err message if there are not clock-in events") {
+        executeClockOutWitArgs(arrayOf<String>(             "--datetime=2022-11-02 14:30"))
+
+        val output = tapSystemOut {
+            executeMonthlySummaryWitArgs(arrayOf<String>("-m2022-11"))
+        }
+
+        splitIgnoreBlank(output) shouldBe listOf(
+            "[NO SUMMARY for 2022-11 because there are no clock-in events]")
     }
 
     test("monthly summary for one day with lunch break") {
