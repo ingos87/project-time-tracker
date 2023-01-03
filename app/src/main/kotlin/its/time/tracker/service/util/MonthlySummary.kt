@@ -21,7 +21,7 @@ data class MonthlySummary(
     }
 
     fun getAllBookingPositionNames(): List<String> {
-        return data.values.map { it.second.map { item -> item.bookingKey } }.flatten()
+        return data.values.map { it.second.map { item -> item.bookingKey } }.flatten().distinct()
     }
 
     fun getAllTotalWorkTimes(): List<String> {
@@ -35,6 +35,6 @@ data class MonthlySummary(
             dateDurationsMap = dateDurationsMap.plus(Pair(key, maybeBookingPositionItem?.totalWorkTime ?: Duration.ZERO))
         }
 
-        return dateDurationsMap.values.map { DateTimeUtil.durationToString(it) }
+        return dateDurationsMap.values.map { if(it == Duration.ZERO) "     " else DateTimeUtil.durationToString(it) }
     }
 }

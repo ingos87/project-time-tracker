@@ -6,6 +6,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.ResolverStyle
 import java.util.*
+import java.time.temporal.ChronoUnit.DAYS
 
 private const val CELL_WIDTH = 6
 
@@ -13,37 +14,33 @@ class SummaryService(
     private val verbose: Boolean,
     private val csvPath: String,
 ) {
-
-    fun showDailyWorkHoursSummary(date: LocalDate) {
+    fun showDailySummary(date: LocalDate) {
         val csvService = CsvService(verbose, csvPath)
         val clockEvents = csvService.loadClockEvents()
 
         val daysEvents = clockEvents.filter { DateTimeUtil.isSameDay(it.dateTime, date) }.toList()
 
         val workTimeResult = WorkTimeCalculator().calculateWorkTime(daysEvents)
-
-        println("=== SUMMARY for $date ===")
-        println("+---------------------------------------+")
-        println("| clock-in:  ${workTimeResult.firstClockIn}                      |")
-        println("| clock-out: ${workTimeResult.lastClockOut}                      |")
-        println("|_________________                      |")
-        println("| total work time:  ${workTimeResult.totalWorkTime}               |")
-        println("| total break time: ${workTimeResult.totalBreakTime}               |")
-    }
-
-    fun showDailyProjectSummary(date: LocalDate) {
-        val csvService = CsvService(verbose, csvPath)
-        val clockEvents = csvService.loadClockEvents()
-
-        val daysEvents = clockEvents.filter { DateTimeUtil.isSameDay(it.dateTime, date) }.toList()
-
         val bookingPositionsList = ProjectTimeCalculator().calculateProjectTime(daysEvents)
 
-        println("+=======================================+")
+        val cellWidth = 48
+        val bookingPosLength = BookingPositionResolver.getMaxBookingPosNameLength()
+        println("[SUMMARY for $date]")
+        println("┌" + "─".repeat(cellWidth) + "┐")
+        println("│ " + "clock-in:".padEnd(18) + workTimeResult.firstClockIn.padEnd(cellWidth-19) + "│")
+        println("│ " + "clock-out:".padEnd(18) + workTimeResult.lastClockOut.padEnd(cellWidth-19) + "│")
+        println("├" + "─".repeat(cellWidth) + "┤")
+        println("│ " + "total work time:".padEnd(18) + workTimeResult.totalWorkTime.padEnd(cellWidth-19) + "│")
+        println("│ " + "total break time:".padEnd(18) + workTimeResult.totalBreakTime.padEnd(cellWidth-19) + "│")
+        println("├" + "═".repeat(cellWidth) + "┤")
         bookingPositionsList.forEach {
-            println("| ${it.bookingKey}: ${DateTimeUtil.durationToString(it.totalWorkTime)}  (${it.topics.joinToString(",")})")
+            // total width - white space - bookingPosLength - ": " - time - "  " - 1parenthesis
+            val availableSpaceForTopicList = cellWidth-1-bookingPosLength-2-5-2-1
+            val topicList = ("(${it.topics.joinToString(",")}".take(availableSpaceForTopicList)+")").padEnd(availableSpaceForTopicList+1)
+            println("│ " + "${it.bookingKey}:".padEnd(bookingPosLength+2) + DateTimeUtil.durationToString(it.totalWorkTime) + "  " + topicList + "│")
         }
-        println("+---------------------------------------+")
+        println("└" + "─".repeat(cellWidth) + "┘")
+
     }
 
     fun showMonthlySummary(date: LocalDate) {
@@ -65,46 +62,124 @@ class SummaryService(
         }
 
         val firstColWidth = BookingPositionResolver.getMaxBookingPosNameLength()+2
-        val separatorLine = "+" + "-".repeat(firstColWidth) + "+" + ("-".repeat(CELL_WIDTH) + "+").repeat(uniqueDays.size)
 
-        println("=== SUMMARAY for ${dateFormatter.format(date).substring(0, 7)} ===")
+        println("[SUMMARY for ${dateFormatter.format(date).substring(0, 7)}]")
 
-        println(separatorLine)
+        println(getHorizontalSeparator(uniqueDays, SeparatorPosition.TOP, firstColWidth, false))
         println(getContentLine(
             getCellString("day of month", firstColWidth, TextOrientation.LEFT),
-            uniqueDays.map { it.dayOfMonth.toString() }))
+            uniqueDays.map { it.dayOfMonth.toString() },
+            uniqueDays))
         println(getContentLine(
             getCellString("weekday", firstColWidth, TextOrientation.LEFT),
-            uniqueDays.map { it.dayOfWeek.name.substring(0, 3) }))
-        println(separatorLine)
+            uniqueDays.map { it.dayOfWeek.name.substring(0, 3) },
+            uniqueDays))
+        println(getHorizontalSeparator(uniqueDays, SeparatorPosition.MIDDLE, firstColWidth, false))
 
         println(getContentLine(
             getCellString("clock-in", firstColWidth, TextOrientation.LEFT),
-            summaryData.getAllClockIns()))
+            summaryData.getAllClockIns(),
+            uniqueDays))
         println(getContentLine(
             getCellString("clock-out", firstColWidth, TextOrientation.LEFT),
-            summaryData.getAllClockOuts()))
+            summaryData.getAllClockOuts(),
+            uniqueDays))
 
-        println(separatorLine)
-        val allBookinkingPositionNames = summaryData.getAllBookingPositionNames()
-        allBookinkingPositionNames.forEach { name ->
+        println(getHorizontalSeparator(uniqueDays, SeparatorPosition.MIDDLE, firstColWidth, true))
+        val allBookingPositionNames = summaryData.getAllBookingPositionNames()
+        allBookingPositionNames.forEach { name ->
             println(getContentLine(
                 getCellString(name, firstColWidth, TextOrientation.LEFT),
-                summaryData.getAllBookingDurationsForKey(name)))
+                summaryData.getAllBookingDurationsForKey(name),
+                uniqueDays))
         }
 
-        println(separatorLine)
+        println(getHorizontalSeparator(uniqueDays, SeparatorPosition.MIDDLE, firstColWidth, false))
         println(getContentLine(
             getCellString("total", firstColWidth, TextOrientation.LEFT),
-            summaryData.getAllTotalWorkTimes()))
+            summaryData.getAllTotalWorkTimes(),
+            uniqueDays))
+
+        println(getHorizontalSeparator(uniqueDays, SeparatorPosition.BOTTOM, firstColWidth, false))
     }
 
-    private fun getContentLine(title: String, values: List<String>): String {
-        var line = "|$title|"
-        values.forEach {
-            line += getCellString(it, CELL_WIDTH, TextOrientation.CENTER) + "|"
+    private fun getHorizontalSeparator(
+        uniqueDays: List<LocalDate>,
+        separatorPosition: SeparatorPosition,
+        firstColWidth: Int,
+        isDoubleLine: Boolean
+    ): String {
+
+        val lineElem = if(isDoubleLine) "═" else "─"
+        val frontJunction = when(separatorPosition) {
+            SeparatorPosition.TOP ->    "┌"
+            SeparatorPosition.MIDDLE -> "├"
+            SeparatorPosition.BOTTOM -> "└"
         }
-        return line
+
+        val centerJunction = when(separatorPosition) {
+            SeparatorPosition.TOP ->    "┬"
+            SeparatorPosition.MIDDLE -> "┼"
+            SeparatorPosition.BOTTOM -> "┴"
+        }
+
+        val doubleCenterJunction = when(separatorPosition) {
+            SeparatorPosition.TOP ->    "╦"
+            SeparatorPosition.MIDDLE -> "╬"
+            SeparatorPosition.BOTTOM -> "╩"
+        }
+
+        val endJunction = when(separatorPosition) {
+            SeparatorPosition.TOP ->    "┐"
+            SeparatorPosition.MIDDLE -> "┤"
+            SeparatorPosition.BOTTOM -> "┘"
+        }
+
+        val separatorLine = StringBuilder()
+        separatorLine.append(frontJunction + lineElem.repeat(firstColWidth))
+
+        val horizontalLineElem = lineElem.repeat(CELL_WIDTH)
+        for (i in uniqueDays.indices) {
+            if (needsDoubleLineDueToDaysDiff(uniqueDays, i)) {
+                separatorLine.append(doubleCenterJunction)
+            }
+            else {
+                separatorLine.append(centerJunction)
+            }
+            separatorLine.append(horizontalLineElem)
+        }
+
+        separatorLine.append(endJunction)
+
+        return separatorLine.toString()
+    }
+
+    private fun getContentLine(title: String, values: List<String>, uniqueDays: List<LocalDate>): String {
+        val lineBuilder = StringBuilder()
+        lineBuilder.append("│$title")
+
+        for (i in values.indices) {
+            if (needsDoubleLineDueToDaysDiff(uniqueDays, i)) {
+                lineBuilder.append("║")
+            }
+            else {
+                lineBuilder.append("│")
+            }
+            lineBuilder.append(getCellString(values[i], CELL_WIDTH, TextOrientation.CENTER))
+        }
+
+        lineBuilder.append("│")
+
+        return lineBuilder.toString()
+    }
+
+    private fun needsDoubleLineDueToDaysDiff(uniqueDays: List<LocalDate>, currentIdx: Int): Boolean {
+        if (currentIdx > 0) {
+            val prevDate = uniqueDays[currentIdx-1]
+            val date = uniqueDays[currentIdx]
+            return DAYS.between(prevDate, date) > 1
+        }
+        return false
     }
 
     private fun getCellString(content: String, cellWidth: Int, textOrientation: TextOrientation): String {
@@ -131,4 +206,8 @@ class SummaryService(
 
 enum class TextOrientation {
     LEFT, RIGHT, CENTER
+}
+
+enum class SeparatorPosition {
+    TOP, MIDDLE, BOTTOM
 }

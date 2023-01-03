@@ -8,7 +8,7 @@ class BookingPositionResolver {
             "ITS meetings" to   listOf("f2f", "allhands", "townhall", "jourfixe", "jourfixe"),
             "DoD" to            listOf("cow"),
             "ProjectA" to       listOf("EPP-007", "EPP-008"),
-            "ProjectB" to       listOf("EPP-009", "EPP-123", "EPP-0815"),
+            "ProjectB" to       listOf("EPP-009", "EPP-123", "EPP-0815", "EPP-17662"),
         )
 
         fun resolveTopicToBookingPosition(topic: String): String {

@@ -1,5 +1,6 @@
 package its.time.tracker.service.util
 
+import its.time.tracker.DATE_PATTERN
 import its.time.tracker.MAX_WORK_HOURS_PER_DAY
 import its.time.tracker.TIME_PATTERN
 import its.time.tracker.service.util.DateTimeUtil.Companion.dateTimeToString
@@ -12,6 +13,14 @@ import java.time.Duration
 class WorkTimeCalculator {
 
     fun calculateWorkTime(clockEvents: List<ClockEvent>): WorkTimeResult {
+        if (clockEvents.isEmpty()) {
+            return WorkTimeResult(
+                firstClockIn = "00:00",
+                lastClockOut = "00:00",
+                totalWorkTime = "00:00",
+                totalBreakTime = "00:00",)
+        }
+
         var firstClockIn: LocalDateTime? = null
         var totalWorkDuration: Duration = Duration.ZERO
         var totalBreakDuration: Duration = Duration.ZERO
@@ -58,7 +67,7 @@ class WorkTimeCalculator {
                 totalWorkDuration = Duration.ofHours(MAX_WORK_HOURS_PER_DAY.toLong())
                 mostRecentClockOut = mostRecentClockIn!!.plus(minutesTillMax, ChronoUnit.MINUTES)
             }
-            println("No final clock-out found. Will insert one to fill up working time to ${durationToString(totalWorkDuration)} hours.")
+            println(dateTimeToString(clockEvents[0].dateTime, DATE_PATTERN) + ": No final clock-out found. Will insert one to fill up working time to ${durationToString(totalWorkDuration)} hours.")
         }
 
         return WorkTimeResult(

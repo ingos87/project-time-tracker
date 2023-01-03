@@ -69,8 +69,7 @@ class DailySummary: CliktCommand(help="show summary of a specific day") {
         val date = DateTimeUtil.toValidDate(dateInput)
         if (date != null) {
             val service = SummaryService(v, csvPath)
-            service.showDailyWorkHoursSummary(date as LocalDate)
-            service.showDailyProjectSummary(date)
+            service.showDailySummary(date as LocalDate)
         }
     }
 }
