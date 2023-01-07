@@ -7,6 +7,7 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import its.time.tracker.service.ClockEventService
+import its.time.tracker.service.ConfigService
 import its.time.tracker.service.SummaryService
 import its.time.tracker.service.util.DateTimeUtil
 import java.time.LocalDate
@@ -31,6 +32,16 @@ class TimeTracker: CliktCommand() {
 class Version: CliktCommand(help="Show version") {
     override fun run() {
         echo("${appName}:: ${version}")
+    }
+}
+
+class Init: CliktCommand(help="initializes App and writes custom properties") {
+    val csvPath by option("--csvpath", help = "path to persistent file").required()
+    val myHrSelfServiceUrl by option("-m", "--myselfhr", help="Url to MyHRSelfService landing page").required()
+    val eTimeUrl by option("-e", "--etime", help="Url to project booking landing page").required()
+    override fun run() {
+            val service = ConfigService()
+            service.createEmptyConfig(csvPath, myHrSelfServiceUrl, eTimeUrl)
     }
 }
 
@@ -88,5 +99,5 @@ class MonthlySummary: CliktCommand(help="show work time an project summary of a 
 }
 
 fun main(args: Array<String>) = TimeTracker()
-    .subcommands(Version(), ClockIn(), ClockOut(), DailySummary(), MonthlySummary())
+    .subcommands(Version(), Init(), ClockIn(), ClockOut(), DailySummary(), MonthlySummary())
     .main(args)

@@ -15,6 +15,7 @@ repositories {
 
 dependencies {
     implementation("com.github.ajalt.clikt:clikt:3.5.0")
+    implementation("com.beust:klaxon:5.5")
 
     testImplementation("io.kotest:kotest-runner-junit5-jvm:4.6.0")
     testImplementation("com.github.stefanbirkner:system-lambda:1.2.0")
