@@ -6,24 +6,34 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 
-private const val CONFIG_FILE_PATH = "./app.json"
-
-class ConfigService() {
+class ConfigService private constructor(var configFilePath: String) {
 
     companion object {
         const val KEY_CSV_PATH = "csv_path"
         const val KEY_MY_HR_SELF_SERVICE_URL = "my_hr_self_service_url"
-        const val E_TIME_URL = "e_time_url"
+        const val KEY_E_TIME_URL = "e_time_url"
+        const val KEY_WEEKDAYS_OFF = "weekdays_off"
+
+        fun createConfigService(configFilePath: String?): ConfigService {
+            return ConfigService(configFilePath ?: "./app.json")
+        }
     }
 
-    fun loadConfig(): MutableMap<String, Any?> {
-        if (!File(CONFIG_FILE_PATH).exists()) {
-            println("No config file present in same dir as jar. You must create one.")
-            println("Use 'java -jar app.jar init'")
-            return mutableMapOf()
-        }
+    fun getConfigParameterValue(key: String): String {
+        val map: MutableMap<String, Any?> = loadConfig()
+        val value = map[key]
 
-        val reader = File(CONFIG_FILE_PATH).inputStream().bufferedReader()
+        if (value != null) {
+            return value.toString()
+        }
+        else {
+            throw AbortException("unknown parameter $key")
+        }
+    }
+
+    private fun loadConfig(): MutableMap<String, Any?> {
+        checkConfig()
+        val reader = File(configFilePath!!).inputStream().bufferedReader()
         return Parser.default().parse(reader) as JsonObject
     }
 
@@ -31,21 +41,25 @@ class ConfigService() {
         csvPath: String = "/Users/me/its_times.csv",
         myHrSelfServiceUrl: String = "https://someurl.de",
         eTimeUrl: String = "https://someurl.de",
+        weekdaysOff: String = "SAT,SUN",
     ) {
-        if (File(CONFIG_FILE_PATH).exists()) {
-            println("$CONFIG_FILE_PATH already exists.")
+        if (File(configFilePath!!).exists()) {
+            println("$configFilePath already exists.")
             return
         }
 
         val defaultConfig = listOf(
             "{",
-            "  \"$KEY_CSV_PATH\": \"$csvPath\",",
-            "  \"$KEY_MY_HR_SELF_SERVICE_URL\": \"$myHrSelfServiceUrl\"",
-            "  \"$E_TIME_URL\": \"$eTimeUrl\"",
+            "  \"$KEY_CSV_PATH\":\"$csvPath\",",
+            "  \"$KEY_MY_HR_SELF_SERVICE_URL\":\"$myHrSelfServiceUrl\",",
+            "  \"$KEY_E_TIME_URL\":\"$eTimeUrl\",",
+            "  \"$KEY_WEEKDAYS_OFF\":\"$weekdaysOff\"",
             "}")
 
-        File(CONFIG_FILE_PATH).createNewFile()
-        FileOutputStream(CONFIG_FILE_PATH).apply { writeJson(defaultConfig) }
+        File(configFilePath!!).createNewFile()
+        FileOutputStream(configFilePath!!).apply { writeJson(defaultConfig) }
+
+        println("Successfully created config file: $configFilePath")
     }
 
     private fun OutputStream.writeJson(clockEvents: List<String>) {
@@ -55,5 +69,11 @@ class ConfigService() {
             writer.newLine()
         }
         writer.flush()
+    }
+
+    fun checkConfig() {
+        if (!File(configFilePath!!).exists()) {
+            throw AbortException("No config file found in $configFilePath", listOf("Use 'java -jar app.jar init' with the according parameters"))
+        }
     }
 }

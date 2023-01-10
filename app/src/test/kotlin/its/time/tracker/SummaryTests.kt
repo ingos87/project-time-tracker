@@ -13,6 +13,7 @@ import java.time.temporal.ChronoUnit.MINUTES
 class SummaryTests : FunSpec({
 
     beforeEach {
+        ensureTestConfig()
         ensureCsvEmpty()
     }
 

@@ -1,11 +1,15 @@
 package its.time.tracker
 
+import its.time.tracker.service.ConfigService
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
+import java.io.OutputStream
 import java.nio.file.Files
 import java.nio.file.Paths
 
-private const val TEST_CSV_PATH = "/Users/tollpatsch/test_its_times.csv"
+private const val TEST_CSV_PATH = "/tmp/its-time-tracker/test_its_times.csv"
+private const val TEST_CONFIG_PATH = "/tmp/its-time-tracker/app.json"
 
 fun ensureCsvEmpty() {
     val path = Paths.get(TEST_CSV_PATH)
@@ -20,20 +24,45 @@ fun ensureCsvEmpty() {
     File(TEST_CSV_PATH).createNewFile()
 }
 
+fun ensureTestConfig(weekdaysOff: String = "SAT,SUN") {
+    ensureNoConfig()
+
+    val defaultConfig = listOf(
+        "{",
+        "  \"${ConfigService.KEY_CSV_PATH}\":\"$TEST_CSV_PATH\",",
+        "  \"${ConfigService.KEY_MY_HR_SELF_SERVICE_URL}\":\"https://bullabue.de\",",
+        "  \"${ConfigService.KEY_E_TIME_URL}\":\"https://rotten-apples.de\",",
+        "  \"${ConfigService.KEY_WEEKDAYS_OFF}\":\"$weekdaysOff\"",
+        "}")
+
+    File(TEST_CONFIG_PATH).createNewFile()
+    FileOutputStream(TEST_CONFIG_PATH).apply { writeJson(defaultConfig) }
+}
+
+fun ensureNoConfig() {
+    if (File(TEST_CONFIG_PATH).exists()) {
+        File(TEST_CONFIG_PATH).delete()
+    }
+}
+
+fun executeInitWitArgs(args: Array<String>) {
+    main(arrayOf<String>("init").plus(args))
+}
+
 fun executeClockInWitArgs(args: Array<String>) {
-    main(arrayOf<String>("clock-in", "--csvpath=$TEST_CSV_PATH").plus(args))
+    main(arrayOf<String>("clock-in", "--configpath=$TEST_CONFIG_PATH").plus(args))
 }
 
 fun executeClockOutWitArgs(args: Array<String>) {
-    main(arrayOf<String>("clock-out", "--csvpath=$TEST_CSV_PATH").plus(args))
+    main(arrayOf<String>("clock-out", "--configpath=$TEST_CONFIG_PATH").plus(args))
 }
 
 fun executeDailySummaryWitArgs(args: Array<String>) {
-    main(arrayOf<String>("daily-summary", "--csvpath=$TEST_CSV_PATH").plus(args))
+    main(arrayOf<String>("daily-summary", "--configpath=$TEST_CONFIG_PATH").plus(args))
 }
 
 fun executeMonthlySummaryWitArgs(args: Array<String>) {
-    main(arrayOf<String>("monthly-summary", "--csvpath=$TEST_CSV_PATH").plus(args))
+    main(arrayOf<String>("monthly-summary", "--configpath=$TEST_CONFIG_PATH").plus(args))
 }
 
 fun getTimesCsvContent(): List<String> {
@@ -45,4 +74,13 @@ fun getTimesCsvContent(): List<String> {
     return reader.lineSequence()
         .filter { it.isNotBlank() }
         .toList()
+}
+
+private fun OutputStream.writeJson(clockEvents: List<String>) {
+    val writer = bufferedWriter()
+    clockEvents.forEach {
+        writer.write(it)
+        writer.newLine()
+    }
+    writer.flush()
 }

@@ -2,10 +2,10 @@ package its.time.tracker
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
-import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
+import its.time.tracker.service.AbortException
 import its.time.tracker.service.ClockEventService
 import its.time.tracker.service.ConfigService
 import its.time.tracker.service.SummaryService
@@ -13,7 +13,7 @@ import its.time.tracker.service.util.DateTimeUtil
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-const val CSV_PATH = "/Users/tollpatsch/its_times.csv"
+const val CSV_PATH = "/Users/ingo/its_times.csv"
 
 const val DATE_TIME_PATTERN = "uuuu-MM-dd HH:mm"
 const val DATE_PATTERN = "uuuu-MM-dd"
@@ -35,26 +35,39 @@ class Version: CliktCommand(help="Show version") {
     }
 }
 
-class Init: CliktCommand(help="initializes App and writes custom properties") {
-    val csvPath by option("--csvpath", help = "path to persistent file").required()
+class Init: CliktCommand(help="initializes App by writing custom properties to a file") {
+    val configPath by option("-i", "--configpath", help = "Path to persistent config file").required()
+    val csvPath by option("-c", "--csvpath", help = "Path to persistent file with clockins and clockouts. You should backup this file regularly").required()
     val myHrSelfServiceUrl by option("-m", "--myselfhr", help="Url to MyHRSelfService landing page").required()
     val eTimeUrl by option("-e", "--etime", help="Url to project booking landing page").required()
+    val weekdaysOff by option("-w", "--weekdaysoff", help="Comma seperated list of weekdays (MON,TUE,..,SAT,SUN) when no work time is to be transferred to external systems").required()
     override fun run() {
-            val service = ConfigService()
-            service.createEmptyConfig(csvPath, myHrSelfServiceUrl, eTimeUrl)
+            val service = ConfigService.createConfigService(configPath)
+            service.createEmptyConfig(
+                csvPath = csvPath,
+                myHrSelfServiceUrl = myHrSelfServiceUrl,
+                eTimeUrl = eTimeUrl,
+                weekdaysOff = weekdaysOff)
     }
 }
 
 class ClockIn: CliktCommand(help="Start working on something") {
     val v: Boolean by option("-v", help = "enable verbose mode").flag()
     val topic by option("-t", "--topic", help = "time tracking topic - usually some Jira Ticket Id").required()
-    val dateTimeInput by option("-d", "--datetime", help="start datetime (format: $DATE_TIME_PATTERN) for this topic - will be NOW if left empty; today's date is prepended if only time (format: HHmm) is given")
-    val csvPath by option("--csvpath", help = "defines path to persistent file. default: $CSV_PATH").default(CSV_PATH)
+    val dateTimeInput by option("-d", "--datetime", help="Start datetime (format: $DATE_TIME_PATTERN) for this topic - will be NOW if left empty; today's date is prepended if only time (format: HHmm) is given")
+    val configPath by option("--configpath", help = "Defines a custom config file path. That file has to be created before-hand")
     override fun run() {
-        val dateTime = DateTimeUtil.toValidDateTime(dateTimeInput)
-        if (dateTime != null) {
-            val success = ClockEventService(v, csvPath).addClockIn(topic, dateTime as LocalDateTime)
-            if (success) echo("clock-in for topic '$topic' saved: ${DateTimeUtil.dateTimeToString(dateTime)}")
+        try {
+            val cfg = ConfigService.createConfigService(configPath)
+            val csvPath = cfg.getConfigParameterValue(ConfigService.KEY_CSV_PATH)
+
+            val dateTime = DateTimeUtil.toValidDateTime(dateTimeInput)
+            if (dateTime != null) {
+                val success = ClockEventService(v, csvPath).addClockIn(topic, dateTime as LocalDateTime)
+                if (success) echo("clock-in for topic '$topic' saved: ${DateTimeUtil.dateTimeToString(dateTime)}")
+            }
+        } catch (e: AbortException) {
+            e.printMessage()
         }
     }
 }
@@ -62,12 +75,19 @@ class ClockIn: CliktCommand(help="Start working on something") {
 class ClockOut: CliktCommand(help="Interrupt or end work day") {
     val v: Boolean by option("-v", help = "enable verbose mode").flag()
     val dateTimeInput by option("-d", "--datetime", help="start datetime (format: $DATE_TIME_PATTERN) for this topic - will be NOW if left empty; today's date is prepended if only time (format: HHmm) is given")
-    val csvPath by option("--csvpath", help = "defines path to persistent file. default: $CSV_PATH").default(CSV_PATH)
+    val configPath by option("--configpath", help = "Defines a custom config file path. That file has to be created before-hand")
     override fun run() {
-        val dateTime = DateTimeUtil.toValidDateTime(dateTimeInput)
-        if (dateTime != null) {
-            val success = ClockEventService(v, csvPath).addClockOut(dateTime as LocalDateTime)
-            if (success) echo("clock-out saved: ${DateTimeUtil.dateTimeToString(dateTime)}")
+        try {
+            val cfg = ConfigService.createConfigService(configPath)
+            val csvPath = cfg.getConfigParameterValue(ConfigService.KEY_CSV_PATH)
+
+            val dateTime = DateTimeUtil.toValidDateTime(dateTimeInput)
+            if (dateTime != null) {
+                val success = ClockEventService(v, csvPath).addClockOut(dateTime as LocalDateTime)
+                if (success) echo("clock-out saved: ${DateTimeUtil.dateTimeToString(dateTime)}")
+            }
+        } catch (e: AbortException) {
+            e.printMessage()
         }
     }
 }
@@ -75,12 +95,19 @@ class ClockOut: CliktCommand(help="Interrupt or end work day") {
 class DailySummary: CliktCommand(help="show work time an project summary of a specific day") {
     val v: Boolean by option("-v", help = "enable verbose mode").flag()
     val dateInput by option("-d", "--date", help="date (format: $DATE_PATTERN) - will be today's date if left empty")
-    val csvPath by option("--csvpath", help = "defines path to persistent file. default: $CSV_PATH").default(CSV_PATH)
+    val configPath by option("--configpath", help = "Defines a custom config file path. That file has to be created before-hand")
     override fun run() {
-        val date = DateTimeUtil.toValidDate(dateInput)
-        if (date != null) {
-            val service = SummaryService(v, csvPath)
-            service.showDailySummary(date as LocalDate)
+        try {
+            val cfg = ConfigService.createConfigService(configPath)
+            val csvPath = cfg.getConfigParameterValue(ConfigService.KEY_CSV_PATH)
+
+            val date = DateTimeUtil.toValidDate(dateInput)
+            if (date != null) {
+                val service = SummaryService(v, csvPath)
+                service.showDailySummary(date as LocalDate)
+            }
+        } catch (e: AbortException) {
+            e.printMessage()
         }
     }
 }
@@ -88,12 +115,19 @@ class DailySummary: CliktCommand(help="show work time an project summary of a sp
 class MonthlySummary: CliktCommand(help="show work time an project summary of a specific month") {
     val v: Boolean by option("-v", help = "enable verbose mode").flag()
     val dateInput by option("-m", "--month", help="date (format: $MONTH_PATTERN) - will be current month if left empty")
-    val csvPath by option("--csvpath", help = "defines path to persistent file. default: $CSV_PATH").default(CSV_PATH)
+    val configPath by option("--configpath", help = "Defines a custom config file path. That file has to be created before-hand")
     override fun run() {
-        val date = DateTimeUtil.toValidMonth(dateInput)
-        if (date != null) {
-            val service = SummaryService(v, csvPath)
-            service.showMonthlySummary(date as LocalDate)
+        try {
+            val cfg = ConfigService.createConfigService(configPath)
+            val csvPath = cfg.getConfigParameterValue(ConfigService.KEY_CSV_PATH)
+
+            val date = DateTimeUtil.toValidMonth(dateInput)
+            if (date != null) {
+                val service = SummaryService(v, csvPath)
+                service.showMonthlySummary(date as LocalDate)
+            }
+        } catch (e: AbortException) {
+            e.printMessage()
         }
     }
 }

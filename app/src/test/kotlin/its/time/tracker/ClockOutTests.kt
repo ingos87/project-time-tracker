@@ -13,7 +13,19 @@ import java.time.format.DateTimeFormatter
 class ClockOutTests : FunSpec({
 
     beforeEach {
+        ensureTestConfig()
         ensureCsvEmpty()
+    }
+
+    test("clock-out is not possible if there is no config file") {
+        ensureNoConfig()
+
+        val output = tapSystemOut {
+            main(arrayOf<String>("clock-out"))
+        }
+
+        output shouldStartWith "No config file found in ./app.json\n" +
+                "Use 'java -jar app.jar init' with the according parameters"
     }
 
     test("clock-out is saved with current time") {
@@ -72,8 +84,8 @@ class ClockOutTests : FunSpec({
             executeClockOutWitArgs(arrayOf<String>("-v", "--datetime=2022-12-23 17:30"))
         }
 
-        output shouldBe "loaded 0 clock events from /Users/tollpatsch/test_its_times.csv\n" +
-                "wrote 1 events to /Users/tollpatsch/test_its_times.csv\n" +
+        output shouldBe "loaded 0 clock events from /tmp/its-time-tracker/test_its_times.csv\n" +
+                "wrote 1 events to /tmp/its-time-tracker/test_its_times.csv\n" +
                 "clock-out saved: 2022-12-23 17:30\n"
         getTimesCsvContent() shouldBe listOf(
             "dateTime;eventType;topic",

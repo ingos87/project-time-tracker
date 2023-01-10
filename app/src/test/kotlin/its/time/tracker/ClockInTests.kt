@@ -13,7 +13,19 @@ import java.time.format.DateTimeFormatter
 class ClockInTests : FunSpec({
 
     beforeEach {
+        ensureTestConfig()
         ensureCsvEmpty()
+    }
+
+    test("clock-in is not possible if there is no config file") {
+        ensureNoConfig()
+
+        val output = tapSystemOut {
+            main(arrayOf<String>("clock-in", "-tEPP-007"))
+        }
+
+        output shouldStartWith "No config file found in ./app.json\n" +
+                "Use 'java -jar app.jar init' with the according parameters"
     }
 
     test("clock-in is saved with current time") {
