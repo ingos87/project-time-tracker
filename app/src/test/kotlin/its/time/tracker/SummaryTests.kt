@@ -3,6 +3,8 @@ package its.time.tracker
 import com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldStartWith
+import its.time.tracker.service.util.DATE_PATTERN
 import its.time.tracker.service.util.DateTimeUtil
 import org.junit.platform.commons.util.StringUtils
 import java.time.Duration
@@ -15,6 +17,27 @@ class SummaryTests : FunSpec({
     beforeEach {
         ensureTestConfig()
         ensureCsvEmpty()
+    }
+
+    test("summary is not possible if there is no config file") {
+        executeClockInWitArgs(arrayOf<String>("-tEPP-007",  "--datetime=2022-01-03 07:30"))
+        executeClockOutWitArgs(arrayOf<String>(             "--datetime=2022-01-03 16:30"))
+
+        ensureNoConfig()
+
+        val output = tapSystemOut {
+            main(arrayOf<String>("daily-summary", "--date=2023-01-03"))
+        }
+
+        output shouldStartWith "No config file found in ./app.json\n" +
+                "Use 'java -jar app.jar init' with the according parameters"
+
+        val output2 = tapSystemOut {
+            main(arrayOf<String>("monthly-summary", "--month=2023-01"))
+        }
+
+        output2 shouldStartWith "No config file found in ./app.json\n" +
+                "Use 'java -jar app.jar init' with the according parameters"
     }
 
     test("today's summary shows err message if there are not clock-in events") {
@@ -51,7 +74,7 @@ class SummaryTests : FunSpec({
 
     test("today's summary if working day is in progress") {
         val today = LocalDate.now()
-        val todayString = DateTimeUtil.dateTimeToString(today, DATE_PATTERN)
+        val todayString = DateTimeUtil.temporalToString(today, DATE_PATTERN)
         executeClockInWitArgs(arrayOf<String>("-tEPP-007",  "--datetime=$todayString 01:30"))
         executeClockInWitArgs(arrayOf<String>("-tEPP-123",  "--datetime=$todayString 03:45"))
         executeClockOutWitArgs(arrayOf<String>(             "--datetime=$todayString 04:30"))
@@ -82,7 +105,7 @@ class SummaryTests : FunSpec({
 
     test("today's summary if working day is ended") {
         val today = LocalDate.now()
-        val todayString = DateTimeUtil.dateTimeToString(today, DATE_PATTERN)
+        val todayString = DateTimeUtil.temporalToString(today, DATE_PATTERN)
         executeClockInWitArgs(arrayOf<String>("-tEPP-007",  "--datetime=$todayString 01:30"))
         executeClockInWitArgs(arrayOf<String>("-tEPP-123",  "--datetime=$todayString 03:45"))
         executeClockOutWitArgs(arrayOf<String>(             "--datetime=$todayString 04:30"))
@@ -329,10 +352,5 @@ class SummaryTests : FunSpec({
             "│ total        │ 10:00│ 08:30│ 09:00│ 10:00║ 01:30│ 07:30│ 12:00║ 01:25║ 08:31│ 10:45│",
             "└──────────────┴──────┴──────┴──────┴──────╩──────┴──────┴──────╩──────╩──────┴──────┘")
     }
-
 })
-
-fun splitIgnoreBlank(output: String): List<String> {
-    return output.split("\n").filter { StringUtils.isNotBlank(it) }
-}
 

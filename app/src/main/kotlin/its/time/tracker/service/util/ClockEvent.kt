@@ -13,6 +13,6 @@ data class ClockEvent(
         }
     }
     fun toCsvLine(): String {
-        return "${DateTimeUtil.dateTimeToString(dateTime)};${eventType.name};$topic"
+        return "${DateTimeUtil.temporalToString(dateTime)};${eventType.name};$topic"
     }
 }

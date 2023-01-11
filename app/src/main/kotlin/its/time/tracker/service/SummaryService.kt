@@ -1,6 +1,6 @@
 package its.time.tracker.service
 
-import its.time.tracker.DATE_PATTERN
+import its.time.tracker.service.util.DATE_PATTERN
 import its.time.tracker.service.util.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

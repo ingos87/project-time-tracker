@@ -3,15 +3,14 @@ package its.time.tracker.service.util
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.inspectors.forAll
 import io.kotest.matchers.shouldBe
-import its.time.tracker.DATE_PATTERN
-import its.time.tracker.DATE_TIME_PATTERN
+import its.time.tracker.service.AbortException
+import org.junit.jupiter.api.assertThrows
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 
 class DateTimeUtilTests : StringSpec({
 
@@ -34,7 +33,7 @@ class DateTimeUtilTests : StringSpec({
         formatter.format(DateTimeUtil.toValidDate(null)) shouldBe today
     }
 
-    "toValidDate returns null if input is invalid" {
+    "toValidDate throws Exception if input is invalid" {
         listOf(
             "1",
             "12",
@@ -43,7 +42,9 @@ class DateTimeUtilTests : StringSpec({
             "0000-00-00",
             "not_a_date",
         ).forAll {
-            DateTimeUtil.toValidDate(it) shouldBe null
+            assertThrows<AbortException> {
+                DateTimeUtil.toValidDate(it)
+            }
         }
     }
 
@@ -83,7 +84,7 @@ class DateTimeUtilTests : StringSpec({
         }
     }
 
-    "toValidDateTime returns null if input is invalid" {
+    "toValidDateTime throws Exception if input is invalid" {
         listOf(
             "1",
             "12",
@@ -93,7 +94,9 @@ class DateTimeUtilTests : StringSpec({
             "not_a_date",
             "2020-01-01 23:60",
         ).forAll {
-            DateTimeUtil.toValidDateTime(it) shouldBe null
+            assertThrows<AbortException> {
+                DateTimeUtil.toValidDateTime(it)
+            }
         }
     }
 
@@ -116,7 +119,7 @@ class DateTimeUtilTests : StringSpec({
         formatter.format(DateTimeUtil.toValidMonth(null)) shouldBe today
     }
 
-    "toValidMonth returns null if input is invalid" {
+    "toValidMonth throws Exception if input is invalid" {
         listOf(
             "1",
             "12",
@@ -126,7 +129,9 @@ class DateTimeUtilTests : StringSpec({
             "2000-00-15",
             "not_a_date",
         ).forAll {
-            DateTimeUtil.toValidMonth(it) shouldBe null
+            assertThrows<AbortException> {
+                DateTimeUtil.toValidMonth(it)
+            }
         }
     }
 
@@ -184,7 +189,7 @@ class DateTimeUtilTests : StringSpec({
             Pair(LocalDate.parse("2022-12-01", dFormatter), DATE_PATTERN) to "2022-12-01",
             Pair(LocalDate.parse("1987-03-12", dFormatter), DATE_PATTERN) to "1987-03-12",
         ).forAll { (params, expectedResult) ->
-            DateTimeUtil.dateTimeToString(params.first, params.second) shouldBe expectedResult
+            DateTimeUtil.temporalToString(params.first, params.second) shouldBe expectedResult
         }
     }
 

@@ -1,9 +1,7 @@
 package its.time.tracker.service.util
 
-import its.time.tracker.DATE_PATTERN
 import its.time.tracker.MAX_WORK_HOURS_PER_DAY
-import its.time.tracker.TIME_PATTERN
-import its.time.tracker.service.util.DateTimeUtil.Companion.dateTimeToString
+import its.time.tracker.service.util.DateTimeUtil.Companion.temporalToString
 import its.time.tracker.service.util.DateTimeUtil.Companion.durationToString
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.MINUTES
@@ -66,20 +64,20 @@ class WorkTimeCalculator {
                 totalWorkDuration = totalWorkDuration.plusMinutes(30)
                 mostRecentClockOut = mostRecentClockIn!!.plusMinutes(30)
 
-                println(dateTimeToString(clockEvents[0].dateTime, DATE_PATTERN) + ": No final clock-out found. Will insert one. Work time will be ${durationToString(totalWorkDuration)} hours.")
+                println(temporalToString(clockEvents[0].dateTime, DATE_PATTERN) + ": No final clock-out found. Will insert one. Work time will be ${durationToString(totalWorkDuration)} hours.")
             }
             else {
                 val minutesTillMax = MAX_WORK_HOURS_PER_DAY * 60 - totalWorkDuration.toMinutes()
 
                 totalWorkDuration = Duration.ofHours(MAX_WORK_HOURS_PER_DAY.toLong())
                 mostRecentClockOut = mostRecentClockIn!!.plusMinutes(minutesTillMax)
-                println(dateTimeToString(clockEvents[0].dateTime, DATE_PATTERN) + ": No final clock-out found. Will insert one to fill up working time to maximum (${durationToString(totalWorkDuration)} hours).")
+                println(temporalToString(clockEvents[0].dateTime, DATE_PATTERN) + ": No final clock-out found. Will insert one to fill up working time to maximum (${durationToString(totalWorkDuration)} hours).")
             }
         }
 
         return WorkTimeResult(
-            firstClockIn = dateTimeToString(firstClockIn!!, TIME_PATTERN),
-            lastClockOut = dateTimeToString(mostRecentClockOut!!, TIME_PATTERN),
+            firstClockIn = temporalToString(firstClockIn!!, TIME_PATTERN),
+            lastClockOut = temporalToString(mostRecentClockOut!!, TIME_PATTERN),
             totalWorkTime = durationToString(totalWorkDuration),
             totalBreakTime = durationToString(totalBreakDuration))
     }
