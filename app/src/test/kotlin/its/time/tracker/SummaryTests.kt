@@ -330,6 +330,8 @@ class SummaryTests : FunSpec({
             executeMonthlySummaryWitArgs(arrayOf<String>("-m2022-11"))
         }
 
+        // TODO add week number to first section
+        // TODO add flex time to second section
         splitIgnoreBlank(output) shouldBe listOf(
             "2022-11-03: No final clock-out found. Will insert one to fill up working time to maximum (09:00 hours).",
             "2022-11-04: No final clock-out found. Will insert one. Work time will be 10:00 hours.",

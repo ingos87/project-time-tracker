@@ -46,6 +46,7 @@ class DateTimeUtil {
             return parseStringWithPattern("$dateInput-01", DATE_PATTERN)
         }
 
+        // TODO unittest
         fun toValidCalendarWeek(dateInput: String?): Temporal? {
             if (dateInput.isNullOrBlank()) return LocalDate.now()
             if (dateInput.contains("-") && dateInput.length == 7) {
@@ -66,6 +67,7 @@ class DateTimeUtil {
             throw AbortException("unable to parse '$dateInput' for pattern '$WEEK_PATTERN'")
         }
 
+        // TODO unittest
         private fun getFirstMondayOfYear(year: Int): LocalDate {
             val date = parseStringWithPattern("$year-01-01", DATE_PATTERN) as LocalDate
             val firstDayOfYear = date.dayOfWeek
@@ -90,6 +92,7 @@ class DateTimeUtil {
 
             return try {
                 when (pattern) {
+                    // TODO unittest
                     WEEK_PATTERN -> {
                         LocalTime.parse(string, dateFormatter)
                     }
@@ -128,6 +131,7 @@ class DateTimeUtil {
                     (if (duration.toMinutesPart() < 10) "0" else "") + duration.toMinutesPart()
         }
 
+        // TODO unittest
         fun getWeekOfYearFromDate(date: LocalDate): String {
             val weekFields: WeekFields = WeekFields.of(Locale.getDefault())
             val weekNumber: Int = date.get(weekFields.weekOfWeekBasedYear())
