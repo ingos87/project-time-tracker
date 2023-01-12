@@ -129,6 +129,17 @@ class SummaryTests : FunSpec({
             "└────────────────────────────────────────────────┘")
     }
 
+    test("today's summary if flex time was booked") {
+        executeFlexTimeWitArgs(arrayOf<String>("--date=2022-01-03"))
+
+        val output = tapSystemOut {
+            executeDailySummaryWitArgs(arrayOf<String>("-d2022-01-03"))
+        }
+
+        splitIgnoreBlank(output) shouldBe listOf(
+            "[NO SUMMARY for 2022-01-03 because there are no clock-in events]")
+    }
+
     test("day with breaks and several projects") {
         executeClockInWitArgs(arrayOf<String>("-tEPP-007",  "--datetime=2022-01-03 07:30"))
         executeClockInWitArgs(arrayOf<String>("-tEPP-008",  "--datetime=2022-01-03 09:00")) // worktime 1:30
@@ -238,8 +249,9 @@ class SummaryTests : FunSpec({
         splitIgnoreBlank(output) shouldBe listOf(
             "[SUMMARY for 2022-11]",
             "┌──────────────┬──────┐",
-            "│ day of month │    2 │",
             "│ weekday      │  WED │",
+            "│ day of month │    2 │",
+            "│ week of year │   44 │",
             "├──────────────┼──────┤",
             "│ clock-in     │ 07:30│",
             "│ clock-out    │ 16:45│",
@@ -306,6 +318,9 @@ class SummaryTests : FunSpec({
         executeClockInWitArgs(arrayOf<String>("-tEPP-123",  "--datetime=2022-11-09 13:00"))
         executeClockOutWitArgs(arrayOf<String>(             "--datetime=2022-11-09 22:00"))
 
+        // NOV-10
+        executeFlexTimeWitArgs(arrayOf<String>(             "--date=2022-11-10"))
+
         // NOV-25
         executeClockInWitArgs(arrayOf<String>("-tcow",      "--datetime=2022-11-25 09:30"))
         executeClockInWitArgs(arrayOf<String>("-tEPP-123",  "--datetime=2022-11-25 09:45"))
@@ -331,29 +346,28 @@ class SummaryTests : FunSpec({
             executeMonthlySummaryWitArgs(arrayOf<String>("-m2022-11"))
         }
 
-        // TODO add week number to first section
-        // TODO add flex time to second section
         splitIgnoreBlank(output) shouldBe listOf(
             "2022-11-03: No final clock-out found. Will insert one to fill up working time to maximum (09:00 hours).",
             "2022-11-04: No final clock-out found. Will insert one. Work time will be 10:00 hours.",
             "[SUMMARY for 2022-11]",
-            "┌──────────────┬──────┬──────┬──────┬──────╦──────┬──────┬──────╦──────╦──────┬──────┐",
-            "│ day of month │    1 │    2 │    3 │    4 ║    7 │    8 │    9 ║   25 ║   29 │   30 │",
-            "│ weekday      │  TUE │  WED │  THU │  FRI ║  MON │  TUE │  WED ║  FRI ║  TUE │  WED │",
-            "├──────────────┼──────┼──────┼──────┼──────╬──────┼──────┼──────╬──────╬──────┼──────┤",
-            "│ clock-in     │ 07:30│ 07:45│ 07:45│ 08:30║ 09:30│ 08:30│ 09:00║ 09:30║ 08:30│ 09:30│",
-            "│ clock-out    │ 17:30│ 17:30│ 16:45│ 22:30║ 11:00│ 16:50│ 22:00║ 10:55║ 18:03│ 22:45│",
-            "├══════════════┼══════┼══════┼══════┼══════╬══════┼══════┼══════╬══════╬══════┼══════┤",
-            "│ DoD          │ 01:30│      │ 00:30│ 01:00║      │      │ 02:00║ 00:15║      │ 02:30│",
-            "│ ITS meetings │ 01:00│      │      │      ║      │ 01:30│      ║      ║ 01:30│      │",
-            "│ ProjectA     │ 07:30│ 02:00│ 08:30│      ║      │ 03:25│      ║      ║ 03:28│      │",
-            "│ ProjectB     │      │ 01:00│      │      ║      │ 02:35│ 10:00║ 01:10║ 03:33│ 08:15│",
-            "│ EDF-2223     │      │ 02:00│      │      ║      │      │      ║      ║      │      │",
-            "│ Recruiting   │      │ 03:30│      │      ║      │      │      ║      ║      │      │",
-            "│ EDF-0815     │      │      │      │ 09:00║ 01:30│      │      ║      ║      │      │",
-            "├──────────────┼──────┼──────┼──────┼──────╬──────┼──────┼──────╬──────╬──────┼──────┤",
-            "│ total        │ 10:00│ 08:30│ 09:00│ 10:00║ 01:30│ 07:30│ 12:00║ 01:25║ 08:31│ 10:45│",
-            "└──────────────┴──────┴──────┴──────┴──────╩──────┴──────┴──────╩──────╩──────┴──────┘")
+            "┌──────────────┬──────┬──────┬──────┬──────╦──────┬──────┬──────┬──────╦──────╦──────┬──────┐",
+            "│ weekday      │  TUE │  WED │  THU │  FRI ║  MON │  TUE │  WED │  THU ║  FRI ║  TUE │  WED │",
+            "│ day of month │    1 │    2 │    3 │    4 ║    7 │    8 │    9 │   10 ║   25 ║   29 │   30 │",
+            "│ week of year │   44 │   44 │   44 │   44 ║   45 │   45 │   45 │   45 ║   47 ║   48 │   48 │",
+            "├──────────────┼──────┼──────┼──────┼──────╬──────┼──────┼──────┼──────╬──────╬──────┼──────┤",
+            "│ clock-in     │ 07:30│ 07:45│ 07:45│ 08:30║ 09:30│ 08:30│ 09:00│ flex ║ 09:30║ 08:30│ 09:30│",
+            "│ clock-out    │ 17:30│ 17:30│ 16:45│ 22:30║ 11:00│ 16:50│ 22:00│ flex ║ 10:55║ 18:03│ 22:45│",
+            "├══════════════┼══════┼══════┼══════┼══════╬══════┼══════┼══════┼══════╬══════╬══════┼══════┤",
+            "│ DoD          │ 01:30│      │ 00:30│ 01:00║      │      │ 02:00│      ║ 00:15║      │ 02:30│",
+            "│ ITS meetings │ 01:00│      │      │      ║      │ 01:30│      │      ║      ║ 01:30│      │",
+            "│ ProjectA     │ 07:30│ 02:00│ 08:30│      ║      │ 03:25│      │      ║      ║ 03:28│      │",
+            "│ ProjectB     │      │ 01:00│      │      ║      │ 02:35│ 10:00│      ║ 01:10║ 03:33│ 08:15│",
+            "│ EDF-2223     │      │ 02:00│      │      ║      │      │      │      ║      ║      │      │",
+            "│ Recruiting   │      │ 03:30│      │      ║      │      │      │      ║      ║      │      │",
+            "│ EDF-0815     │      │      │      │ 09:00║ 01:30│      │      │      ║      ║      │      │",
+            "├──────────────┼──────┼──────┼──────┼──────╬──────┼──────┼──────┼──────╬──────╬──────┼──────┤",
+            "│ total        │ 10:00│ 08:30│ 09:00│ 10:00║ 01:30│ 07:30│ 12:00│ 00:00║ 01:25║ 08:31│ 10:45│",
+            "└──────────────┴──────┴──────┴──────┴──────╩──────┴──────┴──────┴──────╩──────╩──────┴──────┘")
     }
 })
 

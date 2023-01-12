@@ -19,6 +19,15 @@ class WorkTimeCalculator {
                 totalBreakTime = "00:00",)
         }
 
+        val flexTimeEvent = clockEvents.find { it.eventType == EventType.FLEX_TIME }
+        if (flexTimeEvent != null) {
+            return WorkTimeResult(
+                firstClockIn = "flex",
+                lastClockOut = "flex",
+                totalWorkTime = "00:00",
+                totalBreakTime = "00:00",)
+        }
+
         var firstClockIn: LocalDateTime? = null
         var totalWorkDuration: Duration = Duration.ZERO
         var totalBreakDuration: Duration = Duration.ZERO

@@ -91,12 +91,16 @@ class SummaryService(
 
         println(getHorizontalSeparator(uniqueDays, SeparatorPosition.TOP, firstColWidth, false))
         println(getContentLine(
+            getCellString("weekday", firstColWidth, TextOrientation.LEFT),
+            uniqueDays.map { it.dayOfWeek.name.substring(0, 3) },
+            uniqueDays))
+        println(getContentLine(
             getCellString("day of month", firstColWidth, TextOrientation.LEFT),
             uniqueDays.map { it.dayOfMonth.toString() },
             uniqueDays))
         println(getContentLine(
-            getCellString("weekday", firstColWidth, TextOrientation.LEFT),
-            uniqueDays.map { it.dayOfWeek.name.substring(0, 3) },
+            getCellString("week of year", firstColWidth, TextOrientation.LEFT),
+            uniqueDays.map { "" + Integer.parseInt(DateTimeUtil.getWeekOfYearFromDate(it)) },
             uniqueDays))
         println(getHorizontalSeparator(uniqueDays, SeparatorPosition.MIDDLE, firstColWidth, false))
 
