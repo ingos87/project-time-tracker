@@ -38,6 +38,7 @@ class SummaryService(
             println("├" + "─".repeat(cellWidth) + "┤")
             println("│ " + "current work time:".padEnd(20) + workTimeResult.totalWorkTime.padEnd(cellWidth-21) + "│")
             println("│ " + "current break time:".padEnd(20) + workTimeResult.totalBreakTime.padEnd(cellWidth-21) + "│")
+            println("│ " + "current work topic:".padEnd(20) + daysEvents.last().topic.take(21).padEnd(cellWidth-21) + "│")
         }
         else {
             println("[SUMMARY for $date]")

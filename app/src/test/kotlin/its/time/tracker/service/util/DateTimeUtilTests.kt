@@ -100,7 +100,7 @@ class DateTimeUtilTests : StringSpec({
         }
     }
 
-    "toValidMonth returns same string for valid date" {
+    "toValidMonth returns same value for valid date" {
         listOf(
             "2022-12" to "2022-12-01",
             "2020-02" to "2020-02-01",
@@ -132,6 +132,61 @@ class DateTimeUtilTests : StringSpec({
             assertThrows<AbortException> {
                 DateTimeUtil.toValidMonth(it)
             }
+        }
+    }
+
+    "toValidCalendarWeek returns specific date for input week-of-year" {
+        listOf(
+            "2023-01" to "2023-01-02",
+            "2023-02" to "2023-01-09",
+            "2023-20" to "2023-05-15",
+            "2023-50" to "2023-12-11",
+            "2023-52" to "2023-12-25",
+            "2024-52" to "2024-12-23",
+            "2025-01" to "2024-12-30",
+            "2031-01" to "2030-12-30",
+            "2031-20" to "2031-05-12",
+            "2023-53" to "2024-01-01", // there is no week 53 in 2023
+        ).forAll { (inputWeekOfYearString, expectedDateString) ->
+            DateTimeUtil.toValidCalendarWeek(inputWeekOfYearString).toString() shouldBe expectedDateString
+        }
+    }
+
+    "toValidCalendarWeek returns today if input is empty" {
+        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+            .withZone(ZoneId.systemDefault())
+        val today = formatter.format(Instant.now())
+
+        formatter.format(DateTimeUtil.toValidCalendarWeek("")) shouldBe today
+        formatter.format(DateTimeUtil.toValidCalendarWeek(null)) shouldBe today
+    }
+
+    "toValidCalendarWeek throws exception for invalid input" {
+        listOf(
+            "2023-1",
+            "2023",
+            "2023-007",
+            "2023-00",
+            "2023-54",
+            "bullshit",
+            "01-2022",
+            "-100-01",
+        ).forAll {
+            assertThrows<AbortException> {
+                DateTimeUtil.toValidCalendarWeek(it)
+            }
+        }
+    }
+
+    "getWeekOfYearFromDate works for valid dates" {
+        listOf(
+            LocalDate.parse("2023-01-01") to "52",
+            LocalDate.parse("2023-01-02") to "01",
+            LocalDate.parse("2027-01-01") to "53",
+            LocalDate.parse("2019-02-07") to "06",
+            LocalDate.parse("2024-01-01") to "01",
+        ).forAll { (inputDate, expectedWeekOfYear) ->
+            DateTimeUtil.getWeekOfYearFromDate(inputDate) shouldBe expectedWeekOfYear
         }
     }
 

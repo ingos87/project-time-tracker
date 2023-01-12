@@ -96,6 +96,7 @@ class SummaryTests : FunSpec({
             "├────────────────────────────────────────────────┤",
             "│ current work time:  ${DateTimeUtil.durationToString(currentWorkDuration)}                      │",
             "│ current break time: 00:15                      │",
+            "│ current work topic: EDF-777                    │",
             "├════════════════════════════════════════════════┤",
             "│ ProjectA:     02:15  (EPP-007)                 │",
             "│ ProjectB:     01:55  (EPP-123)                 │",

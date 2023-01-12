@@ -46,7 +46,6 @@ class DateTimeUtil {
             return parseStringWithPattern("$dateInput-01", DATE_PATTERN)
         }
 
-        // TODO unittest
         fun toValidCalendarWeek(dateInput: String?): Temporal? {
             if (dateInput.isNullOrBlank()) return LocalDate.now()
             if (dateInput.contains("-") && dateInput.length == 7) {
@@ -67,19 +66,20 @@ class DateTimeUtil {
             throw AbortException("unable to parse '$dateInput' for pattern '$WEEK_PATTERN'")
         }
 
-        // TODO unittest
         private fun getFirstMondayOfYear(year: Int): LocalDate {
             val date = parseStringWithPattern("$year-01-01", DATE_PATTERN) as LocalDate
+            val weekOfYear: Int = Integer.parseInt(getWeekOfYearFromDate(date))
+
             val firstDayOfYear = date.dayOfWeek
 
             val dayIncr = when(firstDayOfYear.value) {
-                1 -> 0L
-                2 -> 6L
-                3 -> 5L
-                4 -> 4L
-                5 -> 3L
-                6 -> 2L
-                7 -> 1L
+                1 -> if(weekOfYear == 1) 0L else 7L
+                2 -> if(weekOfYear == 1) -1L else 6L
+                3 -> if(weekOfYear == 1) -2L else 5L
+                4 -> if(weekOfYear == 1) -3L else 4L
+                5 -> if(weekOfYear == 1) -4L else 3L
+                6 -> if(weekOfYear == 1) -5L else 2L
+                7 -> if(weekOfYear == 1) -6L else 1L
                 else -> 0L
             }
 
@@ -92,10 +92,6 @@ class DateTimeUtil {
 
             return try {
                 when (pattern) {
-                    // TODO unittest
-                    WEEK_PATTERN -> {
-                        LocalTime.parse(string, dateFormatter)
-                    }
                     TIME_PATTERN -> {
                         LocalTime.parse(string, dateFormatter)
                     }
@@ -131,7 +127,6 @@ class DateTimeUtil {
                     (if (duration.toMinutesPart() < 10) "0" else "") + duration.toMinutesPart()
         }
 
-        // TODO unittest
         fun getWeekOfYearFromDate(date: LocalDate): String {
             val weekFields: WeekFields = WeekFields.of(Locale.getDefault())
             val weekNumber: Int = date.get(weekFields.weekOfWeekBasedYear())
