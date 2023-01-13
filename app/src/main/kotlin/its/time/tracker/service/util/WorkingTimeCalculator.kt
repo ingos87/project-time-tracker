@@ -18,11 +18,12 @@ import java.util.HashMap
  * minimum break time after 6h work time: 30min
  * minimum break time after another 3h work time: 15min (45min in total)
  */
-val EARLIEST_START_OF_DAY = LocalTime.parse("06:00")
-val LATEST_END_OF_DAY = LocalTime.parse("06:00")
-val MIN_BREAK_BTW_DAYS = Duration.ofHours(11)
-val MAX_WORK_BEFORE_BREAK1 = Duration.ofHours(6)
-val MAX_WORK_BEFORE_BREAK2 = Duration.ofHours(9)
+val EARLIEST_START_OF_DAY: LocalTime = LocalTime.parse("06:00")
+val LATEST_END_OF_DAY: LocalTime = LocalTime.parse("21:00")
+val MIN_BREAK_BTW_DAYS: Duration = Duration.ofHours(11)
+val MAX_WORK_BEFORE_BREAK1: Duration = Duration.ofHours(6)
+val MAX_WORK_BEFORE_BREAK2: Duration = Duration.ofHours(9)
+val MAX_WORK_PER_DAY: Duration = Duration.ofHours(10)
 
 class WorkingTimeCalculator {
 
@@ -117,20 +118,54 @@ class WorkingTimeCalculator {
 
 
     fun toCompliantWorkingTime(workingTimeResult: WorkingTimeResult): CompliantWorkingTime {
+        // flex day
+        if (workingTimeResult.firstClockIn == null || workingTimeResult.lastClockOut == null) {
+            return CompliantWorkingTime(
+                originalClockIn = null,
+                originalClockOut = null,
+                originalTotalWorkingTime = Duration.ZERO,
+                compliantClockIn = null,
+                compliantClockOut = null,
+                compliantTotalWorkingTime = Duration.ZERO
+            )
+        }
 
-        var compliantClockOut = workingTimeResult.lastClockOut
-        if (compliantClockOut != null && workingTimeResult.totalWorkingTime > MAX_WORK_BEFORE_BREAK1) {
+        var compliantClockOut = workingTimeResult.firstClockIn.plus(workingTimeResult.totalWorkingTime)
+        if (workingTimeResult.totalWorkingTime > MAX_WORK_BEFORE_BREAK1) {
             compliantClockOut = compliantClockOut.plus(Duration.ofMinutes(30))
+        }
+        if (workingTimeResult.totalWorkingTime > MAX_WORK_BEFORE_BREAK2) {
+            compliantClockOut = compliantClockOut.plus(Duration.ofMinutes(15))
+        }
+
+        var compliantTotalWorkingTime = workingTimeResult.totalWorkingTime
+        if (workingTimeResult.totalWorkingTime > MAX_WORK_PER_DAY) {
+            compliantTotalWorkingTime = MAX_WORK_PER_DAY
+            compliantClockOut = compliantClockOut.minus(workingTimeResult.totalWorkingTime.minus(MAX_WORK_PER_DAY))
+        }
+
+        var compliantClockIn = workingTimeResult.firstClockIn
+        if (compliantClockIn.isBefore(EARLIEST_START_OF_DAY) && compliantClockOut.isAfter(LATEST_END_OF_DAY)) {
+            // reduce working time ... can this even happen at this point?!
+        }
+        if (compliantClockIn.isBefore(EARLIEST_START_OF_DAY)) {
+            val postponeMinutes = MINUTES.between(EARLIEST_START_OF_DAY, workingTimeResult.firstClockIn)
+            compliantClockIn = compliantClockIn.plus(Duration.ofMinutes(postponeMinutes))
+            compliantClockOut = compliantClockOut.plus(Duration.ofMinutes(postponeMinutes))
+        }
+        if (compliantClockOut.isAfter(LATEST_END_OF_DAY)) {
+            val preponeMinutes = MINUTES.between(LATEST_END_OF_DAY, compliantClockOut)
+            compliantClockIn = compliantClockIn?.minus(Duration.ofMinutes(preponeMinutes))
+            compliantClockOut = compliantClockOut.minus(Duration.ofMinutes(preponeMinutes))
         }
 
         return CompliantWorkingTime(
             originalClockIn = workingTimeResult.firstClockIn,
             originalClockOut = workingTimeResult.lastClockOut,
             originalTotalWorkingTime = workingTimeResult.totalWorkingTime,
-            compliantClockIn = workingTimeResult.firstClockIn,
+            compliantClockIn = compliantClockIn,
             compliantClockOut = compliantClockOut,
-            compliantTotalWorkingTime = workingTimeResult.totalWorkingTime,
-            workingTimeDiff = Duration.ZERO,
+            compliantTotalWorkingTime = compliantTotalWorkingTime,
         )
     }
 }
@@ -149,5 +184,4 @@ data class CompliantWorkingTime(
     val compliantClockIn: LocalTime?,
     val compliantClockOut: LocalTime?,
     val compliantTotalWorkingTime: Duration,
-    val workingTimeDiff: Duration,
 )
