@@ -5,7 +5,7 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
 
-class RecordWorkingTimeTests : FunSpec({
+class UploadWorkingTimeTests : FunSpec({
 
     beforeEach {
         ensureTestConfig()
@@ -16,7 +16,7 @@ class RecordWorkingTimeTests : FunSpec({
         ensureNoConfig()
 
         val output = tapSystemOut {
-            main(arrayOf<String>("record-working-time"))
+            main(arrayOf<String>("upload-working-time"))
         }
 
         output shouldStartWith "No config file found in ./app.json\n" +
@@ -26,7 +26,7 @@ class RecordWorkingTimeTests : FunSpec({
     test("todo: name test") {
 
         val output = tapSystemOut {
-            executeRecordWorkingTimeWitArgs(arrayOf<String>("-w2023-34"))
+            executeUploadWorkingTimeWitArgs(arrayOf<String>("-w2023-34"))
         }
 
         splitIgnoreBlank(output) shouldBe listOf(

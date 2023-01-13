@@ -142,16 +142,16 @@ class SummaryTests : FunSpec({
 
     test("day with breaks and several projects") {
         executeClockInWitArgs(arrayOf<String>("-tEPP-007",  "--datetime=2022-01-03 07:30"))
-        executeClockInWitArgs(arrayOf<String>("-tEPP-008",  "--datetime=2022-01-03 09:00")) // worktime 1:30
-        executeClockOutWitArgs(arrayOf<String>(             "--datetime=2022-01-03 11:25")) // worktime 3:55
+        executeClockInWitArgs(arrayOf<String>("-tEPP-008",  "--datetime=2022-01-03 09:00")) // workingtime 1:30
+        executeClockOutWitArgs(arrayOf<String>(             "--datetime=2022-01-03 11:25")) // workingtime 3:55
         executeClockInWitArgs(arrayOf<String>("-tEPP-123",  "--datetime=2022-01-03 13:30")) // break 2:05
-        executeClockInWitArgs(arrayOf<String>("-tEPP-009",  "--datetime=2022-01-03 13:40")) // worktime 0:10
-        executeClockInWitArgs(arrayOf<String>("-tEPP-0815", "--datetime=2022-01-03 13:50")) // worktime 0:10
-        executeClockInWitArgs(arrayOf<String>("-tEPP-17662","--datetime=2022-01-03 14:00")) // worktime 0:10
-        executeClockOutWitArgs(arrayOf<String>(             "--datetime=2022-01-03 15:30")) // worktime 1:30
+        executeClockInWitArgs(arrayOf<String>("-tEPP-009",  "--datetime=2022-01-03 13:40")) // workingtime 0:10
+        executeClockInWitArgs(arrayOf<String>("-tEPP-0815", "--datetime=2022-01-03 13:50")) // workingtime 0:10
+        executeClockInWitArgs(arrayOf<String>("-tEPP-17662","--datetime=2022-01-03 14:00")) // workingtime 0:10
+        executeClockOutWitArgs(arrayOf<String>(             "--datetime=2022-01-03 15:30")) // workingtime 1:30
         executeClockInWitArgs(arrayOf<String>("-tallhands", "--datetime=2022-01-03 17:05")) // break 1:35
-        executeClockInWitArgs(arrayOf<String>("-tEDF-99",   "--datetime=2022-01-03 18:05")) // worktime 1:00
-        executeClockOutWitArgs(arrayOf<String>(             "--datetime=2022-01-03 20:52")) // worktime 2:47
+        executeClockInWitArgs(arrayOf<String>("-tEDF-99",   "--datetime=2022-01-03 18:05")) // workingtime 1:00
+        executeClockOutWitArgs(arrayOf<String>(             "--datetime=2022-01-03 20:52")) // workingtime 2:47
 
         val output = tapSystemOut {
             executeDailySummaryWitArgs(arrayOf<String>("-d2022-01-03"))

@@ -259,4 +259,38 @@ class DateTimeUtilTests : StringSpec({
             DateTimeUtil.durationToString(duration) shouldBe expectedResult
         }
     }
+
+    "getAllDaysInSameWeekAs works for ..." {
+        listOf(
+            LocalDate.parse("2023-01-09") to listOf(
+                LocalDate.parse("2023-01-09"),
+                LocalDate.parse("2023-01-10"),
+                LocalDate.parse("2023-01-11"),
+                LocalDate.parse("2023-01-12"),
+                LocalDate.parse("2023-01-13"),
+                LocalDate.parse("2023-01-14"),
+                LocalDate.parse("2023-01-15"),
+            ),
+            LocalDate.parse("2023-01-10") to listOf(
+                LocalDate.parse("2023-01-09"),
+                LocalDate.parse("2023-01-10"),
+                LocalDate.parse("2023-01-11"),
+                LocalDate.parse("2023-01-12"),
+                LocalDate.parse("2023-01-13"),
+                LocalDate.parse("2023-01-14"),
+                LocalDate.parse("2023-01-15"),
+            ),
+            LocalDate.parse("2023-01-15") to listOf(
+                LocalDate.parse("2023-01-09"),
+                LocalDate.parse("2023-01-10"),
+                LocalDate.parse("2023-01-11"),
+                LocalDate.parse("2023-01-12"),
+                LocalDate.parse("2023-01-13"),
+                LocalDate.parse("2023-01-14"),
+                LocalDate.parse("2023-01-15"),
+            ),
+        ).forAll { (date, expectedListOfDays) ->
+            DateTimeUtil.getAllDaysInSameWeekAs(date) shouldBe expectedListOfDays
+        }
+    }
 })

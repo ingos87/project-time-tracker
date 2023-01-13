@@ -6,26 +6,44 @@ import its.time.tracker.service.util.DateTimeUtil.Companion.durationToString
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.MINUTES
 import java.time.Duration
+import java.time.LocalDate
+import java.time.LocalTime
+import java.util.HashMap
 
+/**
+ * MySelfHr/ArbSG rules
+ * no work before 06:00
+ * no work after 21:00
+ * break between days: 11 hours
+ * minimum break time after 6h work time: 30min
+ * minimum break time after another 3h work time: 15min (45min in total)
+ */
+val EARLIEST_START_OF_DAY = LocalTime.parse("06:00")
+val LATEST_END_OF_DAY = LocalTime.parse("06:00")
+val MIN_BREAK_BTW_DAYS = Duration.ofHours(11)
+val MAX_WORK_BEFORE_BREAK1 = Duration.ofHours(6)
+val MAX_WORK_BEFORE_BREAK2 = Duration.ofHours(9)
 
-class WorkTimeCalculator {
+class WorkingTimeCalculator {
 
-    fun calculateWorkTime(clockEvents: List<ClockEvent>, useNowAsCLockOut: Boolean = false): WorkTimeResult {
+    fun calculateWorkingTime(clockEvents: List<ClockEvent>, useNowAsCLockOut: Boolean = false): WorkingTimeResult {
         if (clockEvents.isEmpty()) {
-            return WorkTimeResult(
-                firstClockIn = "00:00",
-                lastClockOut = "00:00",
-                totalWorkTime = "00:00",
-                totalBreakTime = "00:00",)
+            return WorkingTimeResult(
+                firstClockIn = LocalTime.parse("00:00"),
+                lastClockOut = LocalTime.parse("00:00"),
+                totalWorkingTime = Duration.ZERO,
+                totalBreakTime = Duration.ZERO,
+            )
         }
 
         val flexTimeEvent = clockEvents.find { it.eventType == EventType.FLEX_TIME }
         if (flexTimeEvent != null) {
-            return WorkTimeResult(
-                firstClockIn = "flex",
-                lastClockOut = "flex",
-                totalWorkTime = "00:00",
-                totalBreakTime = "00:00",)
+            return WorkingTimeResult(
+                firstClockIn = null,
+                lastClockOut = null,
+                totalWorkingTime = Duration.ZERO,
+                totalBreakTime = Duration.ZERO,
+            )
         }
 
         var firstClockIn: LocalDateTime? = null
@@ -84,17 +102,52 @@ class WorkTimeCalculator {
             }
         }
 
-        return WorkTimeResult(
-            firstClockIn = temporalToString(firstClockIn!!, TIME_PATTERN),
-            lastClockOut = temporalToString(mostRecentClockOut!!, TIME_PATTERN),
-            totalWorkTime = durationToString(totalWorkDuration),
-            totalBreakTime = durationToString(totalBreakDuration))
+        return WorkingTimeResult(
+            firstClockIn = firstClockIn?.toLocalTime(),
+            lastClockOut = mostRecentClockOut?.toLocalTime(),
+            totalWorkingTime = totalWorkDuration,
+            totalBreakTime = totalBreakDuration
+        )
+    }
+
+    fun normalizeWeekWorkingTime(workingTimeResults: HashMap<LocalDate, WorkingTimeResult>): HashMap<LocalDate, CompliantWorkingTime> {
+
+        TODO("Not yet implemented")
+    }
+
+
+    fun toCompliantWorkingTime(workingTimeResult: WorkingTimeResult): CompliantWorkingTime {
+
+        var compliantClockOut = workingTimeResult.lastClockOut
+        if (compliantClockOut != null && workingTimeResult.totalWorkingTime > MAX_WORK_BEFORE_BREAK1) {
+            compliantClockOut = compliantClockOut.plus(Duration.ofMinutes(30))
+        }
+
+        return CompliantWorkingTime(
+            originalClockIn = workingTimeResult.firstClockIn,
+            originalClockOut = workingTimeResult.lastClockOut,
+            originalTotalWorkingTime = workingTimeResult.totalWorkingTime,
+            compliantClockIn = workingTimeResult.firstClockIn,
+            compliantClockOut = compliantClockOut,
+            compliantTotalWorkingTime = workingTimeResult.totalWorkingTime,
+            workingTimeDiff = Duration.ZERO,
+        )
     }
 }
 
-data class WorkTimeResult(
-    val firstClockIn: String,
-    val lastClockOut: String,
-    val totalWorkTime: String,
-    val totalBreakTime: String,
+data class WorkingTimeResult(
+    val firstClockIn: LocalTime?,
+    val lastClockOut: LocalTime?,
+    val totalWorkingTime: Duration,
+    val totalBreakTime: Duration,
+)
+
+data class CompliantWorkingTime(
+    val originalClockIn: LocalTime?,
+    val originalClockOut: LocalTime?,
+    val originalTotalWorkingTime: Duration,
+    val compliantClockIn: LocalTime?,
+    val compliantClockOut: LocalTime?,
+    val compliantTotalWorkingTime: Duration,
+    val workingTimeDiff: Duration,
 )

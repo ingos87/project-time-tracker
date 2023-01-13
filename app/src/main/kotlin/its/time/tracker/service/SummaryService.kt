@@ -2,6 +2,8 @@ package its.time.tracker.service
 
 import its.time.tracker.service.util.DATE_PATTERN
 import its.time.tracker.service.util.*
+import its.time.tracker.service.util.DateTimeUtil.Companion.durationToString
+import its.time.tracker.service.util.DateTimeUtil.Companion.temporalToString
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.ResolverStyle
@@ -26,7 +28,7 @@ class SummaryService(
 
         val showWorkInProgress = DAYS.between(date, LocalDate.now()) == 0L && daysEvents.last().eventType != EventType.CLOCK_OUT
 
-        val workTimeResult = WorkTimeCalculator().calculateWorkTime(daysEvents, showWorkInProgress)
+        val workingTimeResult = WorkingTimeCalculator().calculateWorkingTime(daysEvents, showWorkInProgress)
         val bookingPositionsList = ProjectTimeCalculator().calculateProjectTime(daysEvents, showWorkInProgress)
 
         val cellWidth = 48
@@ -34,20 +36,20 @@ class SummaryService(
         if (showWorkInProgress) {
             println("[today's work in progress]")
             println("┌" + "─".repeat(cellWidth) + "┐")
-            println("│ " + "clock-in:".padEnd(20) + workTimeResult.firstClockIn.padEnd(cellWidth-21) + "│")
+            println("│ " + "clock-in:".padEnd(20) + temporalToString(workingTimeResult.firstClockIn!!, TIME_PATTERN).padEnd(cellWidth-21) + "│")
             println("├" + "─".repeat(cellWidth) + "┤")
-            println("│ " + "current work time:".padEnd(20) + workTimeResult.totalWorkTime.padEnd(cellWidth-21) + "│")
-            println("│ " + "current break time:".padEnd(20) + workTimeResult.totalBreakTime.padEnd(cellWidth-21) + "│")
+            println("│ " + "current work time:".padEnd(20) + durationToString(workingTimeResult.totalWorkingTime).padEnd(cellWidth-21) + "│")
+            println("│ " + "current break time:".padEnd(20) + durationToString(workingTimeResult.totalBreakTime).padEnd(cellWidth-21) + "│")
             println("│ " + "current work topic:".padEnd(20) + daysEvents.last().topic.take(21).padEnd(cellWidth-21) + "│")
         }
         else {
             println("[SUMMARY for $date]")
             println("┌" + "─".repeat(cellWidth) + "┐")
-            println("│ " + "clock-in:".padEnd(18) + workTimeResult.firstClockIn.padEnd(cellWidth-19) + "│")
-            println("│ " + "clock-out:".padEnd(18) + workTimeResult.lastClockOut.padEnd(cellWidth-19) + "│")
+            println("│ " + "clock-in:".padEnd(18) + temporalToString(workingTimeResult.firstClockIn!!, TIME_PATTERN).padEnd(cellWidth-19) + "│")
+            println("│ " + "clock-out:".padEnd(18) + temporalToString(workingTimeResult.lastClockOut!!, TIME_PATTERN).padEnd(cellWidth-19) + "│")
             println("├" + "─".repeat(cellWidth) + "┤")
-            println("│ " + "total work time:".padEnd(18) + workTimeResult.totalWorkTime.padEnd(cellWidth-19) + "│")
-            println("│ " + "total break time:".padEnd(18) + workTimeResult.totalBreakTime.padEnd(cellWidth-19) + "│")
+            println("│ " + "total work time:".padEnd(18) + durationToString(workingTimeResult.totalWorkingTime).padEnd(cellWidth-19) + "│")
+            println("│ " + "total break time:".padEnd(18) + durationToString(workingTimeResult.totalBreakTime).padEnd(cellWidth-19) + "│")
         }
 
         println("├" + "═".repeat(cellWidth) + "┤")
@@ -55,7 +57,7 @@ class SummaryService(
             // total width - white space - bookingPosLength - ": " - time - "  " - 1parenthesis
             val availableSpaceForTopicList = cellWidth-1-bookingPosLength-2-5-2-1
             val topicList = ("(${it.topics.joinToString(",")}".take(availableSpaceForTopicList)+")").padEnd(availableSpaceForTopicList+1)
-            println("│ " + "${it.bookingKey}:".padEnd(bookingPosLength+2) + DateTimeUtil.durationToString(it.totalWorkTime) + "  " + topicList + "│")
+            println("│ " + "${it.bookingKey}:".padEnd(bookingPosLength+2) + DateTimeUtil.durationToString(it.totalWorkingTime) + "  " + topicList + "│")
         }
         println("└" + "─".repeat(cellWidth) + "┘")
 
@@ -80,9 +82,9 @@ class SummaryService(
         val summaryData = MonthlySummary()
         uniqueDays.forEach { day ->
             val daysEvents = clockEvents.filter { DateTimeUtil.isSameDay(it.dateTime, day) }.toList()
-            val workTimeResult = WorkTimeCalculator().calculateWorkTime(daysEvents)
+            val workingTimeResult = WorkingTimeCalculator().calculateWorkingTime(daysEvents)
             val bookingPositionsList = ProjectTimeCalculator().calculateProjectTime(daysEvents)
-            summaryData.addDay(day, workTimeResult, bookingPositionsList)
+            summaryData.addDay(day, workingTimeResult, bookingPositionsList)
         }
 
         val firstColWidth = BookingPositionResolver.getMaxBookingPosNameLength()+2
@@ -125,7 +127,7 @@ class SummaryService(
         println(getHorizontalSeparator(uniqueDays, SeparatorPosition.MIDDLE, firstColWidth, false))
         println(getContentLine(
             getCellString("total", firstColWidth, TextOrientation.LEFT),
-            summaryData.getAllTotalWorkTimes(),
+            summaryData.getAllTotalWorkingTimes(),
             uniqueDays))
 
         println(getHorizontalSeparator(uniqueDays, SeparatorPosition.BOTTOM, firstColWidth, false))

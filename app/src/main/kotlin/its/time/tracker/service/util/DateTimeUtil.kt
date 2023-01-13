@@ -133,5 +133,19 @@ class DateTimeUtil {
 
             return (if (weekNumber < 10) "0" else "") + weekNumber
         }
+
+        fun getAllDaysInSameWeekAs(date: LocalDate): List<LocalDate> {
+            val weekDayOrdinal: Long = date.dayOfWeek.ordinal.toLong()
+            var plusValue = weekDayOrdinal * (-1)
+            return listOf(
+                date.plusDays(plusValue++),
+                date.plusDays(plusValue++),
+                date.plusDays(plusValue++),
+                date.plusDays(plusValue++),
+                date.plusDays(plusValue++),
+                date.plusDays(plusValue++),
+                date.plusDays(plusValue),
+            )
+        }
     }
 }

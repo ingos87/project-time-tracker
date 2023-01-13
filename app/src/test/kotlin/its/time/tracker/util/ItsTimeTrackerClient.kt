@@ -70,8 +70,8 @@ fun executeMonthlySummaryWitArgs(args: Array<String>) {
     main(arrayOf<String>("monthly-summary", "--configpath=$TEST_CONFIG_PATH").plus(args))
 }
 
-fun executeRecordWorkingTimeWitArgs(args: Array<String>) {
-    main(arrayOf<String>("record-working-time", "--configpath=$TEST_CONFIG_PATH").plus(args))
+fun executeUploadWorkingTimeWitArgs(args: Array<String>) {
+    main(arrayOf<String>("upload-working-time", "--configpath=$TEST_CONFIG_PATH").plus(args))
 }
 
 fun getTimesCsvContent(): List<String> {

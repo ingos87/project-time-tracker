@@ -62,7 +62,7 @@ class ProjectTimeCalculator {
         val bookingPositionItems = ArrayList<BookingPositionItem>()
         topicTimes.forEach {
             val topic = it.first
-            val workTime = it.second
+            val workingTime = it.second
             val bookingKey = BookingPositionResolver.resolveTopicToBookingPosition(topic)
 
             val presentItem = bookingPositionItems.find { item -> item.bookingKey == bookingKey }
@@ -70,7 +70,7 @@ class ProjectTimeCalculator {
                 bookingPositionItems.remove(presentItem)
                 val newItem = BookingPositionItem(
                     bookingKey = bookingKey,
-                    totalWorkTime = presentItem.totalWorkTime.plus(workTime),
+                    totalWorkingTime = presentItem.totalWorkingTime.plus(workingTime),
                     topics = presentItem.topics.plus(topic)
                 )
                 bookingPositionItems.add(newItem)
@@ -78,7 +78,7 @@ class ProjectTimeCalculator {
             else {
                 val newItem = BookingPositionItem(
                     bookingKey = bookingKey,
-                    totalWorkTime = workTime,
+                    totalWorkingTime = workingTime,
                     topics = setOf(topic)
                 )
                 bookingPositionItems.add(newItem)
@@ -91,6 +91,6 @@ class ProjectTimeCalculator {
 
 data class BookingPositionItem(
     val bookingKey: String,
-    val totalWorkTime: Duration,
+    val totalWorkingTime: Duration,
     val topics: Set<String>,
 )
