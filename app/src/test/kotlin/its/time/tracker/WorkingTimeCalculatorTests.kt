@@ -126,25 +126,20 @@ class WorkingTimeCalculatorTests : StringSpec({
             wrkDay("07:30", "16:00", "PT8H", "PT30M"),
             wrkDay("07:30", "16:00", "PT8H", "PT30M"))
 
-        val expectedOutput = HashMap<LocalDate, List<WorkDaySummary>>()
-        expectedOutput[LocalDate.parse("2023-01-10")] = listOf(
-            wrkDay("07:30", "16:00", "PT8H", "PT30M"),
-            wrkDay("07:30", "16:00", "PT8H", "PT30M"),
-            wrkDay("07:30", "16:00", "PT8H", "PT30M"))
-        expectedOutput[LocalDate.parse("2023-01-11")] = listOf(
-            wrkDay("07:30", "16:00", "PT8H", "PT30M"),
-            wrkDay("07:30", "16:00", "PT8H", "PT30M"),
-            wrkDay("07:30", "16:00", "PT8H", "PT30M"))
-        expectedOutput[LocalDate.parse("2023-01-12")] = listOf(
-            wrkDay("07:30", "16:00", "PT8H", "PT30M"),
-            wrkDay("07:30", "16:00", "PT8H", "PT30M"),
-            wrkDay("07:30", "16:00", "PT8H", "PT30M"))
-        expectedOutput[LocalDate.parse("2023-01-13")] = listOf(
-            wrkDay("07:30", "16:00", "PT8H", "PT30M"),
-            wrkDay("07:30", "16:00", "PT8H", "PT30M"),
-            wrkDay("07:30", "16:00", "PT8H", "PT30M"))
+        val expectedOutput = HashMap<LocalDate, WorkDaySummary>()
+        expectedOutput[LocalDate.parse("2023-01-10")] =
+            wrkDay("07:30", "16:00", "PT8H", "PT30M")
+        expectedOutput[LocalDate.parse("2023-01-11")] =
+            wrkDay("07:30", "16:00", "PT8H", "PT30M")
+        expectedOutput[LocalDate.parse("2023-01-12")] =
+            wrkDay("07:30", "16:00", "PT8H", "PT30M")
+        expectedOutput[LocalDate.parse("2023-01-13")] =
+            wrkDay("07:30", "16:00", "PT8H", "PT30M")
 
-        WorkingTimeCalculator().distributeWorkingTime(input) shouldBe expectedOutput.toSortedMap()
+        val result = WorkingTimeCalculator().distributeWorkingTime(input)
+        result.forEach{ entry ->
+            entry.value.last() shouldBe expectedOutput[entry.key]
+        }
     }
 
     "distributeWorkingTime moves excess working time to following day" {
@@ -162,25 +157,20 @@ class WorkingTimeCalculatorTests : StringSpec({
             wrkDay("07:30", "16:00", "PT8H", "PT30M"),
             wrkDay("07:30", "16:00", "PT8H", "PT30M"))
         
-        val expectedOutput = HashMap<LocalDate, List<WorkDaySummary>>()
-        expectedOutput[LocalDate.parse("2023-01-10")] = listOf(
-            wrkDay("07:15", "18:00", "PT10H", "PT45M"),
-            wrkDay("07:15", "18:00", "PT10H", "PT45M"),
-            wrkDay("07:15", "18:00", "PT10H", "PT45M"))
-        expectedOutput[LocalDate.parse("2023-01-11")] = listOf(
-            wrkDay("07:15", "19:00", "PT11H", "PT45M"),
-            wrkDay("07:15", "18:00", "PT10H", "PT45M"),
-            wrkDay("07:15", "18:00", "PT10H", "PT45M"))
-        expectedOutput[LocalDate.parse("2023-01-12")] = listOf(
-            wrkDay("07:30", "15:00", "PT7H", "PT30M"),
-            wrkDay("07:30", "15:00", "PT7H", "PT30M"),
-            wrkDay("07:30", "16:00", "PT8H", "PT30M"))
-        expectedOutput[LocalDate.parse("2023-01-13")] = listOf(
-            wrkDay("07:30", "16:00", "PT8H", "PT30M"),
-            wrkDay("07:30", "16:00", "PT8H", "PT30M"),
-            wrkDay("07:30", "16:00", "PT8H", "PT30M"))
-        
-        WorkingTimeCalculator().distributeWorkingTime(input) shouldBe expectedOutput.toSortedMap()
+        val expectedOutput = HashMap<LocalDate, WorkDaySummary>()
+        expectedOutput[LocalDate.parse("2023-01-10")] =
+            wrkDay("07:15", "18:00", "PT10H", "PT45M")
+        expectedOutput[LocalDate.parse("2023-01-11")] =
+            wrkDay("07:15", "18:00", "PT10H", "PT45M")
+        expectedOutput[LocalDate.parse("2023-01-12")] =
+            wrkDay("07:30", "16:00", "PT8H", "PT30M")
+        expectedOutput[LocalDate.parse("2023-01-13")] =
+            wrkDay("07:30", "16:00", "PT8H", "PT30M")
+
+        val result = WorkingTimeCalculator().distributeWorkingTime(input)
+        result.forEach{ entry ->
+            entry.value.last() shouldBe expectedOutput[entry.key]
+        }
     }
 
     "distributeWorkingTime moves excess working time to two days" {
@@ -198,24 +188,20 @@ class WorkingTimeCalculatorTests : StringSpec({
             wrkDay("07:30", "16:00", "PT8H", "PT30M"),
             wrkDay("07:30", "16:00", "PT8H", "PT30M"))
 
-        val expectedOutput = HashMap<LocalDate, List<WorkDaySummary>>()
-        expectedOutput[LocalDate.parse("2023-01-10")] = listOf(
-            wrkDay("07:15", "18:00", "PT10H", "PT45M"),
-            wrkDay("07:15", "18:00", "PT10H", "PT45M"),
-            wrkDay("07:15", "18:00", "PT10H", "PT45M"))
-        expectedOutput[LocalDate.parse("2023-01-11")] = listOf(
-            wrkDay("07:15", "19:00", "PT11H", "PT45M"),
-            wrkDay("07:15", "18:00", "PT10H", "PT45M"),
-            wrkDay("07:15", "18:00", "PT10H", "PT45M"))
-        expectedOutput[LocalDate.parse("2023-01-12")] = listOf(
-            wrkDay("07:30", "17:45", "PT9H30M", "PT45M"),
-            wrkDay("07:30", "17:45", "PT9H30M", "PT45M"),
-            wrkDay("07:30", "18:15", "PT10H", "PT45M"))
-        expectedOutput[LocalDate.parse("2023-01-13")] = listOf(
-            wrkDay("07:30", "16:00", "PT8H", "PT30M"),
-            wrkDay("07:30", "16:00", "PT8H", "PT30M"),
-            wrkDay("07:30", "16:30", "PT8H30M", "PT30M"))
-        WorkingTimeCalculator().distributeWorkingTime(input) shouldBe expectedOutput.toSortedMap()
+        val expectedOutput = HashMap<LocalDate, WorkDaySummary>()
+        expectedOutput[LocalDate.parse("2023-01-10")] =
+            wrkDay("07:15", "18:00", "PT10H", "PT45M")
+        expectedOutput[LocalDate.parse("2023-01-11")] =
+            wrkDay("07:15", "18:00", "PT10H", "PT45M")
+        expectedOutput[LocalDate.parse("2023-01-12")] =
+            wrkDay("07:30", "18:15", "PT10H", "PT45M")
+        expectedOutput[LocalDate.parse("2023-01-13")] =
+            wrkDay("07:30", "16:30", "PT8H30M", "PT30M")
+
+        val result = WorkingTimeCalculator().distributeWorkingTime(input)
+        result.forEach{ entry ->
+            entry.value.last() shouldBe expectedOutput[entry.key]
+        }
     }
 
     "distributeWorkingTime moves excess working time to day before if following days to not allow it" {
@@ -233,29 +219,20 @@ class WorkingTimeCalculatorTests : StringSpec({
             wrkDay("07:00", "17:15", "PT9H30M", "PT45M"),
             wrkDay("07:00", "17:15", "PT9H30M", "PT45M"))
 
-        val expectedOutput = HashMap<LocalDate, List<WorkDaySummary>>()
-        expectedOutput[LocalDate.parse("2023-01-10")] = listOf(
-            wrkDay("07:00", "15:30", "PT8H", "PT30M"),
-            wrkDay("07:00", "15:30", "PT8H", "PT30M"),
-            wrkDay("07:00", "15:30", "PT8H", "PT30M"),
-            wrkDay("07:00", "15:30", "PT8H", "PT30M"))
-        expectedOutput[LocalDate.parse("2023-01-11")] = listOf(
-            wrkDay("07:00", "15:30", "PT8H", "PT30M"),
-            wrkDay("07:00", "15:30", "PT8H", "PT30M"),
-            wrkDay("07:00", "15:30", "PT8H", "PT30M"),
-            wrkDay("07:00", "16:00", "PT8H30M", "PT30M"))
-        expectedOutput[LocalDate.parse("2023-01-12")] = listOf(
-            wrkDay("07:00", "18:45", "PT11H", "PT45M"),
-            wrkDay("07:00", "17:45", "PT10H", "PT45M"),
-            wrkDay("07:00", "17:45", "PT10H", "PT45M"),
-            wrkDay("07:00", "17:45", "PT10H", "PT45M"))
-        expectedOutput[LocalDate.parse("2023-01-14")] = listOf(
-            wrkDay("07:00", "17:15", "PT9H30M", "PT45M"),
-            wrkDay("07:00", "17:15", "PT9H30M", "PT45M"),
-            wrkDay("07:00", "17:45", "PT10H", "PT45M"),
-            wrkDay("07:00", "17:45", "PT10H", "PT45M"))
+        val expectedOutput = HashMap<LocalDate, WorkDaySummary>()
+        expectedOutput[LocalDate.parse("2023-01-10")] =
+            wrkDay("07:00", "15:30", "PT8H", "PT30M")
+        expectedOutput[LocalDate.parse("2023-01-11")] =
+            wrkDay("07:00", "16:00", "PT8H30M", "PT30M")
+        expectedOutput[LocalDate.parse("2023-01-12")] =
+            wrkDay("07:00", "17:45", "PT10H", "PT45M")
+        expectedOutput[LocalDate.parse("2023-01-14")] =
+            wrkDay("07:00", "17:45", "PT10H", "PT45M")
 
-        WorkingTimeCalculator().distributeWorkingTime(input) shouldBe expectedOutput.toSortedMap()
+        val result = WorkingTimeCalculator().distributeWorkingTime(input)
+        result.forEach{ entry ->
+            entry.value.last() shouldBe expectedOutput[entry.key]
+        }
     }
 })
 

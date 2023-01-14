@@ -112,28 +112,33 @@ class WorkingTimeCalculator {
         )
     }
 
-    fun normalizeWeekWorkingTime(workingTimeResults: HashMap<LocalDate, WorkDaySummary>): SortedMap<LocalDate, List<WorkDaySummary>> {
-        val compliantWorkingTimeResults = HashMap<LocalDate, List<WorkDaySummary>>()
-        workingTimeResults.forEach{ entry ->
-            compliantWorkingTimeResults[entry.key] = listOf(entry.value, toCompliantWorkDaySummary(entry.value))
+    fun normalizeWeekWorkingTime(workDaySummaries: HashMap<LocalDate, WorkDaySummary>): SortedMap<LocalDate, List<WorkDaySummary>> {
+        val compliantWorkDaySummaries = HashMap<LocalDate, List<WorkDaySummary>>()
+        workDaySummaries.forEach { entry ->
+            compliantWorkDaySummaries[entry.key] = listOf(entry.value, toCompliantWorkDaySummary(entry.value))
         }
 
-        val correctyDistributedWorkingTimeResults = distributeWorkingTime(compliantWorkingTimeResults)
+        val correctlyDistributedWorkDaySummaries = distributeWorkingTime(compliantWorkDaySummaries)
 
-        return correctyDistributedWorkingTimeResults
+        return spreadOutWorkDays(correctlyDistributedWorkDaySummaries)
+    }
+
+    private fun spreadOutWorkDays(workDaySummaries: SortedMap<LocalDate, List<WorkDaySummary>>): SortedMap<LocalDate, List<WorkDaySummary>> {
+        // TODO implement
+        return  workDaySummaries
     }
 
     fun distributeWorkingTime(complWorkingTimeResults: HashMap<LocalDate, List<WorkDaySummary>>): SortedMap<LocalDate, List<WorkDaySummary>> {
-        var result = moveExtraTimeToNextDays(complWorkingTimeResults.toSortedMap(), Duration.ZERO)
+        var result = moveExtraTimeToAdjacentDays(complWorkingTimeResults.toSortedMap(), Duration.ZERO)
 
         if (result.second > Duration.ZERO) {
-            result = moveExtraTimeToNextDays(result.first.toSortedMap(Comparator.reverseOrder()), result.second)
+            result = moveExtraTimeToAdjacentDays(result.first.toSortedMap(Comparator.reverseOrder()), result.second)
         }
 
         return result.first.toSortedMap()
     }
 
-    private fun moveExtraTimeToNextDays(
+    private fun moveExtraTimeToAdjacentDays(
         complWorkingTimeResults: SortedMap<LocalDate, List<WorkDaySummary>>,
         additionalExtraTime: Duration
     ): Pair<SortedMap<LocalDate, List<WorkDaySummary>>, Duration> {
