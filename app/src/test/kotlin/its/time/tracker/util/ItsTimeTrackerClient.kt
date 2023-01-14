@@ -31,8 +31,8 @@ fun ensureTestConfig(weekdaysOff: String = "SAT,SUN") {
     val defaultConfig = listOf(
         "{",
         "  \"${ConfigService.KEY_CSV_PATH}\":\"$TEST_CSV_PATH\",",
-        "  \"${ConfigService.KEY_MY_HR_SELF_SERVICE_URL}\":\"https://bullabue.de\",",
-        "  \"${ConfigService.KEY_E_TIME_URL}\":\"https://rotten-apples.de\",",
+        "  \"${ConfigService.KEY_MY_HR_SELF_SERVICE_URL}\":\"https://no.url\",",
+        "  \"${ConfigService.KEY_E_TIME_URL}\":\"https://no.second.url\",",
         "  \"${ConfigService.KEY_WEEKDAYS_OFF}\":\"$weekdaysOff\"",
         "}")
 
@@ -71,7 +71,7 @@ fun executeMonthlySummaryWitArgs(args: Array<String>) {
 }
 
 fun executeUploadWorkingTimeWitArgs(args: Array<String>) {
-    main(arrayOf<String>("upload-working-time", "--configpath=$TEST_CONFIG_PATH").plus(args))
+    main(arrayOf<String>("timekeeping", "--configpath=$TEST_CONFIG_PATH").plus(args))
 }
 
 fun getTimesCsvContent(): List<String> {

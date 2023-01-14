@@ -27,7 +27,7 @@ class DateTimeUtil {
             if (dateTimeInput.isNullOrBlank()) return LocalDateTime.now()
 
             try {
-                val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.getDefault())
+                val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.GERMANY)
                     .withZone(ZoneId.systemDefault())
                 return parseStringWithPattern(formatter.format(LocalDateTime.now()) + " " + dateTimeInput, DATE_TIME_PATTERN)
             } catch (e: AbortException) {
@@ -87,7 +87,7 @@ class DateTimeUtil {
         }
 
         private fun parseStringWithPattern(string: String, pattern: String, verbose: Boolean = true): Temporal? {
-            val dateFormatter = DateTimeFormatter.ofPattern(pattern, Locale.getDefault())
+            val dateFormatter = DateTimeFormatter.ofPattern(pattern, Locale.GERMANY)
                 .withResolverStyle(ResolverStyle.STRICT)
 
             return try {
@@ -116,7 +116,7 @@ class DateTimeUtil {
         }
 
         fun temporalToString(dateTime: Temporal, pattern: String = DATE_TIME_PATTERN): String {
-            val formatter = DateTimeFormatter.ofPattern(pattern, Locale.getDefault())
+            val formatter = DateTimeFormatter.ofPattern(pattern, Locale.GERMANY)
                 .withZone(ZoneId.systemDefault())
 
             return formatter.format(dateTime)
@@ -128,7 +128,7 @@ class DateTimeUtil {
         }
 
         fun getWeekOfYearFromDate(date: LocalDate): String {
-            val weekFields: WeekFields = WeekFields.of(Locale.getDefault())
+            val weekFields: WeekFields = WeekFields.of(Locale.GERMANY)
             val weekNumber: Int = date.get(weekFields.weekOfWeekBasedYear())
 
             return (if (weekNumber < 10) "0" else "") + weekNumber

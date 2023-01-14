@@ -28,7 +28,7 @@ class SummaryService(
 
         val showWorkInProgress = DAYS.between(date, LocalDate.now()) == 0L && daysEvents.last().eventType != EventType.CLOCK_OUT
 
-        val workingTimeResult = WorkingTimeCalculator().calculateWorkingTime(daysEvents, showWorkInProgress)
+        val workDaySummary = WorkingTimeCalculator().toWorkDaySummary(daysEvents, showWorkInProgress)
         val bookingPositionsList = ProjectTimeCalculator().calculateProjectTime(daysEvents, showWorkInProgress)
 
         val cellWidth = 48
@@ -36,20 +36,20 @@ class SummaryService(
         if (showWorkInProgress) {
             println("[today's work in progress]")
             println("┌" + "─".repeat(cellWidth) + "┐")
-            println("│ " + "clock-in:".padEnd(20) + temporalToString(workingTimeResult.firstClockIn!!, TIME_PATTERN).padEnd(cellWidth-21) + "│")
+            println("│ " + "clock-in:".padEnd(20) + temporalToString(workDaySummary.clockIn!!, TIME_PATTERN).padEnd(cellWidth-21) + "│")
             println("├" + "─".repeat(cellWidth) + "┤")
-            println("│ " + "current work time:".padEnd(20) + durationToString(workingTimeResult.totalWorkingTime).padEnd(cellWidth-21) + "│")
-            println("│ " + "current break time:".padEnd(20) + durationToString(workingTimeResult.totalBreakTime).padEnd(cellWidth-21) + "│")
+            println("│ " + "current work time:".padEnd(20) + durationToString(workDaySummary.workingTime).padEnd(cellWidth-21) + "│")
+            println("│ " + "current break time:".padEnd(20) + durationToString(workDaySummary.breakTime).padEnd(cellWidth-21) + "│")
             println("│ " + "current work topic:".padEnd(20) + daysEvents.last().topic.take(21).padEnd(cellWidth-21) + "│")
         }
         else {
             println("[SUMMARY for $date]")
             println("┌" + "─".repeat(cellWidth) + "┐")
-            println("│ " + "clock-in:".padEnd(18) + temporalToString(workingTimeResult.firstClockIn!!, TIME_PATTERN).padEnd(cellWidth-19) + "│")
-            println("│ " + "clock-out:".padEnd(18) + temporalToString(workingTimeResult.lastClockOut!!, TIME_PATTERN).padEnd(cellWidth-19) + "│")
+            println("│ " + "clock-in:".padEnd(18) + temporalToString(workDaySummary.clockIn!!, TIME_PATTERN).padEnd(cellWidth-19) + "│")
+            println("│ " + "clock-out:".padEnd(18) + temporalToString(workDaySummary.clockOut!!, TIME_PATTERN).padEnd(cellWidth-19) + "│")
             println("├" + "─".repeat(cellWidth) + "┤")
-            println("│ " + "total work time:".padEnd(18) + durationToString(workingTimeResult.totalWorkingTime).padEnd(cellWidth-19) + "│")
-            println("│ " + "total break time:".padEnd(18) + durationToString(workingTimeResult.totalBreakTime).padEnd(cellWidth-19) + "│")
+            println("│ " + "total work time:".padEnd(18) + durationToString(workDaySummary.workingTime).padEnd(cellWidth-19) + "│")
+            println("│ " + "total break time:".padEnd(18) + durationToString(workDaySummary.breakTime).padEnd(cellWidth-19) + "│")
         }
 
         println("├" + "═".repeat(cellWidth) + "┤")
@@ -64,7 +64,7 @@ class SummaryService(
     }
 
     fun showMonthlySummary(date: LocalDate) {
-        val dateFormatter = DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.getDefault())
+        val dateFormatter = DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.GERMANY)
             .withResolverStyle(ResolverStyle.STRICT)
         val yearMonthString = dateFormatter.format(date).substring(0, 7)
 
@@ -82,9 +82,9 @@ class SummaryService(
         val summaryData = MonthlySummary()
         uniqueDays.forEach { day ->
             val daysEvents = clockEvents.filter { DateTimeUtil.isSameDay(it.dateTime, day) }.toList()
-            val workingTimeResult = WorkingTimeCalculator().calculateWorkingTime(daysEvents)
+            val workDaySummary = WorkingTimeCalculator().toWorkDaySummary(daysEvents)
             val bookingPositionsList = ProjectTimeCalculator().calculateProjectTime(daysEvents)
-            summaryData.addDay(day, workingTimeResult, bookingPositionsList)
+            summaryData.addDay(day, workDaySummary, bookingPositionsList)
         }
 
         val firstColWidth = BookingPositionResolver.getMaxBookingPosNameLength()+2

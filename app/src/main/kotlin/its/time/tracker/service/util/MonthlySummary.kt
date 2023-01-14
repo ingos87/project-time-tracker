@@ -4,23 +4,23 @@ import java.time.Duration
 import java.time.LocalDate
 
 data class MonthlySummary(
-    var data: MutableMap<LocalDate, Pair<WorkingTimeResult, List<BookingPositionItem>>> = mutableMapOf()
+    var data: MutableMap<LocalDate, Pair<WorkDaySummary, List<BookingPositionItem>>> = mutableMapOf()
 ) {
     fun addDay(dateTime: LocalDate,
-               workingTimeResult: WorkingTimeResult,
+               workDaySummary: WorkDaySummary,
                bookingPositionItems: List<BookingPositionItem>) {
-        data[dateTime] = Pair(workingTimeResult, bookingPositionItems)
+        data[dateTime] = Pair(workDaySummary, bookingPositionItems)
     }
 
     fun getAllClockIns(): List<String> {
         return data.values.map {
-            if(it.first.firstClockIn == null) "flex" else DateTimeUtil.temporalToString(it.first.firstClockIn!!, TIME_PATTERN)
+            if(it.first.clockIn == null) "flex" else DateTimeUtil.temporalToString(it.first.clockIn!!, TIME_PATTERN)
         }
     }
 
     fun getAllClockOuts(): List<String> {
         return data.values.map {
-            if(it.first.lastClockOut == null) "flex" else DateTimeUtil.temporalToString(it.first.lastClockOut!!, TIME_PATTERN)
+            if(it.first.clockOut == null) "flex" else DateTimeUtil.temporalToString(it.first.clockOut!!, TIME_PATTERN)
         }
     }
 
@@ -29,7 +29,7 @@ data class MonthlySummary(
     }
 
     fun getAllTotalWorkingTimes(): List<String> {
-        return data.values.map { DateTimeUtil.durationToString(it.first.totalWorkingTime) }
+        return data.values.map { DateTimeUtil.durationToString(it.first.workingTime) }
     }
 
     fun getAllBookingDurationsForKey(bookingKey: String): List<String> {

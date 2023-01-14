@@ -16,7 +16,7 @@ class UploadWorkingTimeTests : FunSpec({
         ensureNoConfig()
 
         val output = tapSystemOut {
-            main(arrayOf<String>("upload-working-time"))
+            main(arrayOf<String>("timekeeping"))
         }
 
         output shouldStartWith "No config file found in ./app.json\n" +
