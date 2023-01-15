@@ -1,9 +1,8 @@
 package its.time.tracker.service
 
 import its.time.tracker.service.util.DateTimeUtil
-import its.time.tracker.service.util.WorkingTimeDistributionCalculator
 import its.time.tracker.service.util.WorkDaySummary
-import its.time.tracker.service.util.WorkingTimeCalculator
+import its.time.tracker.service.util.WorkingTimeNormalizer
 import java.time.LocalDate
 
 class WorkingTimeService(
@@ -16,16 +15,16 @@ class WorkingTimeService(
 
         val allWeekDays: List<LocalDate> = DateTimeUtil.getAllDaysInSameWeekAs(localDate)
 
-        val workingTimeCalculator = WorkingTimeCalculator()
+        val workingTimeNormalizer = WorkingTimeNormalizer()
         val workingTimeResults = HashMap<LocalDate, WorkDaySummary>()
         allWeekDays.forEach{date ->
-            val workDaySummary = workingTimeCalculator.toWorkDaySummary(clockEvents.filter { event -> DateTimeUtil.isSameDay(event.dateTime, date)})
+            val workDaySummary = WorkDaySummary.toWorkDaySummary(clockEvents.filter { event -> DateTimeUtil.isSameDay(event.dateTime, date)})
             if (workDaySummary != null) {
                 workingTimeResults[date] = workDaySummary
             }
         }
 
-        val normalizedWorkingtimes = workingTimeCalculator.normalizeWeekWorkingTime(workingTimeResults)
+        val normalizedWorkingtimes = workingTimeNormalizer.normalizeWeekWorkingTime(workingTimeResults)
 
 
         println("done")

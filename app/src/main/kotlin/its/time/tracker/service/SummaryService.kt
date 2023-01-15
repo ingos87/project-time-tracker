@@ -28,7 +28,7 @@ class SummaryService(
 
         val showWorkInProgress = DAYS.between(date, LocalDate.now()) == 0L && daysEvents.last().eventType != EventType.CLOCK_OUT
 
-        val workDaySummary = WorkingTimeCalculator().toWorkDaySummary(daysEvents, showWorkInProgress)!!
+        val workDaySummary = WorkDaySummary.toWorkDaySummary(daysEvents, showWorkInProgress)!!
         val bookingPositionsList = ProjectTimeCalculator().calculateProjectTime(daysEvents, showWorkInProgress)
 
         val cellWidth = 48
@@ -82,7 +82,7 @@ class SummaryService(
         val summaryData = MonthlySummary()
         uniqueDays.forEach { day ->
             val daysEvents = clockEvents.filter { DateTimeUtil.isSameDay(it.dateTime, day) }.toList()
-            val workDaySummary = WorkingTimeCalculator().toWorkDaySummary(daysEvents)
+            val workDaySummary = WorkDaySummary.toWorkDaySummary(daysEvents)
             val bookingPositionsList = ProjectTimeCalculator().calculateProjectTime(daysEvents)
             summaryData.addDay(day, workDaySummary!!, bookingPositionsList)
         }
