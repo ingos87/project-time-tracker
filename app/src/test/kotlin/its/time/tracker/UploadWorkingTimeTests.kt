@@ -24,13 +24,40 @@ class UploadWorkingTimeTests : FunSpec({
     }
 
     test("todo: name test") {
+        // TUE
+        executeClockInWitArgs(arrayOf<String>("-tcow",      "--datetime=2023-08-22 07:30"))
+        executeClockInWitArgs(arrayOf<String>("-tEPP-007",  "--datetime=2023-08-22 09:00"))
+        executeClockInWitArgs(arrayOf<String>("-tjourfixe", "--datetime=2023-08-22 14:00"))
+        executeClockInWitArgs(arrayOf<String>("-tEPP-007",  "--datetime=2023-08-22 15:00"))
+        executeClockOutWitArgs(arrayOf<String>(             "--datetime=2023-08-22 17:30"))
+
+        // WED
+        executeClockInWitArgs(arrayOf<String>("-tcow",      "--datetime=2023-08-23 04:45"))
+        executeClockInWitArgs(arrayOf<String>("-tEPP-007",  "--datetime=2023-08-23 09:00"))
+        executeClockOutWitArgs(arrayOf<String>(             "--datetime=2023-08-23 14:45"))
+        executeClockInWitArgs(arrayOf<String>("-tEPP-007",  "--datetime=2023-08-23 15:15"))
+        executeClockOutWitArgs(arrayOf<String>(             "--datetime=2023-08-23 15:30"))
+
+        // FRI
+        executeClockInWitArgs(arrayOf<String>("-tcow",      "--datetime=2023-08-25 08:00"))
+        executeClockInWitArgs(arrayOf<String>("-tEPP-007",  "--datetime=2023-08-25 09:00"))
+        executeClockOutWitArgs(arrayOf<String>(             "--datetime=2023-08-25 14:45"))
+        executeClockInWitArgs(arrayOf<String>("-tEPP-007",  "--datetime=2023-08-25 15:15"))
+        executeClockOutWitArgs(arrayOf<String>(             "--datetime=2023-08-25 15:30"))
+        executeClockInWitArgs(arrayOf<String>("-tEPP-007",  "--datetime=2023-08-25 16:00"))
+        executeClockOutWitArgs(arrayOf<String>(             "--datetime=2023-08-25 17:15"))
 
         val output = tapSystemOut {
             executeUploadWorkingTimeWitArgs(arrayOf<String>("-w2023-34"))
         }
 
         splitIgnoreBlank(output) shouldBe listOf(
-            "done")
+            " date       │ compliant values    ║ original values",
+            "────────────┼─────────────┼───────╬─────────────┼───────",
+            " 2023-08-22 │ 07:30-18:15 │ 10:00 ║ 07:30-17:30 │ 10:00",
+            " 2023-08-23 │ 06:00-16:45 │ 10:00 ║ 04:45-15:30 │ 10:15",
+            " 2023-08-25 │ 08:00-17:00 │ 08:30 ║ 08:00-17:15 │ 08:15",
+            "uploading clock-ins, clock-outs and flex time to myHRSelfService ...")
     }
 
 })

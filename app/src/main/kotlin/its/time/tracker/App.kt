@@ -142,6 +142,7 @@ class MonthlySummary: CliktCommand(help="show work time an project summary of a 
 
 class Timekeeping: CliktCommand(help="export work time for a specific calendar week to myHrSelfService") {
     val v: Boolean by option("-v", help = "enable verbose mode").flag()
+    val noop: Boolean by option("--noop", help = "Do not actually upload anything. Just show stats").flag()
     val calendarWeek by option("-w", "--weeknumber", help="date (format: $WEEK_PATTERN) - will be current week if left empty")
     val configPath by option("--configpath", help = "Defines a custom config file path. That file has to be created before-hand")
     override fun run() {
@@ -152,7 +153,7 @@ class Timekeeping: CliktCommand(help="export work time for a specific calendar w
             val date = DateTimeUtil.toValidCalendarWeek(calendarWeek)
             if (date != null) {
                 val service = WorkingTimeService(v, csvPath)
-                service.captureWorkingTime(date as LocalDate)
+                service.captureWorkingTime(date as LocalDate, noop)
             }
         } catch (e: AbortException) {
             e.printMessage()
