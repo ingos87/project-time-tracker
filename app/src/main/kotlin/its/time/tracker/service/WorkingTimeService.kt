@@ -24,6 +24,8 @@ class WorkingTimeService(
             }
         }
 
+        // TODO regard working time on non-working days (must be moved to working days)
+        // TODO enable possibility to work overnight
         val normalizedWorkingtimes = workingTimeNormalizer.normalizeWeekWorkingTime(workingTimeResults)
 
 

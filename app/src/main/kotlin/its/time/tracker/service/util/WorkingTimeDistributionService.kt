@@ -34,7 +34,7 @@ class WorkingTimeDistributionService {
             entry -> originalMap[entry.key] = entry.value
         }
 
-        val resultingWorkDaySummariesMap = TreeMap<LocalDate, List<WorkDaySummary>>()
+        val resultingWorkDaySummariesMap = HashMap<LocalDate, List<WorkDaySummary>>()
         var postponeDuration = Duration.ZERO
 
         originalMap.forEach { entry ->
