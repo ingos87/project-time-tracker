@@ -28,14 +28,21 @@ val MAX_WORK_PER_DAY: Duration = Duration.ofHours(10)
 
 class WorkingTimeCalculator {
 
-    fun toWorkDaySummary(clockEvents: List<ClockEvent>, useNowAsCLockOut: Boolean = false): WorkDaySummary {
+    companion object {
+        fun getTotalBreakDuration(workingTime: Duration): Duration {
+            if (workingTime <= MAX_WORK_BEFORE_BREAK1) {
+                return Duration.ZERO
+            }
+            else if (workingTime <= MAX_WORK_BEFORE_BREAK2) {
+                return Duration.ofMinutes(30)
+            }
+            return Duration.ofMinutes(45)
+        }
+    }
+
+    fun toWorkDaySummary(clockEvents: List<ClockEvent>, useNowAsCLockOut: Boolean = false): WorkDaySummary? {
         if (clockEvents.isEmpty()) {
-            return WorkDaySummary(
-                clockIn = LocalTime.parse("00:00"),
-                clockOut = LocalTime.parse("00:00"),
-                workingTime = Duration.ZERO,
-                breakTime = Duration.ZERO,
-            )
+            return null
         }
 
         val flexTimeEvent = clockEvents.find { it.eventType == EventType.FLEX_TIME }
@@ -43,8 +50,8 @@ class WorkingTimeCalculator {
             return WorkDaySummary(
                 clockIn = null,
                 clockOut = null,
-                workingTime = Duration.ZERO,
-                breakTime = Duration.ZERO,
+                workDuration = Duration.ZERO,
+                breakDuration = Duration.ZERO,
             )
         }
 
@@ -107,18 +114,19 @@ class WorkingTimeCalculator {
         return WorkDaySummary(
             clockIn = firstClockIn?.toLocalTime(),
             clockOut = mostRecentClockOut?.toLocalTime(),
-            workingTime = totalWorkDuration,
-            breakTime = totalBreakDuration
+            workDuration = totalWorkDuration,
+            breakDuration = totalBreakDuration
         )
     }
 
     fun normalizeWeekWorkingTime(workDaySummaries: HashMap<LocalDate, WorkDaySummary>): SortedMap<LocalDate, List<WorkDaySummary>> {
-        val compliantWorkDaySummaries = HashMap<LocalDate, List<WorkDaySummary>>()
+        val workDaySummariesAsList = HashMap<LocalDate, List<WorkDaySummary>>()
         workDaySummaries.forEach { entry ->
-            compliantWorkDaySummaries[entry.key] = listOf(entry.value, toCompliantWorkDaySummary(entry.value))
+            workDaySummariesAsList[entry.key] = listOf(entry.value)
         }
 
-        val correctlyDistributedWorkDaySummaries = distributeWorkingTime(compliantWorkDaySummaries)
+        val correctlyDistributedWorkDaySummaries =
+            WorkingTimeDistributionCalculator().distributeWorkingTime(workDaySummariesAsList)
 
         return spreadOutWorkDays(correctlyDistributedWorkDaySummaries)
     }
@@ -128,155 +136,4 @@ class WorkingTimeCalculator {
         return  workDaySummaries
     }
 
-    fun distributeWorkingTime(complWorkingTimeResults: HashMap<LocalDate, List<WorkDaySummary>>): SortedMap<LocalDate, List<WorkDaySummary>> {
-        var result = moveExtraTimeToAdjacentDays(complWorkingTimeResults.toSortedMap(), Duration.ZERO)
-
-        if (result.second > Duration.ZERO) {
-            result = moveExtraTimeToAdjacentDays(result.first.toSortedMap(Comparator.reverseOrder()), result.second)
-        }
-
-        return result.first.toSortedMap()
-    }
-
-    private fun moveExtraTimeToAdjacentDays(
-        complWorkingTimeResults: SortedMap<LocalDate, List<WorkDaySummary>>,
-        additionalExtraTime: Duration
-    ): Pair<SortedMap<LocalDate, List<WorkDaySummary>>, Duration> {
-
-        val resultingWorkDaySummaryMap = HashMap<LocalDate, List<WorkDaySummary>>()
-        var totalExtraTime = additionalExtraTime
-        complWorkingTimeResults.forEach { entry ->
-            val workDayV0 = entry.value[entry.value.size-2]
-            val workDayV1 = entry.value.last()
-
-            var newClockIn = workDayV1.clockIn
-            var newClockOut = workDayV1.clockOut
-            var newWorkingTime = workDayV1.workingTime
-            var newBreakTime = workDayV1.breakTime
-
-            val diffToMaxWorkingTime = MAX_WORK_PER_DAY - workDayV1.workingTime
-            val currentExtraTime = workDayV0.workingTime - workDayV1.workingTime
-            if (currentExtraTime > Duration.ZERO) {
-                totalExtraTime += currentExtraTime
-            } else if (totalExtraTime != Duration.ZERO && diffToMaxWorkingTime > Duration.ZERO) {
-                if (totalExtraTime >= diffToMaxWorkingTime) {
-                    // fill up to max
-                    newWorkingTime += diffToMaxWorkingTime
-                    val newClockWindow = addWorkingTimeToClockInAndOut(
-                        workDayV1.clockIn!!,
-                        workDayV1.clockOut!!,
-                        diffToMaxWorkingTime
-                    )
-                    val correctlyMovedClockWindow = moveClockInAndClockOutToCompliantWindow(
-                        newClockWindow.first,
-                        newClockWindow.second
-                    )
-                    newClockIn = correctlyMovedClockWindow.first
-                    newClockOut = correctlyMovedClockWindow.second
-                    newBreakTime = newClockWindow.third
-
-                    totalExtraTime -= diffToMaxWorkingTime
-                } else {
-                    // add all extra time
-                    newWorkingTime += totalExtraTime
-                    val newClockWindow = addWorkingTimeToClockInAndOut(
-                        workDayV1.clockIn!!,
-                        workDayV1.clockOut!!,
-                        totalExtraTime
-                    )
-                    val correctlyMovedClockWindow = moveClockInAndClockOutToCompliantWindow(
-                        newClockWindow.first,
-                        newClockWindow.second
-                    )
-                    newClockIn = correctlyMovedClockWindow.first
-                    newClockOut = correctlyMovedClockWindow.second
-                    newBreakTime = newClockWindow.third
-
-                    totalExtraTime = Duration.ZERO
-                }
-            }
-
-            resultingWorkDaySummaryMap[entry.key] = entry.value + WorkDaySummary(
-                clockIn = newClockIn,
-                clockOut = newClockOut,
-                workingTime = newWorkingTime,
-                breakTime = newBreakTime,
-            )
-        }
-
-        return Pair(resultingWorkDaySummaryMap.toSortedMap(), totalExtraTime)
-    }
-
-    fun addWorkingTimeToClockInAndOut(cIn: LocalTime, cOut: LocalTime, amount: Duration): Triple<LocalTime, LocalTime, Duration> {
-        val breakTimeBefore = getTotalBreakDuration(Duration.between(cIn, cOut))
-        var newClockOut = cOut + amount
-        val breakTimeAfter = getTotalBreakDuration(Duration.between(cIn, newClockOut))
-
-        newClockOut += (breakTimeAfter-breakTimeBefore)
-        return Triple(cIn, newClockOut, breakTimeAfter)
-    }
-
-    fun getTotalBreakDuration(workingTime: Duration): Duration {
-        if (workingTime <= MAX_WORK_BEFORE_BREAK1) {
-            return Duration.ZERO
-        }
-        else if (workingTime <= MAX_WORK_BEFORE_BREAK2) {
-            return Duration.ofMinutes(30)
-        }
-        return Duration.ofMinutes(45)
-    }
-    
-    private fun moveClockInAndClockOutToCompliantWindow(cIn: LocalTime, cOut: LocalTime): Pair<LocalTime, LocalTime> {
-        var clockIn = cIn
-        var clockOut = cOut
-
-        if (clockIn.isBefore(EARLIEST_START_OF_DAY)) {
-            val postponeMinutes = MINUTES.between(clockIn, EARLIEST_START_OF_DAY)
-            clockIn += Duration.ofMinutes(postponeMinutes)
-            clockOut += Duration.ofMinutes(postponeMinutes)
-        }
-        if (clockOut.isAfter(LATEST_END_OF_DAY)) {
-            val preponeMinutes = MINUTES.between(LATEST_END_OF_DAY, clockOut)
-            clockIn -= Duration.ofMinutes(preponeMinutes)
-            clockOut -= Duration.ofMinutes(preponeMinutes)
-        }
-        
-        return Pair(clockIn, clockOut)
-    }
-
-    fun toCompliantWorkDaySummary(workDaySummary: WorkDaySummary): WorkDaySummary {
-        // flex day
-        if (workDaySummary.clockIn == null || workDaySummary.clockOut == null) {
-            return workDaySummary
-        }
-
-        // add breaks
-        var compliantClockOut = workDaySummary.clockIn + workDaySummary.workingTime
-        val totalBreakDuration = getTotalBreakDuration(workDaySummary.workingTime)
-        compliantClockOut += getTotalBreakDuration(workDaySummary.workingTime)
-
-        // truncate if max hours is reached
-        var compliantTotalWorkingTime = workDaySummary.workingTime
-        if (workDaySummary.workingTime > MAX_WORK_PER_DAY) {
-            compliantTotalWorkingTime = MAX_WORK_PER_DAY
-            compliantClockOut -= workDaySummary.workingTime.minus(MAX_WORK_PER_DAY)
-        }
-
-        // move clock in and clock out into legal time window
-        val clockInAndOutInLegalWindow = moveClockInAndClockOutToCompliantWindow(workDaySummary.clockIn, compliantClockOut)
-
-        return WorkDaySummary(
-            clockIn = clockInAndOutInLegalWindow.first,
-            clockOut = clockInAndOutInLegalWindow.second,
-            workingTime = compliantTotalWorkingTime,
-            breakTime = totalBreakDuration
-        )
-    }
 }
-
-data class WorkDaySummary(
-    val clockIn: LocalTime?,
-    val clockOut: LocalTime?,
-    val workingTime: Duration,
-    val breakTime: Duration,
-)

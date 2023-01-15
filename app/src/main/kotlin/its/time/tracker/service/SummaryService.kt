@@ -28,7 +28,7 @@ class SummaryService(
 
         val showWorkInProgress = DAYS.between(date, LocalDate.now()) == 0L && daysEvents.last().eventType != EventType.CLOCK_OUT
 
-        val workDaySummary = WorkingTimeCalculator().toWorkDaySummary(daysEvents, showWorkInProgress)
+        val workDaySummary = WorkingTimeCalculator().toWorkDaySummary(daysEvents, showWorkInProgress)!!
         val bookingPositionsList = ProjectTimeCalculator().calculateProjectTime(daysEvents, showWorkInProgress)
 
         val cellWidth = 48
@@ -38,8 +38,8 @@ class SummaryService(
             println("┌" + "─".repeat(cellWidth) + "┐")
             println("│ " + "clock-in:".padEnd(20) + temporalToString(workDaySummary.clockIn!!, TIME_PATTERN).padEnd(cellWidth-21) + "│")
             println("├" + "─".repeat(cellWidth) + "┤")
-            println("│ " + "current work time:".padEnd(20) + durationToString(workDaySummary.workingTime).padEnd(cellWidth-21) + "│")
-            println("│ " + "current break time:".padEnd(20) + durationToString(workDaySummary.breakTime).padEnd(cellWidth-21) + "│")
+            println("│ " + "current work time:".padEnd(20) + durationToString(workDaySummary.workDuration).padEnd(cellWidth-21) + "│")
+            println("│ " + "current break time:".padEnd(20) + durationToString(workDaySummary.breakDuration).padEnd(cellWidth-21) + "│")
             println("│ " + "current work topic:".padEnd(20) + daysEvents.last().topic.take(21).padEnd(cellWidth-21) + "│")
         }
         else {
@@ -48,8 +48,8 @@ class SummaryService(
             println("│ " + "clock-in:".padEnd(18) + temporalToString(workDaySummary.clockIn!!, TIME_PATTERN).padEnd(cellWidth-19) + "│")
             println("│ " + "clock-out:".padEnd(18) + temporalToString(workDaySummary.clockOut!!, TIME_PATTERN).padEnd(cellWidth-19) + "│")
             println("├" + "─".repeat(cellWidth) + "┤")
-            println("│ " + "total work time:".padEnd(18) + durationToString(workDaySummary.workingTime).padEnd(cellWidth-19) + "│")
-            println("│ " + "total break time:".padEnd(18) + durationToString(workDaySummary.breakTime).padEnd(cellWidth-19) + "│")
+            println("│ " + "total work time:".padEnd(18) + durationToString(workDaySummary.workDuration).padEnd(cellWidth-19) + "│")
+            println("│ " + "total break time:".padEnd(18) + durationToString(workDaySummary.breakDuration).padEnd(cellWidth-19) + "│")
         }
 
         println("├" + "═".repeat(cellWidth) + "┤")
@@ -84,7 +84,7 @@ class SummaryService(
             val daysEvents = clockEvents.filter { DateTimeUtil.isSameDay(it.dateTime, day) }.toList()
             val workDaySummary = WorkingTimeCalculator().toWorkDaySummary(daysEvents)
             val bookingPositionsList = ProjectTimeCalculator().calculateProjectTime(daysEvents)
-            summaryData.addDay(day, workDaySummary, bookingPositionsList)
+            summaryData.addDay(day, workDaySummary!!, bookingPositionsList)
         }
 
         val firstColWidth = BookingPositionResolver.getMaxBookingPosNameLength()+2

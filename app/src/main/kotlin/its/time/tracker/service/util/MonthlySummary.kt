@@ -29,7 +29,7 @@ data class MonthlySummary(
     }
 
     fun getAllTotalWorkingTimes(): List<String> {
-        return data.values.map { DateTimeUtil.durationToString(it.first.workingTime) }
+        return data.values.map { DateTimeUtil.durationToString(it.first.workDuration) }
     }
 
     fun getAllBookingDurationsForKey(bookingKey: String): List<String> {
