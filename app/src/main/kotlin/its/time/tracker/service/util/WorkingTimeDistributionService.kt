@@ -95,13 +95,18 @@ class WorkingTimeDistributionService {
         workDaySummariesMap.forEach { entry ->
             val currentWorkDaySummary = entry.value.last()
 
-            val workDayWithAdditionalTime = currentWorkDaySummary.addWorkingTime(totalExtraTime)
-            totalExtraTime = workDayWithAdditionalTime.second
+            if (DateTimeUtil.isWorkingDay(entry.key)) {
+                val workDayWithAdditionalTime = currentWorkDaySummary.addWorkingTime(totalExtraTime)
+                totalExtraTime = workDayWithAdditionalTime.second
 
-            val complianceResult = workDayWithAdditionalTime.first.makeCompliant()
-            // should not contain any more extra time
+                val compliantResult = workDayWithAdditionalTime.first.makeCompliant()
+                // should not contain any more extra time
 
-            resultingWorkDaySummariesMap[entry.key] = entry.value + complianceResult.first
+                resultingWorkDaySummariesMap[entry.key] = entry.value + compliantResult.first
+            } else {
+                totalExtraTime += currentWorkDaySummary.workDuration
+                resultingWorkDaySummariesMap[entry.key] = entry.value + WorkDaySummary.empty()
+            }
         }
 
         return Pair(resultingWorkDaySummariesMap.toSortedMap(), totalExtraTime)

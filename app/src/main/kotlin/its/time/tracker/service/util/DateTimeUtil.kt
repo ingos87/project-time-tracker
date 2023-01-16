@@ -18,6 +18,21 @@ const val WEEK_PATTERN = "uuuu-ww"
 class DateTimeUtil {
     companion object {
 
+        val WORK_FREE_DAYS = listOf<String>(
+            "2023-01-01",
+            "2023-03-08",
+            "2023-04-07",
+            "2023-04-10",
+            "2023-05-01",
+            "2023-05-18",
+            "2023-05-29",
+            "2023-10-03",
+            "2023-12-24",
+            "2023-12-25",
+            "2023-12-26",
+            "2023-12-31",
+        )
+
         fun toValidDate(dateInput: String?): Temporal? {
             if (dateInput.isNullOrBlank()) return LocalDate.now()
             return parseStringWithPattern(dateInput, DATE_PATTERN)
@@ -146,6 +161,33 @@ class DateTimeUtil {
                 date.plusDays(plusValue++),
                 date.plusDays(plusValue),
             )
+        }
+
+        fun getAllDaysInSameMonthAs(date: LocalDate): List<LocalDate> {
+            val yearAndMonth = temporalToString(date, DATE_PATTERN).take(8)
+            val dateList = mutableListOf<LocalDate>()
+
+            var currentDate = toValidDate(yearAndMonth + "01")!! as LocalDate
+            while (currentDate.monthValue == date.monthValue) {
+                dateList.add(currentDate)
+                currentDate = currentDate.plusDays(1)
+            }
+
+            return dateList
+        }
+
+        fun isWorkingDay(date: LocalDate): Boolean {
+            val dayOfWeek = date.dayOfWeek
+            if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
+                return false
+            }
+            if (WORK_FREE_DAYS.contains(temporalToString(date, DATE_PATTERN))) {
+                return false
+            }
+
+            // TODO load config params and make available here
+
+            return true
         }
     }
 }

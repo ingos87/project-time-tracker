@@ -9,7 +9,7 @@ import java.time.LocalDate
 class WorkingTimeDistributionOverDaysTests : StringSpec({
 
     beforeEach {
-        ensureTestConfig("MON,SAT,SUN")
+        ensureTestConfig()
     }
 
     "ensureMaxWorkingTimePerDay returns empty map" {
@@ -106,7 +106,7 @@ class WorkingTimeDistributionOverDaysTests : StringSpec({
             wrkDay("07:00", "15:30", "PT8H", "PT30M"))
         input[LocalDate.parse("2023-01-12")] = listOf(
             wrkDay("07:00", "18:45", "PT11H", "PT45M"))
-        input[LocalDate.parse("2023-01-14")] = listOf(
+        input[LocalDate.parse("2023-01-13")] = listOf(
             wrkDay("07:00", "17:15", "PT9H30M", "PT45M"))
 
         val expectedOutput = HashMap<LocalDate, WorkDaySummary>()
@@ -116,7 +116,7 @@ class WorkingTimeDistributionOverDaysTests : StringSpec({
             wrkDay("07:00", "16:00", "PT8H30M", "PT30M")
         expectedOutput[LocalDate.parse("2023-01-12")] =
             wrkDay("07:00", "17:45", "PT10H", "PT45M")
-        expectedOutput[LocalDate.parse("2023-01-14")] =
+        expectedOutput[LocalDate.parse("2023-01-13")] =
             wrkDay("07:00", "17:45", "PT10H", "PT45M")
 
         val result = WorkingTimeDistributionService().ensureMaxWorkingTimePerDay(input)

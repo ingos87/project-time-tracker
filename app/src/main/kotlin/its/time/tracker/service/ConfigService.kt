@@ -12,7 +12,7 @@ class ConfigService private constructor(private var configFilePath: String) {
         const val KEY_CSV_PATH = "csv_path"
         const val KEY_MY_HR_SELF_SERVICE_URL = "my_hr_self_service_url"
         const val KEY_E_TIME_URL = "e_time_url"
-        const val KEY_WEEKDAYS_OFF = "weekdays_off"
+        const val KEY_DAYS_OFF = "days_off"
 
         fun createConfigService(configFilePath: String?): ConfigService {
             return ConfigService(configFilePath ?: "./app.json")
@@ -53,7 +53,7 @@ class ConfigService private constructor(private var configFilePath: String) {
             "  \"$KEY_CSV_PATH\":\"$csvPath\",",
             "  \"$KEY_MY_HR_SELF_SERVICE_URL\":\"$myHrSelfServiceUrl\",",
             "  \"$KEY_E_TIME_URL\":\"$eTimeUrl\",",
-            "  \"$KEY_WEEKDAYS_OFF\":\"$weekdaysOff\"",
+            "  \"$KEY_DAYS_OFF\":\"$weekdaysOff\"",
             "}")
 
         File(configFilePath).createNewFile()

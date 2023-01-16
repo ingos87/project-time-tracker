@@ -25,7 +25,7 @@ fun ensureCsvEmpty() {
     File(TEST_CSV_PATH).createNewFile()
 }
 
-fun ensureTestConfig(weekdaysOff: String = "SAT,SUN") {
+fun ensureTestConfig(daysOff: String = "") {
     ensureNoConfig()
 
     val defaultConfig = listOf(
@@ -33,7 +33,7 @@ fun ensureTestConfig(weekdaysOff: String = "SAT,SUN") {
         "  \"${ConfigService.KEY_CSV_PATH}\":\"$TEST_CSV_PATH\",",
         "  \"${ConfigService.KEY_MY_HR_SELF_SERVICE_URL}\":\"https://no.url\",",
         "  \"${ConfigService.KEY_E_TIME_URL}\":\"https://no.second.url\",",
-        "  \"${ConfigService.KEY_WEEKDAYS_OFF}\":\"$weekdaysOff\"",
+        "  \"${ConfigService.KEY_DAYS_OFF}\":\"$daysOff\"",
         "}")
 
     File(TEST_CONFIG_PATH).createNewFile()

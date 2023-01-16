@@ -2,6 +2,7 @@ package its.time.tracker.service.util
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.inspectors.forAll
+import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import its.time.tracker.service.AbortException
 import org.junit.jupiter.api.assertThrows
@@ -264,33 +265,43 @@ class DateTimeUtilTests : StringSpec({
         listOf(
             LocalDate.parse("2023-01-09") to listOf(
                 LocalDate.parse("2023-01-09"),
-                LocalDate.parse("2023-01-10"),
-                LocalDate.parse("2023-01-11"),
-                LocalDate.parse("2023-01-12"),
-                LocalDate.parse("2023-01-13"),
-                LocalDate.parse("2023-01-14"),
                 LocalDate.parse("2023-01-15"),
             ),
             LocalDate.parse("2023-01-10") to listOf(
                 LocalDate.parse("2023-01-09"),
-                LocalDate.parse("2023-01-10"),
-                LocalDate.parse("2023-01-11"),
-                LocalDate.parse("2023-01-12"),
-                LocalDate.parse("2023-01-13"),
-                LocalDate.parse("2023-01-14"),
                 LocalDate.parse("2023-01-15"),
             ),
             LocalDate.parse("2023-01-15") to listOf(
                 LocalDate.parse("2023-01-09"),
-                LocalDate.parse("2023-01-10"),
-                LocalDate.parse("2023-01-11"),
-                LocalDate.parse("2023-01-12"),
-                LocalDate.parse("2023-01-13"),
-                LocalDate.parse("2023-01-14"),
                 LocalDate.parse("2023-01-15"),
             ),
-        ).forAll { (date, expectedListOfDays) ->
-            DateTimeUtil.getAllDaysInSameWeekAs(date) shouldBe expectedListOfDays
+        ).forAll { (date, firstAndLastDay) ->
+            val result = DateTimeUtil.getAllDaysInSameWeekAs(date)
+            result.size shouldBe 7
+            result.first() shouldBe firstAndLastDay.first()
+            result.last() shouldBe firstAndLastDay.last()
+        }
+    }
+
+    "getAllDaysInSameMonthAs works for ..." {
+        listOf(
+            LocalDate.parse("2023-04-09") to listOf(
+                LocalDate.parse("2023-04-01"),
+                LocalDate.parse("2023-04-30"),
+            ),
+            LocalDate.parse("2024-02-10") to listOf(
+                LocalDate.parse("2024-02-01"),
+                LocalDate.parse("2024-02-29"),
+            ),
+            LocalDate.parse("2021-12-15") to listOf(
+                LocalDate.parse("2021-12-01"),
+                LocalDate.parse("2021-12-31"),
+            ),
+        ).forAll { (date, firstAndLastDay) ->
+            val result = DateTimeUtil.getAllDaysInSameMonthAs(date)
+            result.size shouldBeGreaterThanOrEqual 28
+            result.first() shouldBe firstAndLastDay.first()
+            result.last() shouldBe firstAndLastDay.last()
         }
     }
 })

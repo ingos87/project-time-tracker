@@ -9,7 +9,7 @@ import java.time.LocalDate
 class WorkingTimeMovingTests : StringSpec({
 
     beforeEach {
-        ensureTestConfig("MON,SAT,SUN")
+        ensureTestConfig()
     }
 
     "ensureRestPeriodBetweenDays returns empty map" {

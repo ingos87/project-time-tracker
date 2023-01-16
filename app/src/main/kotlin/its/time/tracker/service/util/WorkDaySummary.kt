@@ -109,6 +109,15 @@ data class WorkDaySummary(
                 breakDuration = totalBreakDuration
             )
         }
+
+        fun empty(): WorkDaySummary {
+            return WorkDaySummary(
+                LocalTime.NOON,
+                LocalTime.NOON,
+                Duration.ZERO,
+                Duration.ZERO
+            )
+        }
     }
 
     fun addWorkingTime(amount: Duration): Pair<WorkDaySummary, Duration> {

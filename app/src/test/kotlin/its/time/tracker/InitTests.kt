@@ -42,7 +42,7 @@ class InitTests : FunSpec({
         cfgContent[ConfigService.KEY_CSV_PATH] shouldBe "/tmp/its-time-tracker/unittesttimes.csv"
         cfgContent[ConfigService.KEY_E_TIME_URL] shouldBe "https://blah.de"
         cfgContent[ConfigService.KEY_MY_HR_SELF_SERVICE_URL] shouldBe "https://blubb.de"
-        cfgContent[ConfigService.KEY_WEEKDAYS_OFF] shouldBe "MON,SAT,SUN"
+        cfgContent[ConfigService.KEY_DAYS_OFF] shouldBe "MON,SAT,SUN"
         cfgContent["quark"] shouldBe null
     }
 

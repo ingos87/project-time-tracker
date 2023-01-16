@@ -7,15 +7,18 @@ class WorkingTimeService(
     private val verbose: Boolean,
     private val csvPath: String,
 ) {
-    fun captureWorkingTime(localDate: LocalDate, noop: Boolean) {
+    fun captureWorkingTime(localDate: LocalDate, granularity: Granularity, noop: Boolean) {
         val csvService = CsvService(verbose, csvPath)
         val clockEvents = csvService.loadClockEvents()
 
-        val allWeekDays: List<LocalDate> = DateTimeUtil.getAllDaysInSameWeekAs(localDate)
+        val allDays: List<LocalDate> = when(granularity) {
+            Granularity.MONTH -> DateTimeUtil.getAllDaysInSameMonthAs(localDate)
+            else -> DateTimeUtil.getAllDaysInSameWeekAs(localDate)
+        }
 
         val workingTimeNormalizer = WorkingTimeNormalizer()
         val workingTimeResults = HashMap<LocalDate, WorkDaySummary>()
-        allWeekDays.forEach{date ->
+        allDays.forEach{ date ->
             val workDaySummary = WorkDaySummary.toWorkDaySummary(clockEvents.filter { event -> DateTimeUtil.isSameDay(event.dateTime, date)})
             if (workDaySummary != null) {
                 workingTimeResults[date] = workDaySummary
@@ -49,4 +52,8 @@ class WorkingTimeService(
             println("\nuploading clock-ins and clock-outs to myHRSelfService ...")
         }
     }
+}
+
+enum class Granularity {
+    WEEK, MONTH
 }

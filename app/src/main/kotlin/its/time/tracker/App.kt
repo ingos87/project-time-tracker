@@ -122,17 +122,26 @@ class MonthlySummary: CliktCommand(help="show work time an project summary of a 
 class Timekeeping: CliktCommand(help="export work time for a specific calendar week to myHrSelfService") {
     val v: Boolean by option("-v", help = "enable verbose mode").flag()
     val noop: Boolean by option("--noop", help = "Do not actually upload anything. Just show stats").flag()
-    val calendarWeek by option("-w", "--weeknumber", help="date (format: $WEEK_PATTERN) - will be current week if left empty")
+    val calendarWeek by option("-w", "--weeknumber", help="date (format: $WEEK_PATTERN)")
+    val month by option("-m", "--month", help="date (format: $MONTH_PATTERN)")
     val configPath by option("--configpath", help = "Defines a custom config file path. That file has to be created before-hand")
     override fun run() {
         try {
+            if (calendarWeek == null && month == null || calendarWeek != null && month != null) {
+                throw AbortException("Must provide --weeknumer OR --month")
+            }
             val cfg = ConfigService.createConfigService(configPath)
             val csvPath = cfg.getConfigParameterValue(ConfigService.KEY_CSV_PATH)
 
-            val date = DateTimeUtil.toValidCalendarWeek(calendarWeek)
+            val granularity = if(month != null) Granularity.MONTH else Granularity.WEEK
+            val date = when(granularity) {
+                Granularity.MONTH -> DateTimeUtil.toValidMonth(month)
+                else -> DateTimeUtil.toValidCalendarWeek(calendarWeek)
+            }
+
             if (date != null) {
                 val service = WorkingTimeService(v, csvPath)
-                service.captureWorkingTime(date as LocalDate, noop)
+                service.captureWorkingTime(date as LocalDate, granularity, noop)
             }
         } catch (e: AbortException) {
             e.printMessage()
