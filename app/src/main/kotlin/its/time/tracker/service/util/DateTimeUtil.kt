@@ -86,7 +86,7 @@ class DateTimeUtil {
             return date.plusDays(dayIncr)
         }
 
-        private fun parseStringWithPattern(string: String, pattern: String, verbose: Boolean = true): Temporal? {
+        private fun parseStringWithPattern(string: String, pattern: String): Temporal? {
             val dateFormatter = DateTimeFormatter.ofPattern(pattern, Locale.GERMANY)
                 .withResolverStyle(ResolverStyle.STRICT)
 

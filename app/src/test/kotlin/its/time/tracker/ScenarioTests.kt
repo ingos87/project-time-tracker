@@ -10,7 +10,7 @@ class ScenarioTests : BehaviorSpec({
         ensureCsvEmpty()
         getTimesCsvContent() shouldBe emptyList()
         `when`("clock-in is triggered") {
-            executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=2022-01-03 07:30"))
+            executeClockInWitArgs(arrayOf("-tEPP-007", "--datetime=2022-01-03 07:30"))
             then("event was inserted into csv") {
                 getTimesCsvContent() shouldBe listOf(
                     "dateTime;eventType;topic",
@@ -19,7 +19,7 @@ class ScenarioTests : BehaviorSpec({
         }
 
         `when`("another clock-in is triggered") {
-            executeClockInWitArgs(arrayOf<String>("--topic=EPP-123", "--datetime=2022-01-03 10:00"))
+            executeClockInWitArgs(arrayOf("--topic=EPP-123", "--datetime=2022-01-03 10:00"))
             then("event was inserted into csv") {
                 getTimesCsvContent() shouldBe listOf(
                     "dateTime;eventType;topic",
@@ -29,7 +29,7 @@ class ScenarioTests : BehaviorSpec({
         }
 
         `when`("clock-out is triggered") {
-            executeClockOutWitArgs(arrayOf<String>("-d2022-01-03 17:00"))
+            executeClockOutWitArgs(arrayOf("-d2022-01-03 17:00"))
             then("event was inserted into csv") {
                 getTimesCsvContent() shouldBe listOf(
                     "dateTime;eventType;topic",

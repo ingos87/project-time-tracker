@@ -7,7 +7,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 import java.time.LocalDateTime
-import java.util.Date
 
 const val TMP_CSV_PATH = "/tmp/its_times_tmp.csv"
 

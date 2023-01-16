@@ -24,34 +24,29 @@ class WorkingTimeService(
 
         // TODO regard working time on non-working days (must be moved to working days)
         // TODO enable possibility to work overnight
-        val normalizedWorkingtimes = workingTimeNormalizer.normalizeWeekWorkingTime(workingTimeResults)
+        val normalizedWorkingTimes = workingTimeNormalizer.normalizeWeekWorkingTime(workingTimeResults)
 
         println(" date       │ compliant values    ║ original values")
         println("────────────┼─────────────┼───────╬─────────────┼───────")
 
-        normalizedWorkingtimes.forEach{ entry ->
+        normalizedWorkingTimes.forEach{ entry ->
             val sb = StringBuilder()
-            if (entry.value.first().clockIn != null) {
-                sb.append(" " + DateTimeUtil.temporalToString(entry.key, DATE_PATTERN))
-                sb.append(" │")
-                sb.append(" " + DateTimeUtil.temporalToString(entry.value.last().clockIn!!, TIME_PATTERN))
-                sb.append("-" + DateTimeUtil.temporalToString(entry.value.last().clockOut!!, TIME_PATTERN))
-                sb.append(" │")
-                sb.append(" " + DateTimeUtil.durationToString(entry.value.last().workDuration))
-                sb.append(" ║")
-                sb.append(" " + DateTimeUtil.temporalToString(entry.value.first().clockIn!!, TIME_PATTERN))
-                sb.append("-" + DateTimeUtil.temporalToString(entry.value.first().clockOut!!, TIME_PATTERN))
-                sb.append(" │")
-                sb.append(" " + DateTimeUtil.durationToString(entry.value.first().workDuration))
-                println(sb.toString())
-            }
-            else {
-                println(" ${DateTimeUtil.temporalToString(entry.key, DATE_PATTERN)} │ flex time day       ║ flex time day")
-            }
+            sb.append(" " + DateTimeUtil.temporalToString(entry.key, DATE_PATTERN))
+            sb.append(" │")
+            sb.append(" " + DateTimeUtil.temporalToString(entry.value.last().clockIn, TIME_PATTERN))
+            sb.append("-" + DateTimeUtil.temporalToString(entry.value.last().clockOut, TIME_PATTERN))
+            sb.append(" │")
+            sb.append(" " + DateTimeUtil.durationToString(entry.value.last().workDuration))
+            sb.append(" ║")
+            sb.append(" " + DateTimeUtil.temporalToString(entry.value.first().clockIn, TIME_PATTERN))
+            sb.append("-" + DateTimeUtil.temporalToString(entry.value.first().clockOut, TIME_PATTERN))
+            sb.append(" │")
+            sb.append(" " + DateTimeUtil.durationToString(entry.value.first().workDuration))
+            println(sb.toString())
         }
 
         if (!noop) {
-            println("\nuploading clock-ins, clock-outs and flex time to myHRSelfService ...")
+            println("\nuploading clock-ins and clock-outs to myHRSelfService ...")
         }
     }
 }

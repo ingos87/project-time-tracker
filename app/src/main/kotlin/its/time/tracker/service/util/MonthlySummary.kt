@@ -14,13 +14,13 @@ data class MonthlySummary(
 
     fun getAllClockIns(): List<String> {
         return data.values.map {
-            if(it.first.clockIn == null) "flex" else DateTimeUtil.temporalToString(it.first.clockIn!!, TIME_PATTERN)
+            DateTimeUtil.temporalToString(it.first.clockIn, TIME_PATTERN)
         }
     }
 
     fun getAllClockOuts(): List<String> {
         return data.values.map {
-            if(it.first.clockOut == null) "flex" else DateTimeUtil.temporalToString(it.first.clockOut!!, TIME_PATTERN)
+            DateTimeUtil.temporalToString(it.first.clockOut, TIME_PATTERN)
         }
     }
 

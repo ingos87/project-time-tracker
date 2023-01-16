@@ -42,8 +42,6 @@ class WorkDaySummaryTests : StringSpec({
 
     "makeCompliant adapts final clock-out according to actual working time plus legal breaks" {
         listOf(
-            // flex day
-            WorkDaySummary(null, null, Duration.ZERO, Duration.ZERO) to Pair(WorkDaySummary(null, null, Duration.ZERO, Duration.ZERO), Duration.ZERO),
             // no working time
             wrkDay("06:00", "06:00", "PT0H", "PT0H")       to Pair(wrkDay( "06:00", "06:00", "PT0H", "PT0H"), Duration.ZERO),
             // <6h working time

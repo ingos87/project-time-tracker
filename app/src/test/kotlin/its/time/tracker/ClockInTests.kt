@@ -21,7 +21,7 @@ class ClockInTests : FunSpec({
         ensureNoConfig()
 
         val output = tapSystemOut {
-            main(arrayOf<String>("clock-in", "-tEPP-007"))
+            main(arrayOf("clock-in", "-tEPP-007"))
         }
 
         output shouldStartWith "No config file found in ./app.json\n" +
@@ -30,7 +30,7 @@ class ClockInTests : FunSpec({
 
     test("clock-in is saved with current time") {
         val output = tapSystemOut {
-            executeClockInWitArgs(arrayOf<String>("-tEPP-007"))
+            executeClockInWitArgs(arrayOf("-tEPP-007"))
         }
 
         output shouldStartWith "clock-in for topic 'EPP-007' saved: 20"
@@ -39,7 +39,7 @@ class ClockInTests : FunSpec({
 
     test("clock-in is saved with manual time") {
         val output = tapSystemOut {
-            executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=2022-12-23 17:30"))
+            executeClockInWitArgs(arrayOf("-tEPP-007", "--datetime=2022-12-23 17:30"))
         }
 
         output shouldBe "clock-in for topic 'EPP-007' saved: 2022-12-23 17:30\n"
@@ -50,22 +50,22 @@ class ClockInTests : FunSpec({
 
     test("clock-in is saved with today's date if only time is given") {
         val output = tapSystemOut {
-            executeClockInWitArgs(arrayOf<String>("-tEPP-007", "-d05:34"))
+            executeClockInWitArgs(arrayOf("-tEPP-007", "-d05:34"))
         }
 
         val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
             .withZone(ZoneId.systemDefault())
         val today = formatter.format(Instant.now())
 
-        output shouldBe "clock-in for topic 'EPP-007' saved: ${today} 05:34\n"
+        output shouldBe "clock-in for topic 'EPP-007' saved: $today 05:34\n"
         getTimesCsvContent() shouldBe listOf(
             "dateTime;eventType;topic",
-            "${today} 05:34;CLOCK_IN;EPP-007")
+            "$today 05:34;CLOCK_IN;EPP-007")
     }
 
     test("clock-in is discarded if date is invalid") {
         val output = tapSystemErrAndOut {
-            executeClockInWitArgs(arrayOf<String>("-tEPP-007", "-d2020-01-32"))
+            executeClockInWitArgs(arrayOf("-tEPP-007", "-d2020-01-32"))
         }
 
         output shouldBe "unable to parse '2020-01-32' for pattern 'uuuu-MM-dd HH:mm'\n"
@@ -73,16 +73,16 @@ class ClockInTests : FunSpec({
 
     test("clock-in is discarded if time is invalid") {
         val output = tapSystemErrAndOut {
-            executeClockInWitArgs(arrayOf<String>("-tEPP-007", "-d1961"))
+            executeClockInWitArgs(arrayOf("-tEPP-007", "-d1961"))
         }
 
         output shouldBe "unable to parse '1961' for pattern 'uuuu-MM-dd HH:mm'\n"
     }
 
     test("clock-in can be overwritten") {
-        executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=2022-12-23 17:30"))
+        executeClockInWitArgs(arrayOf("-tEPP-007", "--datetime=2022-12-23 17:30"))
         val output = tapSystemOut {
-            executeClockInWitArgs(arrayOf<String>("-tEPP-123", "--datetime=2022-12-23 17:30"))
+            executeClockInWitArgs(arrayOf("-tEPP-123", "--datetime=2022-12-23 17:30"))
         }
 
         output shouldBe "Will overwrite current event with identical time stamp: ClockEvent(dateTime=2022-12-23T17:30, eventType=CLOCK_IN, topic=EPP-007)\n" +
@@ -93,9 +93,9 @@ class ClockInTests : FunSpec({
     }
 
     test("cannot overwrite clock-out with clock-in") {
-        executeClockOutWitArgs(arrayOf<String>("--datetime=2022-12-23 17:30"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-12-23 17:30"))
         val output = tapSystemOut {
-            executeClockInWitArgs(arrayOf<String>("-tEPP-007", "--datetime=2022-12-23 17:30"))
+            executeClockInWitArgs(arrayOf("-tEPP-007", "--datetime=2022-12-23 17:30"))
         }
 
         output shouldBe "Cannot overwrite event of different type. You must remove the present event before.\n" +

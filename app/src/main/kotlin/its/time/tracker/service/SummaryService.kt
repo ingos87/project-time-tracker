@@ -36,7 +36,7 @@ class SummaryService(
         if (showWorkInProgress) {
             println("[today's work in progress]")
             println("┌" + "─".repeat(cellWidth) + "┐")
-            println("│ " + "clock-in:".padEnd(20) + temporalToString(workDaySummary.clockIn!!, TIME_PATTERN).padEnd(cellWidth-21) + "│")
+            println("│ " + "clock-in:".padEnd(20) + temporalToString(workDaySummary.clockIn, TIME_PATTERN).padEnd(cellWidth-21) + "│")
             println("├" + "─".repeat(cellWidth) + "┤")
             println("│ " + "current work time:".padEnd(20) + durationToString(workDaySummary.workDuration).padEnd(cellWidth-21) + "│")
             println("│ " + "current break time:".padEnd(20) + durationToString(workDaySummary.breakDuration).padEnd(cellWidth-21) + "│")
@@ -45,8 +45,8 @@ class SummaryService(
         else {
             println("[SUMMARY for $date]")
             println("┌" + "─".repeat(cellWidth) + "┐")
-            println("│ " + "clock-in:".padEnd(18) + temporalToString(workDaySummary.clockIn!!, TIME_PATTERN).padEnd(cellWidth-19) + "│")
-            println("│ " + "clock-out:".padEnd(18) + temporalToString(workDaySummary.clockOut!!, TIME_PATTERN).padEnd(cellWidth-19) + "│")
+            println("│ " + "clock-in:".padEnd(18) + temporalToString(workDaySummary.clockIn, TIME_PATTERN).padEnd(cellWidth-19) + "│")
+            println("│ " + "clock-out:".padEnd(18) + temporalToString(workDaySummary.clockOut, TIME_PATTERN).padEnd(cellWidth-19) + "│")
             println("├" + "─".repeat(cellWidth) + "┤")
             println("│ " + "total work time:".padEnd(18) + durationToString(workDaySummary.workDuration).padEnd(cellWidth-19) + "│")
             println("│ " + "total break time:".padEnd(18) + durationToString(workDaySummary.breakDuration).padEnd(cellWidth-19) + "│")
@@ -57,7 +57,7 @@ class SummaryService(
             // total width - white space - bookingPosLength - ": " - time - "  " - 1parenthesis
             val availableSpaceForTopicList = cellWidth-1-bookingPosLength-2-5-2-1
             val topicList = ("(${it.topics.joinToString(",")}".take(availableSpaceForTopicList)+")").padEnd(availableSpaceForTopicList+1)
-            println("│ " + "${it.bookingKey}:".padEnd(bookingPosLength+2) + DateTimeUtil.durationToString(it.totalWorkingTime) + "  " + topicList + "│")
+            println("│ " + "${it.bookingKey}:".padEnd(bookingPosLength+2) + durationToString(it.totalWorkingTime) + "  " + topicList + "│")
         }
         println("└" + "─".repeat(cellWidth) + "┘")
 

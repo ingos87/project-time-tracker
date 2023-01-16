@@ -5,12 +5,11 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
-import kotlin.math.max
 import kotlin.math.min
 
 data class WorkDaySummary(
-    val clockIn: LocalTime?,
-    val clockOut: LocalTime?,
+    val clockIn: LocalTime,
+    val clockOut: LocalTime,
     val workDuration: Duration,
     val breakDuration: Duration,
 ) {
@@ -29,16 +28,6 @@ data class WorkDaySummary(
         fun toWorkDaySummary(clockEvents: List<ClockEvent>, useNowAsCLockOut: Boolean = false): WorkDaySummary? {
             if (clockEvents.isEmpty()) {
                 return null
-            }
-
-            val flexTimeEvent = clockEvents.find { it.eventType == EventType.FLEX_TIME }
-            if (flexTimeEvent != null) {
-                return WorkDaySummary(
-                    clockIn = null,
-                    clockOut = null,
-                    workDuration = Duration.ZERO,
-                    breakDuration = Duration.ZERO,
-                )
             }
 
             var firstClockIn: LocalDateTime? = null
@@ -114,8 +103,8 @@ data class WorkDaySummary(
             }
 
             return WorkDaySummary(
-                clockIn = firstClockIn?.toLocalTime(),
-                clockOut = mostRecentClockOut?.toLocalTime(),
+                clockIn = firstClockIn!!.toLocalTime(),
+                clockOut = mostRecentClockOut!!.toLocalTime(),
                 workDuration = totalWorkDuration,
                 breakDuration = totalBreakDuration
             )
@@ -131,7 +120,7 @@ data class WorkDaySummary(
         var newWorkDuration = workDuration + amount
         val newBreakDuration = getTotalBreakDuration(newWorkDuration)
 
-        var newClockOut = clockOut!! + amount
+        var newClockOut = clockOut + amount
         var extraTime = Duration.ZERO
         if (newWorkDuration > MAX_WORK_PER_DAY) {
             extraTime = newWorkDuration - MAX_WORK_PER_DAY
@@ -149,11 +138,6 @@ data class WorkDaySummary(
     }
 
     fun makeCompliant(): Pair<WorkDaySummary, Duration> {
-        // flex day
-        if (clockIn == null || clockOut == null) {
-            return Pair(this, Duration.ZERO)
-        }
-
         // truncate if max hours is reached
         var compliantClockOut = clockIn + workDuration
         var compliantWorkDuration = workDuration
@@ -181,11 +165,7 @@ data class WorkDaySummary(
         return Pair(compliantWorkDaySummary, extraTime)
     }
 
-    fun moveToComplyWithEarliestInLatestOut(earliestIn: LocalTime?, latestOut: LocalTime?): WorkDaySummary {
-        if (clockIn == null || clockOut == null) {
-            return this
-        }
-
+    private fun moveToComplyWithEarliestInLatestOut(earliestIn: LocalTime?, latestOut: LocalTime?): WorkDaySummary {
         var newClockIn = clockIn
         var newClockOut = clockOut
 
@@ -209,7 +189,7 @@ data class WorkDaySummary(
     }
 
     fun prepone(amount: Duration): Pair<WorkDaySummary, Duration> {
-        if (clockIn == null || clockOut == null || amount == Duration.ZERO) {
+        if (amount == Duration.ZERO) {
             return Pair(this, amount)
         }
 
@@ -232,7 +212,7 @@ data class WorkDaySummary(
     }
 
     fun postpone(amount: Duration): Pair<WorkDaySummary, Duration> {
-        if (clockIn == null || clockOut == null || amount == Duration.ZERO) {
+        if (amount == Duration.ZERO) {
             return Pair(this, amount)
         }
 

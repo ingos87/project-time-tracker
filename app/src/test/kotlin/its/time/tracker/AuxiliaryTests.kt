@@ -8,7 +8,7 @@ class AuxiliaryTests : FunSpec({
 
     test("getVersion") {
         val output = tapSystemOut {
-            main(arrayOf<String>("version"))
+            main(arrayOf("version"))
         }
 
         output shouldBe "ITS TimeTracker App:: 0.0.1\n"

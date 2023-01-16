@@ -3,10 +3,8 @@ package its.time.tracker
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Parser
 import com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
-import its.time.tracker.service.AbortException
 import its.time.tracker.service.ConfigService
 import java.io.File
 
@@ -28,7 +26,7 @@ class InitTests : FunSpec({
 
     test("init creates config file, which can be read from") {
         val output = tapSystemOut {
-            executeInitWitArgs(arrayOf<String>(
+            executeInitWitArgs(arrayOf(
                 "--configpath=$CFG_PATH",
                 "--csvpath=/tmp/its-time-tracker/unittesttimes.csv",
                 "--myselfhr=https://blubb.de",

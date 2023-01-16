@@ -79,27 +79,6 @@ class ClockOut: CliktCommand(help="Interrupt or end work day") {
     }
 }
 
-class FlexTime: CliktCommand(help="book entire days as flex time") {
-    val v: Boolean by option("-v", help = "enable verbose mode").flag()
-    val dateInput by option("-d", "--date", help="single date (format: $DATE_PATTERN) - will be TODAY if left empty")
-    val configPath by option("--configpath", help = "Defines a custom config file path. That file has to be created before-hand")
-    override fun run() {
-        try {
-            val cfg = ConfigService.createConfigService(configPath)
-            val csvPath = cfg.getConfigParameterValue(ConfigService.KEY_CSV_PATH)
-
-            val date = DateTimeUtil.toValidDate(dateInput)
-            if (date != null) {
-                ClockEventService(v, csvPath).addFlexDay(date as LocalDate)
-                echo("Flex time saved for ${DateTimeUtil.temporalToString(date, DATE_PATTERN)}")
-                echo("Note that now, you can no longer do clock-ins for this day.")
-            }
-        } catch (e: AbortException) {
-            e.printMessage()
-        }
-    }
-}
-
 class DailySummary: CliktCommand(help="show work time an project summary of a specific day") {
     val v: Boolean by option("-v", help = "enable verbose mode").flag()
     val dateInput by option("-d", "--date", help="date (format: $DATE_PATTERN) - will be today's date if left empty")
@@ -166,7 +145,6 @@ fun main(args: Array<String>) = TimeTracker()
         Init(),
         ClockIn(),
         ClockOut(),
-        FlexTime(),
         DailySummary(),
         MonthlySummary(),
         Timekeeping())

@@ -6,7 +6,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 
-class ConfigService private constructor(var configFilePath: String) {
+class ConfigService private constructor(private var configFilePath: String) {
 
     companion object {
         const val KEY_CSV_PATH = "csv_path"
@@ -33,7 +33,7 @@ class ConfigService private constructor(var configFilePath: String) {
 
     private fun loadConfig(): MutableMap<String, Any?> {
         checkConfig()
-        val reader = File(configFilePath!!).inputStream().bufferedReader()
+        val reader = File(configFilePath).inputStream().bufferedReader()
         return Parser.default().parse(reader) as JsonObject
     }
 
@@ -43,7 +43,7 @@ class ConfigService private constructor(var configFilePath: String) {
         eTimeUrl: String = "https://someurl.de",
         weekdaysOff: String = "SAT,SUN",
     ) {
-        if (File(configFilePath!!).exists()) {
+        if (File(configFilePath).exists()) {
             println("$configFilePath already exists.")
             return
         }
@@ -56,8 +56,8 @@ class ConfigService private constructor(var configFilePath: String) {
             "  \"$KEY_WEEKDAYS_OFF\":\"$weekdaysOff\"",
             "}")
 
-        File(configFilePath!!).createNewFile()
-        FileOutputStream(configFilePath!!).apply { writeJson(defaultConfig) }
+        File(configFilePath).createNewFile()
+        FileOutputStream(configFilePath).apply { writeJson(defaultConfig) }
 
         println("Successfully created config file: $configFilePath")
     }
@@ -71,8 +71,8 @@ class ConfigService private constructor(var configFilePath: String) {
         writer.flush()
     }
 
-    fun checkConfig() {
-        if (!File(configFilePath!!).exists()) {
+    private fun checkConfig() {
+        if (!File(configFilePath).exists()) {
             throw AbortException("No config file found in $configFilePath", listOf("Use 'java -jar app.jar init' with the according parameters"))
         }
     }

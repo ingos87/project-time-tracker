@@ -47,31 +47,27 @@ fun ensureNoConfig() {
 }
 
 fun executeInitWitArgs(args: Array<String>) {
-    main(arrayOf<String>("init").plus(args))
+    main(arrayOf("init").plus(args))
 }
 
 fun executeClockInWitArgs(args: Array<String>) {
-    main(arrayOf<String>("clock-in", "--configpath=$TEST_CONFIG_PATH").plus(args))
+    main(arrayOf("clock-in", "--configpath=$TEST_CONFIG_PATH").plus(args))
 }
 
 fun executeClockOutWitArgs(args: Array<String>) {
-    main(arrayOf<String>("clock-out", "--configpath=$TEST_CONFIG_PATH").plus(args))
-}
-
-fun executeFlexTimeWitArgs(args: Array<String>) {
-    main(arrayOf<String>("flex-time", "--configpath=$TEST_CONFIG_PATH").plus(args))
+    main(arrayOf("clock-out", "--configpath=$TEST_CONFIG_PATH").plus(args))
 }
 
 fun executeDailySummaryWitArgs(args: Array<String>) {
-    main(arrayOf<String>("daily-summary", "--configpath=$TEST_CONFIG_PATH").plus(args))
+    main(arrayOf("daily-summary", "--configpath=$TEST_CONFIG_PATH").plus(args))
 }
 
 fun executeMonthlySummaryWitArgs(args: Array<String>) {
-    main(arrayOf<String>("monthly-summary", "--configpath=$TEST_CONFIG_PATH").plus(args))
+    main(arrayOf("monthly-summary", "--configpath=$TEST_CONFIG_PATH").plus(args))
 }
 
 fun executeUploadWorkingTimeWitArgs(args: Array<String>) {
-    main(arrayOf<String>("timekeeping", "--configpath=$TEST_CONFIG_PATH").plus(args))
+    main(arrayOf("timekeeping", "--configpath=$TEST_CONFIG_PATH").plus(args))
 }
 
 fun getTimesCsvContent(): List<String> {

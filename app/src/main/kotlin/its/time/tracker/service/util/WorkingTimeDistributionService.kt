@@ -108,8 +108,6 @@ class WorkingTimeDistributionService {
     }
 
     private fun getAllClockIns(map: SortedMap<LocalDate, List<WorkDaySummary>>): List<LocalTime> {
-        return map.values
-            .filter { it.last().clockIn != null }
-            .map { it.last().clockIn!! }
+        return map.values.map { it.last().clockIn }
     }
 }
