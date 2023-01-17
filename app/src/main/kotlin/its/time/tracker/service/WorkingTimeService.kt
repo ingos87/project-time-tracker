@@ -3,12 +3,9 @@ package its.time.tracker.service
 import its.time.tracker.service.util.*
 import java.time.LocalDate
 
-class WorkingTimeService(
-    private val verbose: Boolean,
-    private val csvPath: String,
-) {
+class WorkingTimeService {
     fun captureWorkingTime(localDate: LocalDate, granularity: Granularity, noop: Boolean) {
-        val csvService = CsvService(verbose, csvPath)
+        val csvService = CsvService()
         val clockEvents = csvService.loadClockEvents()
 
         val allDays: List<LocalDate> = when(granularity) {

@@ -28,16 +28,14 @@ fun ensureCsvEmpty() {
 fun ensureTestConfig(daysOff: String = "") {
     ensureNoConfig()
 
-    val defaultConfig = listOf(
-        "{",
-        "  \"${ConfigService.KEY_CSV_PATH}\":\"$TEST_CSV_PATH\",",
-        "  \"${ConfigService.KEY_MY_HR_SELF_SERVICE_URL}\":\"https://no.url\",",
-        "  \"${ConfigService.KEY_E_TIME_URL}\":\"https://no.second.url\",",
-        "  \"${ConfigService.KEY_DAYS_OFF}\":\"$daysOff\"",
-        "}")
-
-    File(TEST_CONFIG_PATH).createNewFile()
-    FileOutputStream(TEST_CONFIG_PATH).apply { writeJson(defaultConfig) }
+    ConfigService.createEmptyConfig(
+        TEST_CONFIG_PATH,
+        csvPath = TEST_CSV_PATH,
+        myHrSelfServiceUrl = "https://no.url",
+        eTimeUrl = "https://no.second.url",
+        daysOff = daysOff,
+        weekdaysOff = "SATURDAY,SUNDAY"
+    )
 }
 
 fun ensureNoConfig() {
@@ -79,15 +77,6 @@ fun getTimesCsvContent(): List<String> {
     return reader.lineSequence()
         .filter { it.isNotBlank() }
         .toList()
-}
-
-private fun OutputStream.writeJson(clockEvents: List<String>) {
-    val writer = bufferedWriter()
-    clockEvents.forEach {
-        writer.write(it)
-        writer.newLine()
-    }
-    writer.flush()
 }
 
 fun splitIgnoreBlank(output: String): List<String> {

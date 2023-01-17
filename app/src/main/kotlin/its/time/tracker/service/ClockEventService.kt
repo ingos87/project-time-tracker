@@ -3,10 +3,7 @@ package its.time.tracker.service
 import its.time.tracker.service.util.*
 import java.time.LocalDateTime
 
-class ClockEventService(
-    private val verbose: Boolean,
-    private val csvPath: String,
-) {
+class ClockEventService {
 
     fun addClockOut(dateTime: LocalDateTime, clockOutType: ClockOutType = ClockOutType.MANUAL_CLOCK_OUT) {
         return addClockEvent(ClockEvent(dateTime, EventType.CLOCK_OUT, clockOutType.name))
@@ -17,7 +14,7 @@ class ClockEventService(
     }
 
     private fun addClockEvent(clockEvent: ClockEvent) {
-        val csvService = CsvService(verbose, csvPath)
+        val csvService = CsvService()
         val clockEvents = csvService.loadClockEvents()
 
         val existingClockEvent = clockEvents.find { it.dateTime.isEqual(clockEvent.dateTime) }

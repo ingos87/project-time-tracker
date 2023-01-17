@@ -1,5 +1,6 @@
 package its.time.tracker.service
 
+import its.time.tracker.Constants
 import its.time.tracker.service.util.ClockEvent
 import its.time.tracker.service.util.DateTimeUtil
 import its.time.tracker.service.util.EventType
@@ -10,14 +11,11 @@ import java.time.LocalDateTime
 
 const val TMP_CSV_PATH = "/tmp/its_times_tmp.csv"
 
-class CsvService(
-    private val verbose: Boolean,
-    private val csvPath: String
-) {
+class CsvService {
 
-    fun loadClockEvents(fileName: String = csvPath): MutableList<ClockEvent> {
+    fun loadClockEvents(fileName: String = Constants.CSV_PATH): MutableList<ClockEvent> {
         if (!File(fileName).exists()) {
-            if (verbose) println("nothing found at $fileName. Will create new csv file in the process")
+            if (Constants.VERBOSE) println("nothing found at $fileName. Will create new csv file in the process")
             return ArrayList()
         }
 
@@ -30,7 +28,7 @@ class CsvService(
                 ClockEvent(DateTimeUtil.toValidDateTime(dateTime.trim()) as LocalDateTime, EventType.valueOf(eventType.trim()), topic.trim())
             }.toMutableList()
 
-        if (verbose) println("loaded ${clockEvents.size} clock events from $fileName")
+        if (Constants.VERBOSE) println("loaded ${clockEvents.size} clock events from $fileName")
         return clockEvents
     }
 
@@ -41,10 +39,10 @@ class CsvService(
         File(TMP_CSV_PATH).createNewFile()
         FileOutputStream(TMP_CSV_PATH).apply { writeCsv(clockEvents) }
 
-        File(csvPath).delete()
-        File(TMP_CSV_PATH).renameTo(File(csvPath))
+        File(Constants.CSV_PATH).delete()
+        File(TMP_CSV_PATH).renameTo(File(Constants.CSV_PATH))
 
-        if (verbose) println("wrote ${clockEvents.size} events to $csvPath")
+        if (Constants.VERBOSE) println("wrote ${clockEvents.size} events to ${Constants.CSV_PATH}")
     }
 
     private fun OutputStream.writeCsv(clockEvents: List<ClockEvent>) {

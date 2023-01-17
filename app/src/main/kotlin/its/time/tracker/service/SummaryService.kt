@@ -12,12 +12,9 @@ import java.time.temporal.ChronoUnit.DAYS
 
 private const val CELL_WIDTH = 6
 
-class SummaryService(
-    private val verbose: Boolean,
-    private val csvPath: String,
-) {
+class SummaryService {
     fun showDailySummary(date: LocalDate) {
-        val csvService = CsvService(verbose, csvPath)
+        val csvService = CsvService()
         val clockEvents = csvService.loadClockEvents()
 
         val daysEvents = clockEvents.filter { DateTimeUtil.isSameDay(it.dateTime, date) }.toList()
@@ -68,7 +65,7 @@ class SummaryService(
             .withResolverStyle(ResolverStyle.STRICT)
         val yearMonthString = dateFormatter.format(date).substring(0, 7)
 
-        val csvService = CsvService(verbose, csvPath)
+        val csvService = CsvService()
         val clockEvents = csvService.loadClockEvents()
 
         val monthsEvents = clockEvents.filter { DateTimeUtil.isSameMonth(it.dateTime, date) }.toList()

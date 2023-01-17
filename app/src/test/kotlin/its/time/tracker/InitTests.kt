@@ -7,6 +7,7 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import its.time.tracker.service.ConfigService
 import java.io.File
+import java.util.*
 
 const val CFG_PATH: String = "/tmp/its-time-tracker/unittestcfg.json"
 
@@ -31,7 +32,8 @@ class InitTests : FunSpec({
                 "--csvpath=/tmp/its-time-tracker/unittesttimes.csv",
                 "--myselfhr=https://blubb.de",
                 "--etime=https://blah.de",
-                "--weekdaysoff=MON,SAT,SUN"))
+                "--weekdaysoff=MONDAY,SATURDAY,SUNDAY",
+                "--daysoff=2023-05-01,2024-12-12"))
         }
 
         output shouldBe "Successfully created config file: /tmp/its-time-tracker/unittestcfg.json\n"
@@ -39,10 +41,11 @@ class InitTests : FunSpec({
         val reader = File(CFG_PATH).inputStream().bufferedReader()
         val cfgContent = Parser.default().parse(reader) as JsonObject
         
-        cfgContent[ConfigService.KEY_CSV_PATH] shouldBe "/tmp/its-time-tracker/unittesttimes.csv"
-        cfgContent[ConfigService.KEY_E_TIME_URL] shouldBe "https://blah.de"
-        cfgContent[ConfigService.KEY_MY_HR_SELF_SERVICE_URL] shouldBe "https://blubb.de"
-        cfgContent[ConfigService.KEY_DAYS_OFF] shouldBe "MON,SAT,SUN"
+        cfgContent[Constants::CSV_PATH.name.lowercase(Locale.getDefault())] shouldBe "/tmp/its-time-tracker/unittesttimes.csv"
+        cfgContent[Constants::E_TIME_URL.name.lowercase(Locale.getDefault())] shouldBe "https://blah.de"
+        cfgContent[Constants::MY_HR_SELF_SERVICE_URL.name.lowercase(Locale.getDefault())] shouldBe "https://blubb.de"
+        cfgContent[Constants::WEEKDAYS_OFF.name.lowercase(Locale.getDefault())] shouldBe "MONDAY,SATURDAY,SUNDAY"
+        cfgContent[Constants::DAYS_OFF.name.lowercase(Locale.getDefault())] shouldBe "2023-05-01,2024-12-12"
         cfgContent["quark"] shouldBe null
     }
 

@@ -5,6 +5,7 @@ import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.options.versionOption
 import its.time.tracker.service.*
 import its.time.tracker.service.util.*
 import java.time.LocalDate
@@ -27,14 +28,17 @@ class Init: CliktCommand(help="initializes App by writing custom properties to a
     val csvPath by option("-c", "--csvpath", help = "Path to persistent file with clockins and clockouts. You should backup this file regularly").required()
     val myHrSelfServiceUrl by option("-m", "--myselfhr", help="Url to MyHRSelfService landing page").required()
     val eTimeUrl by option("-e", "--etime", help="Url to project booking landing page").required()
-    val weekdaysOff by option("-w", "--weekdaysoff", help="Comma seperated list of weekdays (MON,TUE,..,SAT,SUN) when no work time is to be transferred to external systems").required()
+    val weekdaysOff by option("-w", "--weekdaysoff", help="Comma seperated list of weekdays (MONDAY,TUESDAY,..,SATURDAY,SUNDAY) when no work time is to be transferred to external systems")
+    val daysOff by option("-d", "--daysoff", help="Comma seperated list of days (format: $DATE_PATTERN) when no work time is to be transferred to external systems")
     override fun run() {
-            val service = ConfigService.createConfigService(configPath)
-            service.createEmptyConfig(
-                csvPath = csvPath,
-                myHrSelfServiceUrl = myHrSelfServiceUrl,
-                eTimeUrl = eTimeUrl,
-                weekdaysOff = weekdaysOff)
+        ConfigService.createEmptyConfig(
+            configFilePath = configPath,
+            csvPath = csvPath,
+            myHrSelfServiceUrl = myHrSelfServiceUrl,
+            eTimeUrl = eTimeUrl,
+            weekdaysOff = weekdaysOff?:"",
+            daysOff = daysOff?:"",
+        )
     }
 }
 
@@ -45,12 +49,11 @@ class ClockIn: CliktCommand(help="Start working on something") {
     val configPath by option("--configpath", help = "Defines a custom config file path. That file has to be created before-hand")
     override fun run() {
         try {
-            val cfg = ConfigService.createConfigService(configPath)
-            val csvPath = cfg.getConfigParameterValue(ConfigService.KEY_CSV_PATH)
+            ConfigService.createConfigService(configPath).initConstants(v)
 
             val dateTime = DateTimeUtil.toValidDateTime(dateTimeInput)
             if (dateTime != null) {
-                ClockEventService(v, csvPath).addClockIn(topic, dateTime as LocalDateTime)
+                ClockEventService().addClockIn(topic, dateTime as LocalDateTime)
                 echo("clock-in for topic '$topic' saved: ${DateTimeUtil.temporalToString(dateTime)}")
             }
         } catch (e: AbortException) {
@@ -65,12 +68,11 @@ class ClockOut: CliktCommand(help="Interrupt or end work day") {
     val configPath by option("--configpath", help = "Defines a custom config file path. That file has to be created before-hand")
     override fun run() {
         try {
-            val cfg = ConfigService.createConfigService(configPath)
-            val csvPath = cfg.getConfigParameterValue(ConfigService.KEY_CSV_PATH)
+            ConfigService.createConfigService(configPath).initConstants(v)
 
             val dateTime = DateTimeUtil.toValidDateTime(dateTimeInput)
             if (dateTime != null) {
-                ClockEventService(v, csvPath).addClockOut(dateTime as LocalDateTime)
+                ClockEventService().addClockOut(dateTime as LocalDateTime)
                 echo("clock-out saved: ${DateTimeUtil.temporalToString(dateTime)}")
             }
         } catch (e: AbortException) {
@@ -85,12 +87,11 @@ class DailySummary: CliktCommand(help="show work time an project summary of a sp
     val configPath by option("--configpath", help = "Defines a custom config file path. That file has to be created before-hand")
     override fun run() {
         try {
-            val cfg = ConfigService.createConfigService(configPath)
-            val csvPath = cfg.getConfigParameterValue(ConfigService.KEY_CSV_PATH)
+            ConfigService.createConfigService(configPath).initConstants(v)
 
             val date = DateTimeUtil.toValidDate(dateInput)
             if (date != null) {
-                val service = SummaryService(v, csvPath)
+                val service = SummaryService()
                 service.showDailySummary(date as LocalDate)
             }
         } catch (e: AbortException) {
@@ -105,12 +106,11 @@ class MonthlySummary: CliktCommand(help="show work time an project summary of a 
     val configPath by option("--configpath", help = "Defines a custom config file path. That file has to be created before-hand")
     override fun run() {
         try {
-            val cfg = ConfigService.createConfigService(configPath)
-            val csvPath = cfg.getConfigParameterValue(ConfigService.KEY_CSV_PATH)
+            ConfigService.createConfigService(configPath).initConstants(v)
 
             val date = DateTimeUtil.toValidMonth(dateInput)
             if (date != null) {
-                val service = SummaryService(v, csvPath)
+                val service = SummaryService()
                 service.showMonthlySummary(date as LocalDate)
             }
         } catch (e: AbortException) {
@@ -130,8 +130,7 @@ class Timekeeping: CliktCommand(help="export work time for a specific calendar w
             if (calendarWeek == null && month == null || calendarWeek != null && month != null) {
                 throw AbortException("Must provide --weeknumer OR --month")
             }
-            val cfg = ConfigService.createConfigService(configPath)
-            val csvPath = cfg.getConfigParameterValue(ConfigService.KEY_CSV_PATH)
+            ConfigService.createConfigService(configPath).initConstants(v)
 
             val granularity = if(month != null) Granularity.MONTH else Granularity.WEEK
             val date = when(granularity) {
@@ -140,7 +139,7 @@ class Timekeeping: CliktCommand(help="export work time for a specific calendar w
             }
 
             if (date != null) {
-                val service = WorkingTimeService(v, csvPath)
+                val service = WorkingTimeService()
                 service.captureWorkingTime(date as LocalDate, granularity, noop)
             }
         } catch (e: AbortException) {
