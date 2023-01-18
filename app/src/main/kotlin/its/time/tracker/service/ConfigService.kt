@@ -15,11 +15,12 @@ class ConfigService private constructor(private var configFilePath: String) {
             return ConfigService(configFilePath ?: "./app.json")
         }
 
-        fun createEmptyConfig(
+        fun createConfigFileWithParams(
             configFilePath: String = "./app.json",
             csvPath: String = "/Users/me/its_times.csv",
             myHrSelfServiceUrl: String = "https://someurl.de",
             eTimeUrl: String = "https://someurl.de",
+            maxDailyWorkDuration: String = "",
             weekdaysOff: String = "",
             daysOff: String = "",
         ) {
@@ -33,6 +34,7 @@ class ConfigService private constructor(private var configFilePath: String) {
                 "  \"${Constants::CSV_PATH.name.lowercase(Locale.GERMANY)}\":\"$csvPath\",",
                 "  \"${Constants::MY_HR_SELF_SERVICE_URL.name.lowercase(Locale.GERMANY)}\":\"$myHrSelfServiceUrl\",",
                 "  \"${Constants::E_TIME_URL.name.lowercase(Locale.GERMANY)}\":\"$eTimeUrl\",",
+                "  \"${Constants::MAX_WORK_DURATION_PER_DAY.name.lowercase(Locale.GERMANY)}\":\"$maxDailyWorkDuration\"",
                 "  \"${Constants::WEEKDAYS_OFF.name.lowercase(Locale.GERMANY)}\":\"$weekdaysOff\"",
                 "  \"${Constants::DAYS_OFF.name.lowercase(Locale.GERMANY)}\":\"$daysOff\"",
                 "}")

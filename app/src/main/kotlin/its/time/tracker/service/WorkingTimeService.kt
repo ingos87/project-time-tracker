@@ -16,14 +16,12 @@ class WorkingTimeService {
         val workingTimeNormalizer = WorkingTimeNormalizer()
         val workingTimeResults = HashMap<LocalDate, WorkDaySummary>()
         allDays.forEach{ date ->
-            val workDaySummary = WorkDaySummary.toWorkDaySummary(clockEvents.filter { event -> DateTimeUtil.isSameDay(event.dateTime, date)})
+            val workDaySummary = WorkDaySummary.toWorkDaySummary(ClockEventsFilter.getEventsBelongingToSameDay(clockEvents, date))
             if (workDaySummary != null) {
                 workingTimeResults[date] = workDaySummary
             }
         }
 
-        // TODO regard working time on non-working days (must be moved to working days)
-        // TODO enable possibility to work overnight
         val normalizedWorkingTimes = workingTimeNormalizer.normalizeWeekWorkingTime(workingTimeResults)
 
         println(" date       │ compliant values    ║ original values")
@@ -33,13 +31,13 @@ class WorkingTimeService {
             val sb = StringBuilder()
             sb.append(" " + DateTimeUtil.temporalToString(entry.key, DATE_PATTERN))
             sb.append(" │")
-            sb.append(" " + DateTimeUtil.temporalToString(entry.value.last().clockIn, TIME_PATTERN))
-            sb.append("-" + DateTimeUtil.temporalToString(entry.value.last().clockOut, TIME_PATTERN))
+            sb.append(" " + DateTimeUtil.temporalToString(entry.value.last().clockIn.toLocalTime(), TIME_PATTERN))
+            sb.append("-" + DateTimeUtil.temporalToString(entry.value.last().clockOut.toLocalTime(), TIME_PATTERN))
             sb.append(" │")
             sb.append(" " + DateTimeUtil.durationToString(entry.value.last().workDuration))
             sb.append(" ║")
-            sb.append(" " + DateTimeUtil.temporalToString(entry.value.first().clockIn, TIME_PATTERN))
-            sb.append("-" + DateTimeUtil.temporalToString(entry.value.first().clockOut, TIME_PATTERN))
+            sb.append(" " + DateTimeUtil.temporalToString(entry.value.first().clockIn.toLocalTime(), TIME_PATTERN))
+            sb.append("-" + DateTimeUtil.temporalToString(entry.value.first().clockOut.toLocalTime(), TIME_PATTERN))
             sb.append(" │")
             sb.append(" " + DateTimeUtil.durationToString(entry.value.first().workDuration))
             println(sb.toString())

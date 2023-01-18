@@ -3,14 +3,12 @@ package its.time.tracker
 import its.time.tracker.service.ConfigService
 import org.junit.platform.commons.util.StringUtils
 import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
-import java.io.OutputStream
 import java.nio.file.Files
 import java.nio.file.Paths
 
-private const val TEST_CSV_PATH = "/tmp/its-time-tracker/test_its_times.csv"
-private const val TEST_CONFIG_PATH = "/tmp/its-time-tracker/app.json"
+const val TEST_CSV_PATH = "/tmp/its-time-tracker/test_its_times.csv"
+const val TEST_CONFIG_PATH = "/tmp/its-time-tracker/app.json"
 
 fun ensureCsvEmpty() {
     val path = Paths.get(TEST_CSV_PATH)
@@ -28,14 +26,19 @@ fun ensureCsvEmpty() {
 fun ensureTestConfig(daysOff: String = "") {
     ensureNoConfig()
 
-    ConfigService.createEmptyConfig(
+    // write config
+    ConfigService.createConfigFileWithParams(
         TEST_CONFIG_PATH,
         csvPath = TEST_CSV_PATH,
         myHrSelfServiceUrl = "https://no.url",
+        maxDailyWorkDuration = "PT9H",
         eTimeUrl = "https://no.second.url",
         daysOff = daysOff,
         weekdaysOff = "SATURDAY,SUNDAY"
     )
+
+    // set constants
+    ConfigService.createConfigService(TEST_CONFIG_PATH).initConstants(false)
 }
 
 fun ensureNoConfig() {

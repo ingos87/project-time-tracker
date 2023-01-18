@@ -191,49 +191,6 @@ class DateTimeUtilTests : StringSpec({
         }
     }
 
-    "isSameDay works for ..." {
-        val dtFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm")
-            .withZone(ZoneId.systemDefault())
-        val dFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd")
-            .withZone(ZoneId.systemDefault())
-        listOf(
-            Pair(
-                LocalDateTime.parse("2020-12-01 10:00", dtFormatter),
-                LocalDate.parse("2020-12-01", dFormatter)) to true,
-            Pair(
-                LocalDateTime.parse("2020-12-05 10:00", dtFormatter),
-                LocalDate.parse("2020-12-01", dFormatter)) to false,
-        ).forAll { (input, expectedResult) ->
-            DateTimeUtil.isSameDay(input.first, input.second) shouldBe expectedResult
-        }
-    }
-
-    "isSameMonth works for ..." {
-        val dtFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm")
-            .withZone(ZoneId.systemDefault())
-        val dFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd")
-            .withZone(ZoneId.systemDefault())
-        listOf(
-            Pair(
-                LocalDateTime.parse("2020-12-01 10:00", dtFormatter),
-                LocalDate.parse("2020-12-05", dFormatter)) to true,
-            Pair(
-                LocalDateTime.parse("2020-12-01 10:00", dtFormatter),
-                LocalDate.parse("2020-12-31", dFormatter)) to true,
-            Pair(
-                LocalDateTime.parse("2020-12-01 10:00", dtFormatter),
-                LocalDate.parse("2020-12-01", dFormatter)) to true,
-            Pair(
-                LocalDateTime.parse("2020-12-01 10:00", dtFormatter),
-                LocalDate.parse("2020-11-01", dFormatter)) to false,
-            Pair(
-                LocalDateTime.parse("2020-12-01 10:00", dtFormatter),
-                LocalDate.parse("2020-01-01", dFormatter)) to false,
-        ).forAll { (input, expectedResult) ->
-            DateTimeUtil.isSameMonth(input.first, input.second) shouldBe expectedResult
-        }
-    }
-
     "dateTimeToString works for ..." {
         val dtFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm")
             .withZone(ZoneId.systemDefault())

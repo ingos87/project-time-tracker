@@ -123,14 +123,6 @@ class DateTimeUtil {
             }
         }
 
-        fun isSameDay(dateTime1: LocalDateTime, dateTime2: LocalDate): Boolean {
-            return temporalToString(dateTime1, DATE_PATTERN) == temporalToString(dateTime2, DATE_PATTERN)
-        }
-
-        fun isSameMonth(dateTime1: LocalDateTime, dateTime2: LocalDate): Boolean {
-            return temporalToString(dateTime1, MONTH_PATTERN) == temporalToString(dateTime2, MONTH_PATTERN)
-        }
-
         fun temporalToString(dateTime: Temporal, pattern: String = DATE_TIME_PATTERN): String {
             val formatter = DateTimeFormatter.ofPattern(pattern, Locale.GERMANY)
                 .withZone(ZoneId.systemDefault())
@@ -179,8 +171,7 @@ class DateTimeUtil {
 
         fun isWorkingDay(date: LocalDate): Boolean {
             val dayOfWeek = date.dayOfWeek
-            return dayOfWeek != DayOfWeek.SATURDAY
-                && dayOfWeek != DayOfWeek.SUNDAY
+            return !Constants.WEEKDAYS_OFF.contains(dayOfWeek)
                 && !WORK_FREE_DAYS.contains(date)
                 && !Constants.DAYS_OFF.contains(date)
         }

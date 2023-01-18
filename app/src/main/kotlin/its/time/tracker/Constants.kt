@@ -3,6 +3,7 @@ package its.time.tracker
 import its.time.tracker.service.AbortException
 import its.time.tracker.service.util.DateTimeUtil
 import java.time.DayOfWeek
+import java.time.Duration
 import java.time.LocalDate
 import java.util.*
 
@@ -13,6 +14,7 @@ class Constants {
         var CSV_PATH: String = ""
         var MY_HR_SELF_SERVICE_URL: String = ""
         var E_TIME_URL: String = ""
+        var MAX_WORK_DURATION_PER_DAY: Duration = Duration.ofHours(9)
         var WEEKDAYS_OFF: List<DayOfWeek> = emptyList()
         var DAYS_OFF: List<LocalDate> = emptyList()
 
@@ -20,6 +22,7 @@ class Constants {
             VERBOSE = verbose
             CSV_PATH = readStringProperty(properties, ::CSV_PATH.name.lowercase(Locale.GERMANY))
             MY_HR_SELF_SERVICE_URL = readStringProperty(properties, ::MY_HR_SELF_SERVICE_URL.name.lowercase(Locale.GERMANY))
+            MAX_WORK_DURATION_PER_DAY = Duration.parse(readStringProperty(properties, ::MAX_WORK_DURATION_PER_DAY.name.lowercase(Locale.GERMANY)))
             E_TIME_URL = readStringProperty(properties, ::E_TIME_URL.name.lowercase(Locale.GERMANY))
             DAYS_OFF = parseDayList(properties[::DAYS_OFF.name.lowercase(Locale.GERMANY)] as String)
             WEEKDAYS_OFF = parseWeekdayList(properties[::WEEKDAYS_OFF.name.lowercase(Locale.GERMANY)] as String)

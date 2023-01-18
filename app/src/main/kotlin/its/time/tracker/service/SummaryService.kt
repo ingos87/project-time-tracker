@@ -17,13 +17,14 @@ class SummaryService {
         val csvService = CsvService()
         val clockEvents = csvService.loadClockEvents()
 
-        val daysEvents = clockEvents.filter { DateTimeUtil.isSameDay(it.dateTime, date) }.toList()
+        //val daysEvents = clockEvents.filter { DateTimeUtil.isSameDay(it.dateTime, date) }.toList()
+        val daysEvents = ClockEventsFilter.getEventsBelongingToSameDay(clockEvents, date)
         if (daysEvents.find { it.eventType == EventType.CLOCK_IN } == null) {
             println("[NO SUMMARY for $date because there are no clock-in events]")
             return
         }
 
-        val showWorkInProgress = DAYS.between(date, LocalDate.now()) == 0L && daysEvents.last().eventType != EventType.CLOCK_OUT
+        val showWorkInProgress = date.isEqual(LocalDate.now()) && daysEvents.last().eventType != EventType.CLOCK_OUT
 
         val workDaySummary = WorkDaySummary.toWorkDaySummary(daysEvents, showWorkInProgress)!!
         val bookingPositionsList = ProjectTimeCalculator().calculateProjectTime(daysEvents, showWorkInProgress)
@@ -33,7 +34,7 @@ class SummaryService {
         if (showWorkInProgress) {
             println("[today's work in progress]")
             println("┌" + "─".repeat(cellWidth) + "┐")
-            println("│ " + "clock-in:".padEnd(20) + temporalToString(workDaySummary.clockIn, TIME_PATTERN).padEnd(cellWidth-21) + "│")
+            println("│ " + "clock-in:".padEnd(20) + temporalToString(workDaySummary.clockIn.toLocalTime(), TIME_PATTERN).padEnd(cellWidth-21) + "│")
             println("├" + "─".repeat(cellWidth) + "┤")
             println("│ " + "current work time:".padEnd(20) + durationToString(workDaySummary.workDuration).padEnd(cellWidth-21) + "│")
             println("│ " + "current break time:".padEnd(20) + durationToString(workDaySummary.breakDuration).padEnd(cellWidth-21) + "│")
@@ -42,8 +43,12 @@ class SummaryService {
         else {
             println("[SUMMARY for $date]")
             println("┌" + "─".repeat(cellWidth) + "┐")
-            println("│ " + "clock-in:".padEnd(18) + temporalToString(workDaySummary.clockIn, TIME_PATTERN).padEnd(cellWidth-19) + "│")
-            println("│ " + "clock-out:".padEnd(18) + temporalToString(workDaySummary.clockOut, TIME_PATTERN).padEnd(cellWidth-19) + "│")
+            println("│ " + "clock-in:".padEnd(18) + temporalToString(workDaySummary.clockIn.toLocalTime(), TIME_PATTERN).padEnd(cellWidth-19) + "│")
+            var clockOutSupplement = ""
+            if (workDaySummary.clockIn.toLocalDate().isBefore(workDaySummary.clockOut.toLocalDate())) {
+                clockOutSupplement = " (${temporalToString(workDaySummary.clockOut.toLocalDate(), DATE_PATTERN)})"
+            }
+            println("│ " + "clock-out:".padEnd(18) + (temporalToString(workDaySummary.clockOut.toLocalTime(), TIME_PATTERN) + clockOutSupplement).padEnd(cellWidth-19) + "│")
             println("├" + "─".repeat(cellWidth) + "┤")
             println("│ " + "total work time:".padEnd(18) + durationToString(workDaySummary.workDuration).padEnd(cellWidth-19) + "│")
             println("│ " + "total break time:".padEnd(18) + durationToString(workDaySummary.breakDuration).padEnd(cellWidth-19) + "│")
@@ -68,7 +73,7 @@ class SummaryService {
         val csvService = CsvService()
         val clockEvents = csvService.loadClockEvents()
 
-        val monthsEvents = clockEvents.filter { DateTimeUtil.isSameMonth(it.dateTime, date) }.toList()
+        val monthsEvents = ClockEventsFilter.getEventsBelongingToMonth(clockEvents, date)
         if (monthsEvents.find { it.eventType == EventType.CLOCK_IN } == null) {
             println("[NO SUMMARY for $yearMonthString because there are no clock-in events]")
             return
@@ -78,7 +83,7 @@ class SummaryService {
 
         val summaryData = MonthlySummary()
         uniqueDays.forEach { day ->
-            val daysEvents = clockEvents.filter { DateTimeUtil.isSameDay(it.dateTime, day) }.toList()
+            val daysEvents = ClockEventsFilter.getEventsBelongingToSameDay(clockEvents, day)
             val workDaySummary = WorkDaySummary.toWorkDaySummary(daysEvents)
             val bookingPositionsList = ProjectTimeCalculator().calculateProjectTime(daysEvents)
             summaryData.addDay(day, workDaySummary!!, bookingPositionsList)

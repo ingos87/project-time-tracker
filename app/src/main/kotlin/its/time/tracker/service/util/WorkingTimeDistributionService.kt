@@ -16,8 +16,8 @@ class WorkingTimeDistributionService {
     fun ensureRestPeriodBetweenDays(complWorkingTimeResults: SortedMap<LocalDate, List<WorkDaySummary>>): SortedMap<LocalDate, List<WorkDaySummary>> {
         var result : SortedMap<LocalDate, List<WorkDaySummary>> = complWorkingTimeResults
 
-        var previousClockIns = listOf<LocalTime>(LocalTime.parse("08:15"))
-        var currentClockIns = emptyList<LocalTime>()
+        var previousClockIns = listOf<LocalDateTime>(LocalDateTime.parse("2023-01-01T08:15"))
+        var currentClockIns = emptyList<LocalDateTime>()
 
         while (previousClockIns != currentClockIns) {
             previousClockIns = currentClockIns
@@ -49,8 +49,8 @@ class WorkingTimeDistributionService {
             if (nextKey != null && originalMap.containsKey(nextKey)) {
                 val nextWorkDaySummary = originalMap[nextKey]!!.last()
 
-                val currentClockOut: LocalDateTime = entry.key.atTime(currentWorkDaySummaryV2.clockOut)
-                val followingClockIn: LocalDateTime = nextKey.atTime(nextWorkDaySummary.clockIn)
+                val currentClockOut: LocalDateTime = currentWorkDaySummaryV2.clockOut
+                val followingClockIn: LocalDateTime = nextWorkDaySummary.clockIn
                 val interDayRestDuration = ChronoUnit.MINUTES.between(currentClockOut, followingClockIn)
                 val restDeficitDuration = Duration.ofMinutes(MIN_BREAK_BTW_DAYS.toMinutes() - interDayRestDuration)
 
@@ -105,14 +105,14 @@ class WorkingTimeDistributionService {
                 resultingWorkDaySummariesMap[entry.key] = entry.value + compliantResult.first
             } else {
                 totalExtraTime += currentWorkDaySummary.workDuration
-                resultingWorkDaySummariesMap[entry.key] = entry.value + WorkDaySummary.empty()
+                resultingWorkDaySummariesMap[entry.key] = entry.value + WorkDaySummary.empty(entry.key)
             }
         }
 
         return Pair(resultingWorkDaySummariesMap.toSortedMap(), totalExtraTime)
     }
 
-    private fun getAllClockIns(map: SortedMap<LocalDate, List<WorkDaySummary>>): List<LocalTime> {
+    private fun getAllClockIns(map: SortedMap<LocalDate, List<WorkDaySummary>>): List<LocalDateTime> {
         return map.values.map { it.last().clockIn }
     }
 }

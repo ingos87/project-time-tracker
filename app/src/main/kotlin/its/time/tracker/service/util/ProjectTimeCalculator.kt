@@ -1,6 +1,6 @@
 package its.time.tracker.service.util
 
-import its.time.tracker.MAX_WORK_HOURS_PER_DAY
+import its.time.tracker.Constants
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.MINUTES
@@ -44,14 +44,14 @@ class ProjectTimeCalculator {
                 val durationTillNow = Duration.ofMinutes(MINUTES.between(mostRecentClockIn, now))
                 topicTimes.add(Pair(currentTopic, durationTillNow))
             }
-            else if (totalWorkingTime.toHours() >= MAX_WORK_HOURS_PER_DAY) {
+            else if (totalWorkingTime >= Constants.MAX_WORK_DURATION_PER_DAY) {
                 // although, this is beyond the max hours per day, any new tasks will take at least half an hour
                 val imaginaryTaskTime = Duration.ofMinutes(30)
                 topicTimes.add(Pair(currentTopic, imaginaryTaskTime))
             }
             else {
-                val imaginaryTaskMinutes = MAX_WORK_HOURS_PER_DAY * 60 - totalWorkingTime.toMinutes()
-                topicTimes.add(Pair(currentTopic, Duration.ofMinutes(imaginaryTaskMinutes)))
+                val imaginaryTaskDuration = Constants.MAX_WORK_DURATION_PER_DAY - totalWorkingTime
+                topicTimes.add(Pair(currentTopic, imaginaryTaskDuration))
             }
         }
 

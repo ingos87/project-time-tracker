@@ -22,7 +22,7 @@ val MAX_WORK_PER_DAY: Duration = Duration.ofHours(10)
 
 class WorkingTimeNormalizer {
 
-    fun normalizeWeekWorkingTime(workDaySummaries: HashMap<LocalDate, WorkDaySummary>): SortedMap<LocalDate, List<WorkDaySummary>> {
+    fun normalizeWeekWorkingTime(workDaySummaries: Map<LocalDate, WorkDaySummary>): SortedMap<LocalDate, List<WorkDaySummary>> {
         val workDaySummariesAsList = HashMap<LocalDate, List<WorkDaySummary>>()
         workDaySummaries.forEach { entry ->
             workDaySummariesAsList[entry.key] = listOf(entry.value)

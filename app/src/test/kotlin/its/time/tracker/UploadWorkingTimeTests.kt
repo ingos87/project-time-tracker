@@ -23,7 +23,7 @@ class UploadWorkingTimeTests : FunSpec({
                 "Use 'java -jar app.jar init' with the according parameters"
     }
 
-    test("todo: name test") {
+    test("prints compliant working times") {
         // TUE
         executeClockInWitArgs(arrayOf("-tcow",      "--datetime=2023-08-22 07:30"))
         executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2023-08-22 09:00"))

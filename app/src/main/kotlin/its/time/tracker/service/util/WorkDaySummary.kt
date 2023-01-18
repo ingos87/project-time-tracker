@@ -1,15 +1,16 @@
 package its.time.tracker.service.util
 
-import its.time.tracker.MAX_WORK_HOURS_PER_DAY
+import its.time.tracker.Constants
 import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 import kotlin.math.min
 
 data class WorkDaySummary(
-    val clockIn: LocalTime,
-    val clockOut: LocalTime,
+    val clockIn: LocalDateTime,
+    val clockOut: LocalDateTime,
     val workDuration: Duration,
     val breakDuration: Duration,
 ) {
@@ -70,7 +71,7 @@ data class WorkDaySummary(
                     totalWorkDuration += Duration.ofMinutes(ChronoUnit.MINUTES.between(mostRecentClockIn, now))
                     mostRecentClockOut = now
                 }
-                else if (totalWorkDuration.toHours() >= MAX_WORK_HOURS_PER_DAY) {
+                else if (totalWorkDuration >= Constants.MAX_WORK_DURATION_PER_DAY) {
                     // although, this is beyond the max hours per day, any new tasks will take at least half an hour
                     totalWorkDuration += Duration.ofMinutes(30)
                     mostRecentClockOut = mostRecentClockIn!!.plusMinutes(30)
@@ -86,10 +87,10 @@ data class WorkDaySummary(
                         } hours.")
                 }
                 else {
-                    val minutesTillMax = MAX_WORK_HOURS_PER_DAY * 60 - totalWorkDuration.toMinutes()
+                    val durationTillMax = Constants.MAX_WORK_DURATION_PER_DAY - totalWorkDuration
 
-                    totalWorkDuration = Duration.ofHours(MAX_WORK_HOURS_PER_DAY.toLong())
-                    mostRecentClockOut = mostRecentClockIn!!.plusMinutes(minutesTillMax)
+                    totalWorkDuration = Constants.MAX_WORK_DURATION_PER_DAY
+                    mostRecentClockOut = mostRecentClockIn!! + durationTillMax
                     println(
                         DateTimeUtil.temporalToString(
                             clockEvents[0].dateTime,
@@ -103,17 +104,17 @@ data class WorkDaySummary(
             }
 
             return WorkDaySummary(
-                clockIn = firstClockIn!!.toLocalTime(),
-                clockOut = mostRecentClockOut!!.toLocalTime(),
+                clockIn = firstClockIn!!,
+                clockOut = mostRecentClockOut!!,
                 workDuration = totalWorkDuration,
                 breakDuration = totalBreakDuration
             )
         }
 
-        fun empty(): WorkDaySummary {
+        fun empty(date: LocalDate): WorkDaySummary {
             return WorkDaySummary(
-                LocalTime.NOON,
-                LocalTime.NOON,
+                date.atTime(LocalTime.NOON),
+                date.atTime(LocalTime.NOON),
                 Duration.ZERO,
                 Duration.ZERO
             )
@@ -169,12 +170,13 @@ data class WorkDaySummary(
 
         // move clock in and clock out into legal time window
         val compliantWorkDaySummary = workingTimeCompliantSummary.moveToComplyWithEarliestInLatestOut(
-            EARLIEST_START_OF_DAY, LATEST_END_OF_DAY)
+            workingTimeCompliantSummary.clockIn.toLocalDate().atTime(EARLIEST_START_OF_DAY),
+            workingTimeCompliantSummary.clockIn.toLocalDate().atTime(LATEST_END_OF_DAY))
 
         return Pair(compliantWorkDaySummary, extraTime)
     }
 
-    private fun moveToComplyWithEarliestInLatestOut(earliestIn: LocalTime?, latestOut: LocalTime?): WorkDaySummary {
+    private fun moveToComplyWithEarliestInLatestOut(earliestIn: LocalDateTime?, latestOut: LocalDateTime?): WorkDaySummary {
         var newClockIn = clockIn
         var newClockOut = clockOut
 
@@ -205,7 +207,7 @@ data class WorkDaySummary(
         val finalPreponeAmount: Duration
         var remainingAmount = Duration.ZERO
 
-        val possiblePreponeMinutes = ChronoUnit.MINUTES.between(EARLIEST_START_OF_DAY, clockIn)
+        val possiblePreponeMinutes = ChronoUnit.MINUTES.between(clockIn.toLocalDate().atTime(EARLIEST_START_OF_DAY), clockIn)
         finalPreponeAmount = Duration.ofMinutes(min(amount.toMinutes(), possiblePreponeMinutes))
 
         if (amount.toMinutes() > possiblePreponeMinutes) {
@@ -229,7 +231,7 @@ data class WorkDaySummary(
         var remainingAmount = Duration.ZERO
 
         // postpone
-        val possiblePostponeMinutes = ChronoUnit.MINUTES.between(clockOut, LATEST_END_OF_DAY)
+        val possiblePostponeMinutes = ChronoUnit.MINUTES.between(clockOut, clockIn.toLocalDate().atTime(LATEST_END_OF_DAY))
         finalPostponeAmount = Duration.ofMinutes(min(amount.toMinutes(), possiblePostponeMinutes))
 
         if (amount.toMinutes() > possiblePostponeMinutes) {

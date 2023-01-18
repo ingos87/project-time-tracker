@@ -2,16 +2,14 @@ package its.time.tracker
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
+import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
-import com.github.ajalt.clikt.parameters.options.versionOption
 import its.time.tracker.service.*
 import its.time.tracker.service.util.*
 import java.time.LocalDate
 import java.time.LocalDateTime
-
-const val MAX_WORK_HOURS_PER_DAY = 9 // TODO move this to config file
 
 class TimeTracker: CliktCommand() {
     override fun run() = Unit
@@ -28,14 +26,16 @@ class Init: CliktCommand(help="initializes App by writing custom properties to a
     val csvPath by option("-c", "--csvpath", help = "Path to persistent file with clockins and clockouts. You should backup this file regularly").required()
     val myHrSelfServiceUrl by option("-m", "--myselfhr", help="Url to MyHRSelfService landing page").required()
     val eTimeUrl by option("-e", "--etime", help="Url to project booking landing page").required()
-    val weekdaysOff by option("-w", "--weekdaysoff", help="Comma seperated list of weekdays (MONDAY,TUESDAY,..,SATURDAY,SUNDAY) when no work time is to be transferred to external systems")
+    val maxWorkDuration by option("-h", "--maxworkdurationperday", help="Maximum work duration per day, to which app is to fill up working time in case no explicit clock-out was submitted (e.g.: PT9H, PT8H30M)").default("PT7H42M")
+    val weekdaysOff by option("-w", "--weekdaysoff", help="Comma seperated list of weekdays (MONDAY,TUESDAY,..,SATURDAY,SUNDAY) when no work time is to be transferred to external systems").default("SATURDAY,SUNDAY")
     val daysOff by option("-d", "--daysoff", help="Comma seperated list of days (format: $DATE_PATTERN) when no work time is to be transferred to external systems")
     override fun run() {
-        ConfigService.createEmptyConfig(
+        ConfigService.createConfigFileWithParams(
             configFilePath = configPath,
             csvPath = csvPath,
             myHrSelfServiceUrl = myHrSelfServiceUrl,
             eTimeUrl = eTimeUrl,
+            maxDailyWorkDuration = maxWorkDuration,
             weekdaysOff = weekdaysOff?:"",
             daysOff = daysOff?:"",
         )
