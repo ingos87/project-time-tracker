@@ -3,6 +3,7 @@ package its.time.tracker.service
 import its.time.tracker.domain.ClockEvent
 import its.time.tracker.domain.ClockOutType
 import its.time.tracker.domain.EventType
+import its.time.tracker.exception.AbortException
 import java.time.LocalDateTime
 
 class ClockEventService {

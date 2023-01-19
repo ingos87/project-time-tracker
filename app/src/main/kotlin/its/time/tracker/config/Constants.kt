@@ -1,7 +1,7 @@
-package its.time.tracker
+package its.time.tracker.config
 
-import its.time.tracker.service.AbortException
-import its.time.tracker.service.util.DateTimeUtil
+import its.time.tracker.exception.AbortException
+import its.time.tracker.util.DateTimeUtil
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
@@ -50,12 +50,12 @@ class Constants {
 
         fun setApplicationProperties(verbose: Boolean, properties: Map<String, Any?>) {
             VERBOSE = verbose
-            CSV_PATH = readStringProperty(properties, ::CSV_PATH.name.lowercase(Locale.GERMANY))
-            MY_HR_SELF_SERVICE_URL = readStringProperty(properties, ::MY_HR_SELF_SERVICE_URL.name.lowercase(Locale.GERMANY))
-            MAX_WORK_DURATION_TILL_AUTO_CLOCKOUT = Duration.parse(readStringProperty(properties, ::MAX_WORK_DURATION_TILL_AUTO_CLOCKOUT.name.lowercase(Locale.GERMANY)))
-            E_TIME_URL = readStringProperty(properties, ::E_TIME_URL.name.lowercase(Locale.GERMANY))
-            DAYS_OFF = parseDayList(properties[::DAYS_OFF.name.lowercase(Locale.GERMANY)] as String)
-            WEEKDAYS_OFF = parseWeekdayList(properties[::WEEKDAYS_OFF.name.lowercase(Locale.GERMANY)] as String)
+            CSV_PATH = readStringProperty(properties, Companion::CSV_PATH.name.lowercase(Locale.GERMANY))
+            MY_HR_SELF_SERVICE_URL = readStringProperty(properties, Companion::MY_HR_SELF_SERVICE_URL.name.lowercase(Locale.GERMANY))
+            MAX_WORK_DURATION_TILL_AUTO_CLOCKOUT = Duration.parse(readStringProperty(properties, Companion::MAX_WORK_DURATION_TILL_AUTO_CLOCKOUT.name.lowercase(Locale.GERMANY)))
+            E_TIME_URL = readStringProperty(properties, Companion::E_TIME_URL.name.lowercase(Locale.GERMANY))
+            DAYS_OFF = parseDayList(properties[Companion::DAYS_OFF.name.lowercase(Locale.GERMANY)] as String)
+            WEEKDAYS_OFF = parseWeekdayList(properties[Companion::WEEKDAYS_OFF.name.lowercase(Locale.GERMANY)] as String)
         }
 
         private fun readStringProperty(map: Map<String, Any?>,

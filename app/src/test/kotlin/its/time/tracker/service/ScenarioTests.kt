@@ -1,7 +1,8 @@
-package its.time.tracker
+package its.time.tracker.service
 
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
+import its.time.tracker.*
 
 class ScenarioTests : BehaviorSpec({
 

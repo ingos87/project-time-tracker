@@ -1,9 +1,9 @@
-package its.time.tracker
+package its.time.tracker.upload
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import its.time.tracker.upload.WorkingTimeDistributionService
 import its.time.tracker.domain.WorkDaySummary
+import its.time.tracker.ensureTestConfig
 import java.time.LocalDate
 
 class WorkingTimeDistributionOverDaysTests : StringSpec({
@@ -14,7 +14,7 @@ class WorkingTimeDistributionOverDaysTests : StringSpec({
 
     "ensureMaxWorkingTimePerDay returns empty map" {
         val input = HashMap<LocalDate, List<WorkDaySummary>>()
-        WorkingTimeDistributionService().ensureMaxWorkingTimePerDay(input) shouldBe emptyMap()
+        WorkingTimeDistributer().ensureMaxWorkingTimePerDay(input) shouldBe emptyMap()
     }
 
     "ensureMaxWorkingTimePerDay does not alter data if all legal parameters are met" {
@@ -38,7 +38,7 @@ class WorkingTimeDistributionOverDaysTests : StringSpec({
         expectedOutput[LocalDate.parse("2023-01-13")] =
             wrkDay("2023-01-13", "07:30", "16:00", "PT8H", "PT30M")
 
-        val result = WorkingTimeDistributionService().ensureMaxWorkingTimePerDay(input)
+        val result = WorkingTimeDistributer().ensureMaxWorkingTimePerDay(input)
         result.forEach{ entry ->
             entry.value.last() shouldBe expectedOutput[entry.key]
         }
@@ -65,7 +65,7 @@ class WorkingTimeDistributionOverDaysTests : StringSpec({
         expectedOutput[LocalDate.parse("2023-01-13")] =
             wrkDay("2023-01-13", "07:30", "16:00", "PT8H", "PT30M")
 
-        val result = WorkingTimeDistributionService().ensureMaxWorkingTimePerDay(input)
+        val result = WorkingTimeDistributer().ensureMaxWorkingTimePerDay(input)
         result.forEach{ entry ->
             entry.value.last() shouldBe expectedOutput[entry.key]
         }
@@ -92,7 +92,7 @@ class WorkingTimeDistributionOverDaysTests : StringSpec({
         expectedOutput[LocalDate.parse("2023-01-13")] =
             wrkDay("2023-01-13", "07:30", "16:30", "PT8H30M", "PT30M")
 
-        val result = WorkingTimeDistributionService().ensureMaxWorkingTimePerDay(input)
+        val result = WorkingTimeDistributer().ensureMaxWorkingTimePerDay(input)
         result.forEach{ entry ->
             entry.value.last() shouldBe expectedOutput[entry.key]
         }
@@ -119,7 +119,7 @@ class WorkingTimeDistributionOverDaysTests : StringSpec({
         expectedOutput[LocalDate.parse("2023-01-13")] =
             wrkDay("2023-01-13", "07:00", "17:45", "PT10H", "PT45M")
 
-        val result = WorkingTimeDistributionService().ensureMaxWorkingTimePerDay(input)
+        val result = WorkingTimeDistributer().ensureMaxWorkingTimePerDay(input)
         result.forEach{ entry ->
             entry.value.last() shouldBe expectedOutput[entry.key]
         }
@@ -156,7 +156,7 @@ class WorkingTimeDistributionOverDaysTests : StringSpec({
         expectedOutput[LocalDate.parse("2023-05-06")] =
             wrkDay("2023-05-06", "12:00", "12:00", "PT0H", "PT0M") // saturday
 
-        val result = WorkingTimeDistributionService().ensureMaxWorkingTimePerDay(input)
+        val result = WorkingTimeDistributer().ensureMaxWorkingTimePerDay(input)
         result.forEach{ entry ->
             entry.value.last() shouldBe expectedOutput[entry.key]
         }

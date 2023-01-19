@@ -1,4 +1,4 @@
-package its.time.tracker
+package its.time.tracker.domain
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.inspectors.forAll

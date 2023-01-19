@@ -1,7 +1,7 @@
-package its.time.tracker.service.util
+package its.time.tracker.util
 
-import its.time.tracker.Constants
-import its.time.tracker.service.AbortException
+import its.time.tracker.config.Constants
+import its.time.tracker.exception.AbortException
 import java.time.*
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException

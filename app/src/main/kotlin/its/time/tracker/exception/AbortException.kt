@@ -1,4 +1,4 @@
-package its.time.tracker.service
+package its.time.tracker.exception
 
 class AbortException(message: String, private var details: List<String> = emptyList()) : RuntimeException(message) {
 

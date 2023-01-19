@@ -1,9 +1,9 @@
-package its.time.tracker
+package its.time.tracker.upload
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import its.time.tracker.upload.WorkingTimeDistributionService
 import its.time.tracker.domain.WorkDaySummary
+import its.time.tracker.ensureTestConfig
 import java.time.LocalDate
 
 class WorkingTimeMovingTests : StringSpec({
@@ -14,7 +14,7 @@ class WorkingTimeMovingTests : StringSpec({
 
     "ensureRestPeriodBetweenDays returns empty map" {
         val input = HashMap<LocalDate, List<WorkDaySummary>>().toSortedMap()
-        WorkingTimeDistributionService().ensureRestPeriodBetweenDays(input) shouldBe emptyMap()
+        WorkingTimeDistributer().ensureRestPeriodBetweenDays(input) shouldBe emptyMap()
     }
 
     "ensureRestPeriodBetweenDays does not move any data if all legal parameters are met" {
@@ -34,7 +34,7 @@ class WorkingTimeMovingTests : StringSpec({
         expectedOutput[LocalDate.parse("2023-01-12")] =
             wrkDay("2023-01-12", "07:30", "16:00", "PT8H", "PT30M")
 
-        val result = WorkingTimeDistributionService().ensureRestPeriodBetweenDays(input)
+        val result = WorkingTimeDistributer().ensureRestPeriodBetweenDays(input)
         result.forEach{ entry ->
             entry.value.last() shouldBe expectedOutput[entry.key]
         }
@@ -57,7 +57,7 @@ class WorkingTimeMovingTests : StringSpec({
         expectedOutput[LocalDate.parse("2023-01-12")] =
             wrkDay("2023-01-12", "07:30", "16:00", "PT8H", "PT30M")
 
-        val result = WorkingTimeDistributionService().ensureRestPeriodBetweenDays(input)
+        val result = WorkingTimeDistributer().ensureRestPeriodBetweenDays(input)
         result.forEach{ entry ->
             entry.value.last() shouldBe expectedOutput[entry.key]
         }
@@ -83,7 +83,7 @@ class WorkingTimeMovingTests : StringSpec({
         expectedOutput[LocalDate.parse("2023-01-12")] =
             wrkDay("2023-01-12", "07:00", "17:00", "PT9H30M", "PT30M")
 
-        val result = WorkingTimeDistributionService().ensureRestPeriodBetweenDays(input)
+        val result = WorkingTimeDistributer().ensureRestPeriodBetweenDays(input)
         result.forEach{ entry ->
             entry.value.last() shouldBe expectedOutput[entry.key]
         }

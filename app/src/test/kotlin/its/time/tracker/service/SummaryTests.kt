@@ -1,11 +1,12 @@
-package its.time.tracker
+package its.time.tracker.service
 
 import com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
-import its.time.tracker.service.util.DATE_PATTERN
-import its.time.tracker.service.util.DateTimeUtil
+import its.time.tracker.*
+import its.time.tracker.util.DATE_PATTERN
+import its.time.tracker.util.DateTimeUtil
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime

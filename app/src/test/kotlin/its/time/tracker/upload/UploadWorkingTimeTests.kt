@@ -1,9 +1,10 @@
-package its.time.tracker
+package its.time.tracker.upload
 
 import com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
+import its.time.tracker.*
 
 class UploadWorkingTimeTests : FunSpec({
 

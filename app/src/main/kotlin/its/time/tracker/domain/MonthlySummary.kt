@@ -1,7 +1,7 @@
 package its.time.tracker.domain
 
-import its.time.tracker.service.util.DateTimeUtil
-import its.time.tracker.service.util.TIME_PATTERN
+import its.time.tracker.util.DateTimeUtil
+import its.time.tracker.util.TIME_PATTERN
 import java.time.Duration
 import java.time.LocalDate
 

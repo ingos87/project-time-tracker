@@ -1,8 +1,8 @@
 package its.time.tracker.upload
 
-import its.time.tracker.Constants
+import its.time.tracker.config.Constants
 import its.time.tracker.domain.WorkDaySummary
-import its.time.tracker.service.util.DateTimeUtil
+import its.time.tracker.util.DateTimeUtil
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -11,7 +11,7 @@ import java.util.HashMap
 import java.util.SortedMap
 import java.util.TreeMap
 
-class WorkingTimeDistributionService {
+class WorkingTimeDistributer {
 
     fun ensureRestPeriodBetweenDays(complWorkingTimeResults: SortedMap<LocalDate, List<WorkDaySummary>>): SortedMap<LocalDate, List<WorkDaySummary>> {
         var result : SortedMap<LocalDate, List<WorkDaySummary>> = complWorkingTimeResults

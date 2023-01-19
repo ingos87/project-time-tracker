@@ -1,10 +1,10 @@
-package its.time.tracker.service.util
+package its.time.tracker.util
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.inspectors.forAll
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
-import its.time.tracker.service.AbortException
+import its.time.tracker.exception.AbortException
 import org.junit.jupiter.api.assertThrows
 import java.time.Duration
 import java.time.Instant

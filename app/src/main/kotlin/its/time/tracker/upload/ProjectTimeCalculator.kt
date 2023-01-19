@@ -1,6 +1,6 @@
 package its.time.tracker.upload
 
-import its.time.tracker.Constants
+import its.time.tracker.config.Constants
 import its.time.tracker.domain.BookingPositionItem
 import its.time.tracker.domain.ClockEvent
 import its.time.tracker.domain.EventType

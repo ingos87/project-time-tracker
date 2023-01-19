@@ -1,9 +1,8 @@
-package its.time.tracker
+package its.time.tracker.upload
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.inspectors.forAll
 import io.kotest.matchers.shouldBe
-import its.time.tracker.upload.BookingPositionResolver
 
 class BookingPositionResolverTest : StringSpec({
 

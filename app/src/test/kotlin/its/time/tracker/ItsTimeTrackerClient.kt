@@ -1,6 +1,6 @@
 package its.time.tracker
 
-import its.time.tracker.service.ConfigService
+import its.time.tracker.config.ConfigService
 import org.junit.platform.commons.util.StringUtils
 import java.io.File
 import java.io.IOException

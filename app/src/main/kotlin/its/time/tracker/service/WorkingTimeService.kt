@@ -4,6 +4,10 @@ import its.time.tracker.domain.WorkDaySummary
 import its.time.tracker.service.util.*
 import its.time.tracker.upload.WorkingTimeNormalizer
 import its.time.tracker.upload.WorkingTimeUploader
+import its.time.tracker.util.ClockEventsFilter
+import its.time.tracker.util.DATE_PATTERN
+import its.time.tracker.util.DateTimeUtil
+import its.time.tracker.util.TIME_PATTERN
 import java.time.LocalDate
 
 class WorkingTimeService {

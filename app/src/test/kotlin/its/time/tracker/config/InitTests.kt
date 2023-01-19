@@ -1,11 +1,11 @@
-package its.time.tracker
+package its.time.tracker.config
 
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Parser
 import com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
-import its.time.tracker.service.ConfigService
+import its.time.tracker.config.Constants
 import java.io.File
 import java.util.*
 

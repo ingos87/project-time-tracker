@@ -1,8 +1,8 @@
-package its.time.tracker.service
+package its.time.tracker.config
 
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Parser
-import its.time.tracker.Constants
+import its.time.tracker.exception.AbortException
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream

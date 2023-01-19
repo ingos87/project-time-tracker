@@ -1,4 +1,4 @@
-package its.time.tracker
+package its.time.tracker.service
 
 import com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemErrAndOut
 import com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut
@@ -6,6 +6,7 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
+import its.time.tracker.*
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter

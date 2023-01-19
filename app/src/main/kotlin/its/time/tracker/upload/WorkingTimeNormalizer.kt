@@ -13,7 +13,7 @@ class WorkingTimeNormalizer {
             workDaySummariesAsList[entry.key] = listOf(entry.value)
         }
 
-        val srv = WorkingTimeDistributionService()
+        val srv = WorkingTimeDistributer()
         val correctlyDistributedWorkDaySummaries = srv.ensureMaxWorkingTimePerDay(workDaySummariesAsList)
 
         return srv.ensureRestPeriodBetweenDays(correctlyDistributedWorkDaySummaries)

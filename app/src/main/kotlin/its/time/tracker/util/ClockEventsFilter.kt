@@ -1,4 +1,4 @@
-package its.time.tracker.service.util
+package its.time.tracker.util
 
 import its.time.tracker.domain.ClockEvent
 import its.time.tracker.domain.EventType
