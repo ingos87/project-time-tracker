@@ -1,18 +1,12 @@
-package its.time.tracker.service.util
+package its.time.tracker
 
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.core.spec.style.StringSpec
-import io.kotest.inspectors.forAll
-import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
-import its.time.tracker.service.AbortException
-import org.junit.jupiter.api.assertThrows
-import java.time.Duration
-import java.time.Instant
+import its.time.tracker.domain.ClockEvent
+import its.time.tracker.domain.EventType
+import its.time.tracker.service.util.ClockEventsFilter
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 class ClockEventsFilterTests : FunSpec({
 

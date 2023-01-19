@@ -19,21 +19,6 @@ const val WEEK_PATTERN = "uuuu-ww"
 class DateTimeUtil {
     companion object {
 
-        private val WORK_FREE_DAYS: List<LocalDate> = listOf(
-            "2023-01-01",
-            "2023-03-08",
-            "2023-04-07",
-            "2023-04-10",
-            "2023-05-01",
-            "2023-05-18",
-            "2023-05-29",
-            "2023-10-03",
-            "2023-12-24",
-            "2023-12-25",
-            "2023-12-26",
-            "2023-12-31",
-        ).map { toValidDate(it) as LocalDate }
-
         fun toValidDate(dateInput: String?): Temporal? {
             if (dateInput.isNullOrBlank()) return LocalDate.now()
             return parseStringWithPattern(dateInput, DATE_PATTERN)
@@ -172,7 +157,7 @@ class DateTimeUtil {
         fun isWorkingDay(date: LocalDate): Boolean {
             val dayOfWeek = date.dayOfWeek
             return !Constants.WEEKDAYS_OFF.contains(dayOfWeek)
-                && !WORK_FREE_DAYS.contains(date)
+                && !Constants.WORK_FREE_DAYS.contains(date)
                 && !Constants.DAYS_OFF.contains(date)
         }
     }

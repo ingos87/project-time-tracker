@@ -1,15 +1,15 @@
-package its.time.tracker.service.util
+package its.time.tracker.upload
 
+import its.time.tracker.Constants
+import its.time.tracker.domain.WorkDaySummary
+import its.time.tracker.service.util.DateTimeUtil
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 import java.util.HashMap
 import java.util.SortedMap
 import java.util.TreeMap
-
-val MIN_BREAK_BTW_DAYS: Duration = Duration.ofHours(11)
 
 class WorkingTimeDistributionService {
 
@@ -52,7 +52,7 @@ class WorkingTimeDistributionService {
                 val currentClockOut: LocalDateTime = currentWorkDaySummaryV2.clockOut
                 val followingClockIn: LocalDateTime = nextWorkDaySummary.clockIn
                 val interDayRestDuration = ChronoUnit.MINUTES.between(currentClockOut, followingClockIn)
-                val restDeficitDuration = Duration.ofMinutes(MIN_BREAK_BTW_DAYS.toMinutes() - interDayRestDuration)
+                val restDeficitDuration = Duration.ofMinutes(Constants.MIN_BREAK_BTW_DAYS.toMinutes() - interDayRestDuration)
 
                 if (restDeficitDuration > Duration.ZERO) {
                     if (wasPostponed) {
@@ -79,6 +79,10 @@ class WorkingTimeDistributionService {
 
         if (result.second > Duration.ZERO) {
             result = moveExtraTimeToAdjacentDays(result.first.toSortedMap(Comparator.reverseOrder()), result.second)
+        }
+
+        if (result.second > Duration.ZERO) {
+            println("WARNING: You have worked too much! A total of ${DateTimeUtil.durationToString(result.second)} hours will be lost after the following working times are committed.")
         }
 
         return result.first.toSortedMap()

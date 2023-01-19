@@ -1,5 +1,6 @@
-package its.time.tracker.service.util
+package its.time.tracker.domain
 
+import its.time.tracker.service.util.DateTimeUtil
 import java.time.LocalDateTime
 
 data class ClockEvent(

@@ -1,6 +1,7 @@
-package its.time.tracker.service.util
+package its.time.tracker.domain
 
 import its.time.tracker.Constants
+import its.time.tracker.service.util.*
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -17,10 +18,10 @@ data class WorkDaySummary(
 
     companion object {
         fun getTotalBreakDuration(workingTime: Duration): Duration {
-            if (workingTime <= MAX_WORK_BEFORE_BREAK1) {
+            if (workingTime <= Constants.MAX_WORK_BEFORE_BREAK1) {
                 return Duration.ZERO
             }
-            else if (workingTime <= MAX_WORK_BEFORE_BREAK2) {
+            else if (workingTime <= Constants.MAX_WORK_BEFORE_BREAK2) {
                 return Duration.ofMinutes(30)
             }
             return Duration.ofMinutes(45)
@@ -71,7 +72,7 @@ data class WorkDaySummary(
                     totalWorkDuration += Duration.ofMinutes(ChronoUnit.MINUTES.between(mostRecentClockIn, now))
                     mostRecentClockOut = now
                 }
-                else if (totalWorkDuration >= Constants.MAX_WORK_DURATION_PER_DAY) {
+                else if (totalWorkDuration >= Constants.MAX_WORK_DURATION_TILL_AUTO_CLOCKOUT) {
                     // although, this is beyond the max hours per day, any new tasks will take at least half an hour
                     totalWorkDuration += Duration.ofMinutes(30)
                     mostRecentClockOut = mostRecentClockIn!!.plusMinutes(30)
@@ -87,9 +88,9 @@ data class WorkDaySummary(
                         } hours.")
                 }
                 else {
-                    val durationTillMax = Constants.MAX_WORK_DURATION_PER_DAY - totalWorkDuration
+                    val durationTillMax = Constants.MAX_WORK_DURATION_TILL_AUTO_CLOCKOUT - totalWorkDuration
 
-                    totalWorkDuration = Constants.MAX_WORK_DURATION_PER_DAY
+                    totalWorkDuration = Constants.MAX_WORK_DURATION_TILL_AUTO_CLOCKOUT
                     mostRecentClockOut = mostRecentClockIn!! + durationTillMax
                     println(
                         DateTimeUtil.temporalToString(
@@ -122,7 +123,7 @@ data class WorkDaySummary(
     }
 
     fun addWorkingTime(amount: Duration): Pair<WorkDaySummary, Duration> {
-        if (workDuration == MAX_WORK_PER_DAY) {
+        if (workDuration == Constants.MAX_WORK_PER_DAY) {
             return Pair(this, amount)
         }
 
@@ -132,14 +133,15 @@ data class WorkDaySummary(
 
         var newClockOut = clockOut + amount
         var extraTime = Duration.ZERO
-        if (newWorkDuration > MAX_WORK_PER_DAY) {
-            extraTime = newWorkDuration - MAX_WORK_PER_DAY
-            newWorkDuration = MAX_WORK_PER_DAY
+        if (newWorkDuration > Constants.MAX_WORK_PER_DAY) {
+            extraTime = newWorkDuration - Constants.MAX_WORK_PER_DAY
+            newWorkDuration = Constants.MAX_WORK_PER_DAY
             newClockOut -= extraTime
         }
 
         newClockOut += (newBreakDuration-oldBreakDuration)
-        return Pair(WorkDaySummary(
+        return Pair(
+            WorkDaySummary(
             clockIn = clockIn,
             clockOut = newClockOut,
             workDuration = newWorkDuration,
@@ -152,10 +154,10 @@ data class WorkDaySummary(
         var compliantClockOut = clockIn + workDuration
         var compliantWorkDuration = workDuration
         var extraTime = Duration.ZERO
-        if (workDuration > MAX_WORK_PER_DAY) {
-            compliantWorkDuration = MAX_WORK_PER_DAY
-            compliantClockOut -= workDuration.minus(MAX_WORK_PER_DAY)
-            extraTime = workDuration - MAX_WORK_PER_DAY
+        if (workDuration > Constants.MAX_WORK_PER_DAY) {
+            compliantWorkDuration = Constants.MAX_WORK_PER_DAY
+            compliantClockOut -= workDuration.minus(Constants.MAX_WORK_PER_DAY)
+            extraTime = workDuration - Constants.MAX_WORK_PER_DAY
         }
 
         // add breaks
@@ -170,8 +172,8 @@ data class WorkDaySummary(
 
         // move clock in and clock out into legal time window
         val compliantWorkDaySummary = workingTimeCompliantSummary.moveToComplyWithEarliestInLatestOut(
-            workingTimeCompliantSummary.clockIn.toLocalDate().atTime(EARLIEST_START_OF_DAY),
-            workingTimeCompliantSummary.clockIn.toLocalDate().atTime(LATEST_END_OF_DAY))
+            workingTimeCompliantSummary.clockIn.toLocalDate().atTime(Constants.EARLIEST_START_OF_DAY),
+            workingTimeCompliantSummary.clockIn.toLocalDate().atTime(Constants.LATEST_END_OF_DAY))
 
         return Pair(compliantWorkDaySummary, extraTime)
     }
@@ -207,14 +209,15 @@ data class WorkDaySummary(
         val finalPreponeAmount: Duration
         var remainingAmount = Duration.ZERO
 
-        val possiblePreponeMinutes = ChronoUnit.MINUTES.between(clockIn.toLocalDate().atTime(EARLIEST_START_OF_DAY), clockIn)
+        val possiblePreponeMinutes = ChronoUnit.MINUTES.between(clockIn.toLocalDate().atTime(Constants.EARLIEST_START_OF_DAY), clockIn)
         finalPreponeAmount = Duration.ofMinutes(min(amount.toMinutes(), possiblePreponeMinutes))
 
         if (amount.toMinutes() > possiblePreponeMinutes) {
             remainingAmount = amount - Duration.ofMinutes(possiblePreponeMinutes)
         }
 
-        return Pair(WorkDaySummary(
+        return Pair(
+            WorkDaySummary(
             clockIn = clockIn - finalPreponeAmount,
             clockOut = clockOut - finalPreponeAmount,
             workDuration = workDuration,
@@ -231,14 +234,17 @@ data class WorkDaySummary(
         var remainingAmount = Duration.ZERO
 
         // postpone
-        val possiblePostponeMinutes = ChronoUnit.MINUTES.between(clockOut, clockIn.toLocalDate().atTime(LATEST_END_OF_DAY))
+        val possiblePostponeMinutes = ChronoUnit.MINUTES.between(clockOut, clockIn.toLocalDate().atTime(
+            Constants.LATEST_END_OF_DAY
+        ))
         finalPostponeAmount = Duration.ofMinutes(min(amount.toMinutes(), possiblePostponeMinutes))
 
         if (amount.toMinutes() > possiblePostponeMinutes) {
             remainingAmount = amount - Duration.ofMinutes(possiblePostponeMinutes)
         }
 
-        return Pair(WorkDaySummary(
+        return Pair(
+            WorkDaySummary(
             clockIn = clockIn + finalPostponeAmount,
             clockOut = clockOut + finalPostponeAmount,
             workDuration = workDuration,

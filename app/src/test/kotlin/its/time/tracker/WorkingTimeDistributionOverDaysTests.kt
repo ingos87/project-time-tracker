@@ -2,9 +2,8 @@ package its.time.tracker
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import its.time.tracker.service.ConfigService
-import its.time.tracker.service.util.WorkingTimeDistributionService
-import its.time.tracker.service.util.WorkDaySummary
+import its.time.tracker.upload.WorkingTimeDistributionService
+import its.time.tracker.domain.WorkDaySummary
 import java.time.LocalDate
 
 class WorkingTimeDistributionOverDaysTests : StringSpec({

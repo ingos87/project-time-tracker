@@ -1,6 +1,9 @@
 package its.time.tracker.service
 
+import its.time.tracker.domain.WorkDaySummary
 import its.time.tracker.service.util.*
+import its.time.tracker.upload.WorkingTimeNormalizer
+import its.time.tracker.upload.WorkingTimeUploader
 import java.time.LocalDate
 
 class WorkingTimeService {
@@ -43,8 +46,12 @@ class WorkingTimeService {
             println(sb.toString())
         }
 
-        if (!noop) {
-            println("\nuploading clock-ins and clock-outs to myHRSelfService ...")
+        if (noop) {
+            println("\nNOOP mode. Uploaded nothing")
+        } else {
+            println("\nUploading clock-ins and clock-outs to myHRSelfService ...")
+            val finalWorkingTimes = normalizedWorkingTimes.map { entry -> entry.key to entry.value.last() }.toMap()
+            WorkingTimeUploader(finalWorkingTimes.toSortedMap()).submit()
         }
     }
 }

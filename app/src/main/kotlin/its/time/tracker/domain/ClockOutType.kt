@@ -1,4 +1,4 @@
-package its.time.tracker.service.util
+package its.time.tracker.domain
 
 enum class ClockOutType {
     MANUAL_CLOCK_OUT

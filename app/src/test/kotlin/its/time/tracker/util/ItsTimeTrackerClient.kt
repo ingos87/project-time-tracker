@@ -31,7 +31,7 @@ fun ensureTestConfig(daysOff: String = "") {
         TEST_CONFIG_PATH,
         csvPath = TEST_CSV_PATH,
         myHrSelfServiceUrl = "https://no.url",
-        maxDailyWorkDuration = "PT9H",
+        maxDailyWorkTillAutoClockOut = "PT9H",
         eTimeUrl = "https://no.second.url",
         daysOff = daysOff,
         weekdaysOff = "SATURDAY,SUNDAY"

@@ -1,6 +1,9 @@
-package its.time.tracker.service.util
+package its.time.tracker.upload
 
 import its.time.tracker.Constants
+import its.time.tracker.domain.BookingPositionItem
+import its.time.tracker.domain.ClockEvent
+import its.time.tracker.domain.EventType
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.MINUTES
@@ -44,13 +47,13 @@ class ProjectTimeCalculator {
                 val durationTillNow = Duration.ofMinutes(MINUTES.between(mostRecentClockIn, now))
                 topicTimes.add(Pair(currentTopic, durationTillNow))
             }
-            else if (totalWorkingTime >= Constants.MAX_WORK_DURATION_PER_DAY) {
+            else if (totalWorkingTime >= Constants.MAX_WORK_DURATION_TILL_AUTO_CLOCKOUT) {
                 // although, this is beyond the max hours per day, any new tasks will take at least half an hour
                 val imaginaryTaskTime = Duration.ofMinutes(30)
                 topicTimes.add(Pair(currentTopic, imaginaryTaskTime))
             }
             else {
-                val imaginaryTaskDuration = Constants.MAX_WORK_DURATION_PER_DAY - totalWorkingTime
+                val imaginaryTaskDuration = Constants.MAX_WORK_DURATION_TILL_AUTO_CLOCKOUT - totalWorkingTime
                 topicTimes.add(Pair(currentTopic, imaginaryTaskDuration))
             }
         }
@@ -88,9 +91,3 @@ class ProjectTimeCalculator {
         return bookingPositionItems
     }
 }
-
-data class BookingPositionItem(
-    val bookingKey: String,
-    val totalWorkingTime: Duration,
-    val topics: Set<String>,
-)
