@@ -5,7 +5,7 @@ import com.beust.klaxon.Parser
 import com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
-import its.time.tracker.config.Constants
+import its.time.tracker.executeInitWitArgs
 import java.io.File
 import java.util.*
 

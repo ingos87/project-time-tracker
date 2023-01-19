@@ -3,6 +3,7 @@ package its.time.tracker.upload
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import its.time.tracker.domain.WorkDaySummary
+import its.time.tracker.domain.wrkDay
 import its.time.tracker.ensureTestConfig
 import java.time.LocalDate
 

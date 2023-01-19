@@ -6,6 +6,8 @@ import its.time.tracker.exception.AbortException
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.*
 
 class ConfigService private constructor(private var configFilePath: String) {
@@ -39,6 +41,8 @@ class ConfigService private constructor(private var configFilePath: String) {
                 "  \"${Constants::DAYS_OFF.name.lowercase(Locale.GERMANY)}\":\"$daysOff\"",
                 "}")
 
+            Files.createDirectories(Paths.get(
+                configFilePath.split("/").toList().dropLast(1).joinToString("/")))
             File(configFilePath).createNewFile()
             FileOutputStream(configFilePath).apply { writeJson(defaultConfig) }
 
