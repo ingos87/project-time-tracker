@@ -38,7 +38,7 @@ class Init: CliktCommand(help="initializes App by writing custom properties to a
             myHrSelfServiceUrl = myHrSelfServiceUrl,
             eTimeUrl = eTimeUrl,
             maxDailyWorkTillAutoClockOut = maxWorkDuration,
-            weekdaysOff = weekdaysOff?:"",
+            weekdaysOff = weekdaysOff,
             daysOff = daysOff?:"",
         )
     }
