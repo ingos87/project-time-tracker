@@ -4,7 +4,6 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import its.time.tracker.domain.ClockEvent
 import its.time.tracker.domain.EventType
-import its.time.tracker.util.ClockEventsFilter
 import java.time.LocalDate
 import java.time.LocalDateTime
 

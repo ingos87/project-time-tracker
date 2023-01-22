@@ -3,19 +3,19 @@ package its.time.tracker.service
 import its.time.tracker.domain.EventType
 import its.time.tracker.domain.MonthlySummary
 import its.time.tracker.domain.WorkDaySummary
-import its.time.tracker.util.DATE_PATTERN
-import its.time.tracker.util.DateTimeUtil.Companion.durationToString
-import its.time.tracker.util.DateTimeUtil.Companion.temporalToString
 import its.time.tracker.upload.BookingPositionResolver
 import its.time.tracker.upload.ProjectTimeCalculator
 import its.time.tracker.util.ClockEventsFilter
+import its.time.tracker.util.DATE_PATTERN
 import its.time.tracker.util.DateTimeUtil
+import its.time.tracker.util.DateTimeUtil.Companion.durationToString
+import its.time.tracker.util.DateTimeUtil.Companion.temporalToString
 import its.time.tracker.util.TIME_PATTERN
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.ResolverStyle
-import java.util.*
 import java.time.temporal.ChronoUnit.DAYS
+import java.util.*
 
 private const val CELL_WIDTH = 6
 

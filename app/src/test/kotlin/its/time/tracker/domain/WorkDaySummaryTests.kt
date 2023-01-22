@@ -3,7 +3,6 @@ package its.time.tracker.domain
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.inspectors.forAll
 import io.kotest.matchers.shouldBe
-import its.time.tracker.domain.WorkDaySummary
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime

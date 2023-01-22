@@ -7,9 +7,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.HashMap
-import java.util.SortedMap
-import java.util.TreeMap
+import java.util.*
 
 class WorkingTimeDistributer {
 

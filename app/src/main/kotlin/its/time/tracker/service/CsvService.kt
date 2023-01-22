@@ -2,8 +2,8 @@ package its.time.tracker.service
 
 import its.time.tracker.config.Constants
 import its.time.tracker.domain.ClockEvent
-import its.time.tracker.util.DateTimeUtil
 import its.time.tracker.domain.EventType
+import its.time.tracker.util.DateTimeUtil
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream

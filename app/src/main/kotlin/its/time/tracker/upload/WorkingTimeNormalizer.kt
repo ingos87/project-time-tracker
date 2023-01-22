@@ -2,8 +2,7 @@ package its.time.tracker.upload
 
 import its.time.tracker.domain.WorkDaySummary
 import java.time.LocalDate
-import java.util.HashMap
-import java.util.SortedMap
+import java.util.*
 
 class WorkingTimeNormalizer {
 

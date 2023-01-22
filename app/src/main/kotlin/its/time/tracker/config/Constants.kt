@@ -48,6 +48,7 @@ class Constants {
         var MAX_WORK_DURATION_TILL_AUTO_CLOCKOUT: Duration = Duration.ofHours(9)
         var WEEKDAYS_OFF: List<DayOfWeek> = emptyList()
         var DAYS_OFF: List<LocalDate> = emptyList()
+        var CHROME_PROFILE_PATH: String = ""
 
         fun setApplicationProperties(verbose: Boolean, properties: Map<String, Any?>) {
             VERBOSE = verbose
@@ -57,6 +58,7 @@ class Constants {
             E_TIME_URL = readStringProperty(properties, Companion::E_TIME_URL.name.lowercase(Locale.GERMANY))
             DAYS_OFF = parseDayList(properties[Companion::DAYS_OFF.name.lowercase(Locale.GERMANY)] as String)
             WEEKDAYS_OFF = parseWeekdayList(properties[Companion::WEEKDAYS_OFF.name.lowercase(Locale.GERMANY)] as String)
+            CHROME_PROFILE_PATH = readStringProperty(properties, Companion::CHROME_PROFILE_PATH.name.lowercase(Locale.GERMANY))
         }
 
         private fun readStringProperty(map: Map<String, Any?>,
