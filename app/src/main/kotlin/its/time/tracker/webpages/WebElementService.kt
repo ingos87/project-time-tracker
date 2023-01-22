@@ -14,7 +14,7 @@ class WebElementService {
     private val webDriver: WebDriver
 
     companion object {
-        private const val DEFAULT_WAIT_SECONDS = 10L
+        private const val DEFAULT_WAIT_SECONDS = 15L
         private const val DEFAULT_RETRY_COUNT = 10
     }
 
@@ -28,7 +28,7 @@ class WebElementService {
 
     fun navigateToUrl(url: String) {
         webDriver.get(url)
-        printDebug("navigated to ${Constants.MY_HR_SELF_SERVICE_URL}")
+        printDebug("navigated to $url")
     }
 
     fun clickOnElementWithId(id: String) {
@@ -94,7 +94,7 @@ class WebElementService {
             val inputField: WebElement = WebDriverWait(webDriver, Duration.ofSeconds(DEFAULT_WAIT_SECONDS))
                 .until(ExpectedConditions.elementToBeClickable(By.id(elementId)))
             inputField.sendKeys(character)
-            printDebug("sent letter to input id($elementId): $character")
+            printDebug("sent character to input id($elementId): $character")
         } catch (e: Exception) {
             when(e) {
                 is StaleElementReferenceException,
@@ -113,14 +113,16 @@ class WebElementService {
         try {
             val inputField: WebElement = WebDriverWait(webDriver, Duration.ofSeconds(DEFAULT_WAIT_SECONDS))
                 .until(ExpectedConditions.elementToBeClickable(By.id(elementId)))
+            // TODO needs rework ... takes too long
             inputField.clear()
-            // TODO needs rework
-            repeat(20) {
+            Thread.sleep(30)
+            repeat(30) {
                 inputField.sendKeys(Keys.DELETE)
                 inputField.sendKeys(Keys.BACK_SPACE)
-                Thread.sleep(10)
+                Thread.sleep(50)
             }
-            printDebug("cleared element id($elementId)")
+            Thread.sleep(30)
+            printDebug("cleared text of element id($elementId)")
         } catch (e: Exception) {
             when(e) {
                 is StaleElementReferenceException,

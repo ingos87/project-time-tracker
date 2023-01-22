@@ -44,6 +44,7 @@ class Constants {
 
         var CSV_PATH: String = ""
         var MY_HR_SELF_SERVICE_URL: String = ""
+        var MY_HR_SELF_SERVICE_LANGUAGE: String = ""
         var E_TIME_URL: String = ""
         var MAX_WORK_DURATION_TILL_AUTO_CLOCKOUT: Duration = Duration.ofHours(9)
         var WEEKDAYS_OFF: List<DayOfWeek> = emptyList()
@@ -54,6 +55,7 @@ class Constants {
             VERBOSE = verbose
             CSV_PATH = readStringProperty(properties, Companion::CSV_PATH.name.lowercase(Locale.GERMANY))
             MY_HR_SELF_SERVICE_URL = readStringProperty(properties, Companion::MY_HR_SELF_SERVICE_URL.name.lowercase(Locale.GERMANY))
+            MY_HR_SELF_SERVICE_LANGUAGE = readStringProperty(properties, Companion::MY_HR_SELF_SERVICE_LANGUAGE.name.lowercase(Locale.GERMANY))
             MAX_WORK_DURATION_TILL_AUTO_CLOCKOUT = Duration.parse(readStringProperty(properties, Companion::MAX_WORK_DURATION_TILL_AUTO_CLOCKOUT.name.lowercase(Locale.GERMANY)))
             E_TIME_URL = readStringProperty(properties, Companion::E_TIME_URL.name.lowercase(Locale.GERMANY))
             DAYS_OFF = parseDayList(properties[Companion::DAYS_OFF.name.lowercase(Locale.GERMANY)] as String)

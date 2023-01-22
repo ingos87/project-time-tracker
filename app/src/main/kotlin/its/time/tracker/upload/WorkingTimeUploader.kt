@@ -20,7 +20,7 @@ class WorkingTimeUploader(private val workingTimesByDay: SortedMap<LocalDate, Wo
     fun submit() {
         navigateToTimeCorrectionLandingPage()
         workingTimesByDay.forEach{ entry ->
-            if (isValidInput(entry)) {
+            if (isWithinValidTimeframeForUpload(entry.key)) {
                 navigateToDay(entry.key)
                 ensureClockInClockOutPresent(entry.value)
             }
@@ -51,12 +51,13 @@ class WorkingTimeUploader(private val workingTimesByDay: SortedMap<LocalDate, Wo
             }
         }
 
+        // TODO: do not book on off-days! ensure no events present
         timeCorrectionsPage.clearAllEvents(currentEventCount)
         timeCorrectionsPage.createClockInAndCLockOut(workDaySummary)
     }
 
-    private fun isValidInput(entry: Map.Entry<LocalDate, WorkDaySummary>): Boolean {
-        val entryAge = ChronoUnit.DAYS.between(entry.key, LocalDate.now())
+    private fun isWithinValidTimeframeForUpload(date: LocalDate): Boolean {
+        val entryAge = ChronoUnit.DAYS.between(date, LocalDate.now())
         return entryAge <= 30L
     }
 
