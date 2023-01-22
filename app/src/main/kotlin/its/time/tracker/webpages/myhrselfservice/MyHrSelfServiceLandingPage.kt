@@ -3,7 +3,7 @@ package its.time.tracker.webpages.myhrselfservice
 import its.time.tracker.webpages.WebElementService
 
 
-class LandingPage(private val webElementService: WebElementService) {
+class MyHrSelfServiceLandingPage(private val webElementService: WebElementService) {
     companion object {
         const val CORRECTIONS_TILE_TEXT = "My time corrections"
     }

@@ -6,7 +6,7 @@ import its.time.tracker.domain.WorkDaySummary
 import its.time.tracker.util.DATE_PATTERN
 import its.time.tracker.util.DateTimeUtil
 import its.time.tracker.webpages.WebElementService
-import its.time.tracker.webpages.myhrselfservice.LandingPage
+import its.time.tracker.webpages.myhrselfservice.MyHrSelfServiceLandingPage
 import its.time.tracker.webpages.myhrselfservice.WorkingTimeCorrectionsPage
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -33,8 +33,8 @@ class WorkingTimeUploader(private val workingTimesByDay: SortedMap<LocalDate, Wo
     private fun navigateToTimeCorrectionLandingPage() {
         webElementService.navigateToUrl(Constants.MY_HR_SELF_SERVICE_URL)
 
-        val landingPage = LandingPage(webElementService)
-        landingPage.clickTimeCorrectionsTile()
+        val myHrSelfServiceLandingPage = MyHrSelfServiceLandingPage(webElementService)
+        myHrSelfServiceLandingPage.clickTimeCorrectionsTile()
     }
 
     private fun ensureClockInClockOutPresent(workDaySummary: WorkDaySummary?) {

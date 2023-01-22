@@ -19,16 +19,11 @@ class WebElementService {
     }
 
     init {
-        val chromeOptions = getCustomChromeOptions()
-        webDriver = ChromeDriver(chromeOptions)
-        webDriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(DEFAULT_WAIT_SECONDS))
-        printDebug(webDriver.toString())
-    }
-
-    private fun getCustomChromeOptions(): ChromeOptions {
         val options = ChromeOptions()
         options.addArguments("user-data-dir=${Constants.CHROME_PROFILE_PATH}")
-        return options
+        webDriver = ChromeDriver(options)
+        webDriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(DEFAULT_WAIT_SECONDS))
+        printDebug(webDriver.toString())
     }
 
     fun navigateToUrl(url: String) {
