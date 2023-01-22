@@ -1,5 +1,6 @@
 package its.time.tracker.config
 
+import its.time.tracker.config.Constants.Companion.VERBOSE
 import its.time.tracker.exception.AbortException
 import its.time.tracker.util.DateTimeUtil
 import java.time.DayOfWeek
@@ -85,4 +86,8 @@ class Constants {
                 .map { DayOfWeek.valueOf(it) }
         }
     }
+}
+
+fun printDebug(msg: String) {
+    if (VERBOSE) println("  DEBUG: $msg")
 }

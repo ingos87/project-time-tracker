@@ -1,7 +1,8 @@
 package its.time.tracker.webpages.myhrselfservice
 
+import its.time.tracker.config.printDebug
+import its.time.tracker.domain.EventType
 import its.time.tracker.domain.WorkDaySummary
-import its.time.tracker.util.DATE_PATTERN
 import org.openqa.selenium.By
 import org.openqa.selenium.Keys
 import org.openqa.selenium.WebDriver
@@ -15,9 +16,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import java.util.*
-import java.util.regex.Pattern
 
 
 const val ITEM_EVENT_TYPE_ID = "__item4-__xmlview2--CICO_TIME_EVENT_LIST-%i-titleText-inner"
@@ -26,10 +25,17 @@ const val ITEM_DEL_BUTTON_ID = "__item4-__xmlview2--CICO_TIME_EVENT_LIST-%i-imgD
 
 class WorkingTimeCorrectionsPage(private val driver: WebDriver) {
 
-    @FindBy(id = "__xmlview2--CICO_DATE_PICKER-inner")
+    companion object {
+        private const val DATE_INPUT_FIELD_ID = "__xmlview2--CICO_DATE_PICKER-inner"
+        private const val CURRENT_EVENTS_TITLE_DIV_ID = "__xmlview2--CICO_PREVIOUS_EVENTS_FORM_CONTAINER--title"
+        private const val CONFIRM_BUTTON_ID = "__button51"
+        private const val EVENT_TYPE_INPUT_ID = "__xmlview2--CICO_EVENT_TYPES-inner"
+    }
+
+    @FindBy(id = DATE_INPUT_FIELD_ID)
     private val dateInputField: WebElement? = null
 
-    @FindBy(id = "__xmlview2--CICO_EVENT_TYPES-inner")
+    @FindBy(id = EVENT_TYPE_INPUT_ID)
     private val eventTypeInput: WebElement? = null
 
     @FindBy(id = "__xmlview2--CICO_TIME-Picker-inner")
@@ -38,13 +44,13 @@ class WorkingTimeCorrectionsPage(private val driver: WebDriver) {
     @FindBy(id = "__xmlview2--CICO_SAVE_BTN")
     private val saveButton: WebElement? = null
 
-    @FindBy(id = "__xmlview2--CICO_PREVIOUS_EVENTS_FORM_CONTAINER--title")
+    @FindBy(id = CURRENT_EVENTS_TITLE_DIV_ID)
     private val currentEventsTitleDiv: WebElement? = null
 
     @FindBy(id = "__button55")
     private val confirmDeleteButton: WebElement? = null
 
-    @FindBy(id = "__button51")
+    @FindBy(id = CONFIRM_BUTTON_ID)
     private val confirmSaveButton: WebElement? = null
 
     init {
@@ -52,7 +58,12 @@ class WorkingTimeCorrectionsPage(private val driver: WebDriver) {
     }
 
     fun getCurrentEventCount(): Int {
-        return currentEventsTitleDiv?.text?.split("(")?.get(1)?.substringBefore(")")?.toInt()?:0
+        val titleDiv: WebElement = WebDriverWait(driver, Duration.ofSeconds(20))
+            .until(ExpectedConditions.elementToBeClickable(By.id(CURRENT_EVENTS_TITLE_DIV_ID)))
+        if (!titleDiv.text.contains("(")) {
+            return 0
+        }
+        return titleDiv.text.split("(")[1].substringBefore(")").toInt()
     }
 
     fun selectDate(date: LocalDate) {
@@ -61,9 +72,26 @@ class WorkingTimeCorrectionsPage(private val driver: WebDriver) {
 
         val dateString = formatter.format(date)
 
-        dateInputField?.clear()
-        dateInputField?.sendKeys(dateString)
-        dateInputField?.sendKeys(Keys.RETURN)
+        val inputField: WebElement = WebDriverWait(driver, Duration.ofSeconds(20))
+            .until(ExpectedConditions.elementToBeClickable(By.id(DATE_INPUT_FIELD_ID)))
+        printDebug("current date input value: " + inputField.getAttribute("value"))
+        clearField(inputField)
+        inputField.sendKeys(dateString)
+        inputField.sendKeys(Keys.ENTER)
+
+        WebDriverWait(driver, Duration.ofSeconds(20))
+            .until(ExpectedConditions.visibilityOfElementLocated(By.id(EVENT_TYPE_INPUT_ID)))
+
+        printDebug("successfully inserted date: $dateString")
+    }
+
+    private fun clearField(inputField: WebElement) {
+        inputField.clear()
+        repeat(20) {
+            inputField.sendKeys(Keys.DELETE)
+            inputField.sendKeys(Keys.BACK_SPACE)
+            Thread.sleep(10)
+        }
     }
 
     fun clearAllEvents(maxListIdx: Int) {
@@ -74,22 +102,34 @@ class WorkingTimeCorrectionsPage(private val driver: WebDriver) {
     }
 
     fun createClockInAndCLockOut(workDaySummary: WorkDaySummary?) {
+        addClockEvent(EventType.CLOCK_IN, workDaySummary!!.clockIn.toLocalTime())
+        addClockEvent(EventType.CLOCK_OUT, workDaySummary.clockOut.toLocalTime())
+    }
+
+    private fun addClockEvent(eventType: EventType, clockTime: LocalTime) {
         val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.GERMANY)
             .withZone(ZoneId.systemDefault())
+        val timeString = formatter.format(clockTime)
 
-        eventTypeInput?.clear()
-        eventTypeInput?.sendKeys("Homeoffice clockin")
-        timeInput?.clear()
-        timeInput?.sendKeys(formatter.format(workDaySummary?.clockIn?.toLocalTime()))
-        saveButton?.submit()
-        confirmSaveButton?.submit()
+        val eventTypeText = if (eventType==EventType.CLOCK_IN) "Homeoffice clockin" else "Homeoffice clockout"
+        val typeField: WebElement = WebDriverWait(driver, Duration.ofSeconds(20))
+            .until(ExpectedConditions.elementToBeClickable(By.id(EVENT_TYPE_INPUT_ID)))
+        clearField(typeField)
+        printDebug("cleared clock type")
+        typeField.sendKeys(eventTypeText)
+        printDebug("inserted clock type: $eventTypeText")
 
-        eventTypeInput?.clear()
-        eventTypeInput?.sendKeys("Homeoffice clockout")
-        timeInput?.clear()
-        timeInput?.sendKeys(formatter.format(workDaySummary?.clockOut?.toLocalTime()))
-        saveButton?.submit()
-        confirmSaveButton?.submit()
+        //timeInput?.clear()
+        timeInput?.sendKeys(timeString.replace(":", ""))
+        printDebug("inserted time: $timeString")
+
+        saveButton?.click()
+        printDebug("triggered event save")
+
+        val confirmButton: WebElement = WebDriverWait(driver, Duration.ofSeconds(20))
+            .until(ExpectedConditions.elementToBeClickable(By.id(CONFIRM_BUTTON_ID)))
+        confirmButton.click()
+        printDebug("confirmed event save")
     }
 
     fun getClockInTime(): LocalTime? {
