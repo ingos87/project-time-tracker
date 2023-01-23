@@ -8,6 +8,7 @@ import its.time.tracker.util.DateTimeUtil
 import its.time.tracker.webpages.WebElementService
 import its.time.tracker.webpages.myhrselfservice.MyHrSelfServiceLandingPage
 import its.time.tracker.webpages.myhrselfservice.WorkingTimeCorrectionsPage
+import java.time.Duration
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -35,11 +36,18 @@ class WorkingTimeUploader(private val workingTimesByDay: SortedMap<LocalDate, Wo
 
         val myHrSelfServiceLandingPage = MyHrSelfServiceLandingPage(webElementService)
         myHrSelfServiceLandingPage.clickTimeCorrectionsTile()
+
+        val workingTimeCorrectionsPage = WorkingTimeCorrectionsPage(webElementService)
+        workingTimeCorrectionsPage.doThingyToEnsurePageLoadingFinished()
     }
 
     private fun ensureClockInClockOutPresent(workDaySummary: WorkDaySummary?) {
         val timeCorrectionsPage = WorkingTimeCorrectionsPage(webElementService)
         val currentEventCount = timeCorrectionsPage.getCurrentEventCount()
+        if (workDaySummary!!.workDuration == Duration.ZERO) {
+            timeCorrectionsPage.clearAllEvents(currentEventCount)
+            return
+        }
 
         printDebug("found $currentEventCount clock events for ${DateTimeUtil.temporalToString(workDaySummary!!.clockIn.toLocalDate(), DATE_PATTERN)}")
         if (currentEventCount == 2) {
@@ -51,7 +59,6 @@ class WorkingTimeUploader(private val workingTimesByDay: SortedMap<LocalDate, Wo
             }
         }
 
-        // TODO: do not book on off-days! ensure no events present
         timeCorrectionsPage.clearAllEvents(currentEventCount)
         timeCorrectionsPage.createClockInAndCLockOut(workDaySummary)
     }

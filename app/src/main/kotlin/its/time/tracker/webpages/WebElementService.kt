@@ -81,7 +81,7 @@ class WebElementService {
     }
 
     fun setTextualContent(elementId: String, string: String) {
-        clearField(elementId)
+        clearField(elementId, string.length)
         string.toCharArray().forEach {
             Thread.sleep(20)
             sendCharacter(elementId, "" + it)
@@ -109,26 +109,24 @@ class WebElementService {
         }
     }
 
-    private fun clearField(elementId: String, retryCount: Int = DEFAULT_RETRY_COUNT) {
+    private fun clearField(elementId: String, expectedCharsToByCleared: Int, retryCount: Int = DEFAULT_RETRY_COUNT) {
         try {
             val inputField: WebElement = WebDriverWait(webDriver, Duration.ofSeconds(DEFAULT_WAIT_SECONDS))
                 .until(ExpectedConditions.elementToBeClickable(By.id(elementId)))
-            // TODO needs rework ... takes too long
             inputField.clear()
-            Thread.sleep(30)
-            repeat(30) {
+            repeat(expectedCharsToByCleared * 2) {
                 inputField.sendKeys(Keys.DELETE)
                 inputField.sendKeys(Keys.BACK_SPACE)
-                Thread.sleep(50)
+                Thread.sleep(20)
             }
-            Thread.sleep(30)
+            Thread.sleep(15)
             printDebug("cleared text of element id($elementId)")
         } catch (e: Exception) {
             when(e) {
                 is StaleElementReferenceException,
                 is ElementNotInteractableException -> {
                     if (retryCount > 0) {
-                        clearField(elementId, retryCount-1)
+                        clearField(elementId, expectedCharsToByCleared, retryCount-1)
                         return
                     }
                 }

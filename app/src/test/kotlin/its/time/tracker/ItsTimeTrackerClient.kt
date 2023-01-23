@@ -31,10 +31,12 @@ fun ensureTestConfig(daysOff: String = "") {
         TEST_CONFIG_PATH,
         csvPath = TEST_CSV_PATH,
         myHrSelfServiceUrl = "https://no.url",
+        myHrSelfServiceLanguage = "EN",
         maxDailyWorkTillAutoClockOut = "PT9H",
         eTimeUrl = "https://no.second.url",
         daysOff = daysOff,
-        weekdaysOff = "SATURDAY,SUNDAY"
+        weekdaysOff = "SATURDAY,SUNDAY",
+        chromeProfilePath = "/tmp/nowhere"
     )
 
     // set constants
@@ -68,7 +70,8 @@ fun executeMonthlySummaryWitArgs(args: Array<String>) {
 }
 
 fun executeUploadWorkingTimeWitArgs(args: Array<String>) {
-    main(arrayOf("timekeeping", "--configpath=$TEST_CONFIG_PATH").plus(args))
+    // always use noop for tests to not accidentally upload working times to actual website
+    main(arrayOf("timekeeping", "--configpath=$TEST_CONFIG_PATH", "--noop").plus(args))
 }
 
 fun getTimesCsvContent(): List<String> {

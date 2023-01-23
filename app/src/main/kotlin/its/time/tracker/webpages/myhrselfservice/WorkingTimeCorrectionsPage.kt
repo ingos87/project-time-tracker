@@ -65,9 +65,7 @@ class WorkingTimeCorrectionsPage(private val webElementService: WebElementServic
         val dateString = formatter.format(date)
 
         webElementService.setTextualContent(DATE_INPUT_FIELD_ID, dateString)
-        //webElementService.sendCharacter(DATE_INPUT_FIELD_ID, Keys.ENTER)
-
-        webElementService.setTextualContent(EVENT_TYPE_INPUT_ID, "...") // force page to reload and show present bookings
+        doThingyToEnsurePageLoadingFinished()
     }
 
     fun clearAllEvents(maxListIdx: Int) {
@@ -104,5 +102,9 @@ class WorkingTimeCorrectionsPage(private val webElementService: WebElementServic
     fun getClockOutTime(): Any? {
         val timeString = webElementService.getElementTextualContent(String.format(ITEM_X_TIME_ID, 0))
         return LocalTime.parse(timeString)
+    }
+
+    fun doThingyToEnsurePageLoadingFinished() {
+        webElementService.setTextualContent(EVENT_TYPE_INPUT_ID, "...")
     }
 }

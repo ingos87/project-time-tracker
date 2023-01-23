@@ -9,6 +9,7 @@ import java.time.format.ResolverStyle
 import java.time.temporal.Temporal
 import java.time.temporal.WeekFields
 import java.util.*
+import kotlin.math.roundToInt
 
 const val DATE_TIME_PATTERN = "uuuu-MM-dd HH:mm"
 const val DATE_PATTERN = "uuuu-MM-dd"
@@ -116,8 +117,14 @@ class DateTimeUtil {
         }
 
         fun durationToString(duration: Duration): String {
-            return (if (duration.toHours() < 10) "0" else "") + duration.toHours() + ":" +
-                    (if (duration.toMinutesPart() < 10) "0" else "") + duration.toMinutesPart()
+            return duration.toHours().toString().padStart(2, '0') + ":" +
+                    duration.toMinutesPart().toString().padStart(2, '0')
+        }
+
+        fun durationToDecimal(duration: Duration): String {
+            val minutesPart = ((duration.toMinutesPart() / 60.0) * 100.0).roundToInt().toString()
+            return duration.toHours().toString().padStart(2, '0') + "," +
+                    minutesPart.padEnd(2, '0')
         }
 
         fun getWeekOfYearFromDate(date: LocalDate): String {

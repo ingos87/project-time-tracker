@@ -30,19 +30,23 @@ class Init: CliktCommand(help="initializes App by writing custom properties to a
     val configPath by option("-i", "--configpath", help = "Path to persistent config file").required()
     val csvPath by option("-c", "--csvpath", help = "Path to persistent file with clockins and clockouts. You should backup this file regularly").required()
     val myHrSelfServiceUrl by option("-m", "--myselfhr", help="Url to MyHRSelfService landing page").required()
+    val myHrSelfServiceLanguage by option("-l", "--myselfhrlang", help="Language (EN,DE) of MyHRSelfService").default("EN")
     val eTimeUrl by option("-e", "--etime", help="Url to project booking landing page").required()
     val maxWorkDuration by option("-h", "--maxworkdurationperday", help="Maximum work duration per day, to which app is to fill up working time in case no explicit clock-out was submitted (e.g.: PT9H, PT8H30M)").default("PT7H42M")
     val weekdaysOff by option("-w", "--weekdaysoff", help="Comma seperated list of weekdays (MONDAY,TUESDAY,..,SATURDAY,SUNDAY) when no work time is to be transferred to external systems").default("SATURDAY,SUNDAY")
     val daysOff by option("-d", "--daysoff", help="Comma seperated list of days (format: $DATE_PATTERN) when no work time is to be transferred to external systems")
+    val chromeProfilePath by option("-b", "--browserprofilepath", help="Path to Chrome browser profile path (e.g. /Users/ingo/Library/Application Support/Google/Chrome/profile1 (Mac))")
     override fun run() {
         ConfigService.createConfigFileWithParams(
             configFilePath = configPath,
             csvPath = csvPath,
             myHrSelfServiceUrl = myHrSelfServiceUrl,
+            myHrSelfServiceLanguage = myHrSelfServiceLanguage,
             eTimeUrl = eTimeUrl,
             maxDailyWorkTillAutoClockOut = maxWorkDuration,
             weekdaysOff = weekdaysOff,
             daysOff = daysOff?:"",
+            chromeProfilePath = chromeProfilePath?:"",
         )
     }
 }

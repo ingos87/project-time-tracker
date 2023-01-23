@@ -21,10 +21,12 @@ class ConfigService private constructor(private var configFilePath: String) {
             configFilePath: String = "./app.json",
             csvPath: String = "/Users/me/its_times.csv",
             myHrSelfServiceUrl: String = "https://someurl.de",
+            myHrSelfServiceLanguage: String = "EN",
             eTimeUrl: String = "https://someurl.de",
             maxDailyWorkTillAutoClockOut: String = "",
             weekdaysOff: String = "",
             daysOff: String = "",
+            chromeProfilePath: String = "",
         ) {
             if (File(configFilePath).exists()) {
                 println("$configFilePath already exists.")
@@ -35,10 +37,12 @@ class ConfigService private constructor(private var configFilePath: String) {
                 "{",
                 "  \"${Constants::CSV_PATH.name.lowercase(Locale.GERMANY)}\":\"$csvPath\",",
                 "  \"${Constants::MY_HR_SELF_SERVICE_URL.name.lowercase(Locale.GERMANY)}\":\"$myHrSelfServiceUrl\",",
+                "  \"${Constants::MY_HR_SELF_SERVICE_LANGUAGE.name.lowercase(Locale.GERMANY)}\":\"$myHrSelfServiceLanguage\",",
                 "  \"${Constants::E_TIME_URL.name.lowercase(Locale.GERMANY)}\":\"$eTimeUrl\",",
                 "  \"${Constants::MAX_WORK_DURATION_TILL_AUTO_CLOCKOUT.name.lowercase(Locale.GERMANY)}\":\"$maxDailyWorkTillAutoClockOut\",",
                 "  \"${Constants::WEEKDAYS_OFF.name.lowercase(Locale.GERMANY)}\":\"$weekdaysOff\",",
-                "  \"${Constants::DAYS_OFF.name.lowercase(Locale.GERMANY)}\":\"$daysOff\"",
+                "  \"${Constants::DAYS_OFF.name.lowercase(Locale.GERMANY)}\":\"$daysOff\",",
+                "  \"${Constants::CHROME_PROFILE_PATH.name.lowercase(Locale.GERMANY)}\":\"$chromeProfilePath\"",
                 "}")
 
             Files.createDirectories(Paths.get(

@@ -30,22 +30,23 @@ class WorkingTimeService {
 
         val normalizedWorkingTimes = workingTimeNormalizer.normalizeWeekWorkingTime(workingTimeResults)
 
-        println(" date       │ compliant values    ║ original values")
-        println("────────────┼─────────────┼───────╬─────────────┼───────")
+        println(" date       │ compliant values            ║ original values")
+        println("────────────┼─────────────┼───────────────╬─────────────┼───────")
 
         normalizedWorkingTimes.forEach{ entry ->
             val sb = StringBuilder()
             sb.append(" " + DateTimeUtil.temporalToString(entry.key, DATE_PATTERN))
             sb.append(" │")
             if (entry.value.last().clockIn == entry.value.last().clockOut) {
-                sb.append("            ")
+                sb.append("                    ")
             } else {
                 sb.append(" " + DateTimeUtil.temporalToString(entry.value.last().clockIn.toLocalTime(), TIME_PATTERN))
                 sb.append("-" + DateTimeUtil.temporalToString(entry.value.last().clockOut.toLocalTime(), TIME_PATTERN))
             }
             sb.append(" │")
             sb.append(" " + DateTimeUtil.durationToString(entry.value.last().workDuration))
-            sb.append(" ║")
+            sb.append(" (" + DateTimeUtil.durationToDecimal(entry.value.last().workDuration))
+            sb.append(") ║")
             sb.append(" " + DateTimeUtil.temporalToString(entry.value.first().clockIn.toLocalTime(), TIME_PATTERN))
             sb.append("-" + DateTimeUtil.temporalToString(entry.value.first().clockOut.toLocalTime(), TIME_PATTERN))
             sb.append(" │")

@@ -214,6 +214,19 @@ class DateTimeUtilTests : StringSpec({
         }
     }
 
+    "durationToDecimal works for ..." {
+        listOf(
+            Duration.ofHours(3L) to "03,00",
+            Duration.ofMinutes(90L) to "01,50",
+            Duration.ofMinutes(502L) to "08,37",
+            Duration.parse("PT9H28M") to "09,47",
+            Duration.parse("PT8H34M") to "08,57",
+            Duration.ofHours(65L) to "65,00",
+        ).forAll { (duration, expectedResult) ->
+            DateTimeUtil.durationToDecimal(duration) shouldBe expectedResult
+        }
+    }
+
     "getAllDaysInSameWeekAs works for ..." {
         listOf(
             LocalDate.parse("2023-01-09") to listOf(
