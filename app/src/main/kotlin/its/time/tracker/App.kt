@@ -35,7 +35,7 @@ class Init: CliktCommand(help="initializes App by writing custom properties to a
     val maxWorkDuration by option("-h", "--maxworkdurationperday", help="Maximum work duration per day, to which app is to fill up working time in case no explicit clock-out was submitted (e.g.: PT9H, PT8H30M)").default("PT7H42M")
     val weekdaysOff by option("-w", "--weekdaysoff", help="Comma seperated list of weekdays (MONDAY,TUESDAY,..,SATURDAY,SUNDAY) when no work time is to be transferred to external systems").default("SATURDAY,SUNDAY")
     val daysOff by option("-d", "--daysoff", help="Comma seperated list of days (format: $DATE_PATTERN) when no work time is to be transferred to external systems")
-    val chromeProfilePath by option("-b", "--browserprofilepath", help="Path to Chrome browser profile path (e.g. /Users/ingo/Library/Application Support/Google/Chrome/profile1 (Mac))")
+    val chromeProfilePath by option("-b", "--browserprofilepath", help="Path to Chrome browser profile path (open chrome://version/)")
     override fun run() {
         ConfigService.createConfigFileWithParams(
             configFilePath = configPath,
