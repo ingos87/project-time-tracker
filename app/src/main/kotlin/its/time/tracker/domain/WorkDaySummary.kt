@@ -49,7 +49,7 @@ data class WorkDaySummary(
                         mostRecentClockIn = it.dateTime
                     }
                     else if (currentClockStatus == EventType.CLOCK_OUT) {
-                        val breakDuration = Duration.between(mostRecentClockOut!!, it.dateTime)
+                        val breakDuration = Duration.between(mostRecentClockOut, it.dateTime)
                         totalBreakDuration += breakDuration
                         mostRecentClockIn = it.dateTime
                     }
@@ -58,7 +58,7 @@ data class WorkDaySummary(
                 }
                 else if (it.eventType == EventType.CLOCK_OUT) {
                     if (currentClockStatus == EventType.CLOCK_IN) {
-                        val workDuration = Duration.between(mostRecentClockIn!!, it.dateTime)
+                        val workDuration = Duration.between(mostRecentClockIn, it.dateTime)
                         totalWorkDuration += workDuration
                         mostRecentClockOut = it.dateTime
                     }
