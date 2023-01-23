@@ -41,43 +41,25 @@ class WebElementService {
         printDebug("clicked on element with text '$text'")
     }
 
-    private fun clickOnElementBy(by: By, retryCount: Int = DEFAULT_RETRY_COUNT) {
-        try {
+    private fun clickOnElementBy(by: By): String {
+        val clickFun: (By, String) -> String = { funBy, _ ->
             val elem: WebElement = WebDriverWait(webDriver, Duration.ofSeconds(DEFAULT_WAIT_SECONDS))
-                .until(ExpectedConditions.elementToBeClickable(by))
-            elem.click()
-        } catch (e: Exception) {
-            when(e) {
-                is StaleElementReferenceException,
-                is ElementNotInteractableException -> {
-                    if (retryCount > 0) {
-                        clickOnElementBy(by, retryCount-1)
-                        return
-                    }
-                }
-                else -> throw e
-            }
+                .until(ExpectedConditions.elementToBeClickable(funBy))
+            elem.click();""
         }
+
+        return retryActionUntilSuccess(clickFun, by, "")
     }
 
-    fun getElementTextualContent(elementId: String, retryCount: Int = DEFAULT_RETRY_COUNT): String {
-        try {
+    fun getElementTextualContent(elementId: String): String {
+        val getTextFun: (By, String) -> String = { funBy, _ ->
             val div: WebElement = WebDriverWait(webDriver, Duration.ofSeconds(DEFAULT_WAIT_SECONDS))
-                .until(ExpectedConditions.elementToBeClickable(By.id(elementId)))
+                .until(ExpectedConditions.elementToBeClickable(funBy))
             printDebug("found content of element id($elementId): '${div.text}'")
-            return div.text
-        } catch (e: Exception) {
-            when(e) {
-                is StaleElementReferenceException,
-                is ElementNotInteractableException -> {
-                    if (retryCount > 0) {
-                        return getElementTextualContent(elementId, retryCount-1)
-                    }
-                }
-                else -> throw e
-            }
+            div.text
         }
-        return ""
+
+        return retryActionUntilSuccess(getTextFun, By.id(elementId), "")
     }
 
     fun setTextualContent(elementId: String, string: String) {
@@ -89,49 +71,51 @@ class WebElementService {
         printDebug("successfully inserted text into input id($elementId): $string")
     }
 
-    fun sendCharacter(elementId: String, character: CharSequence, retryCount: Int = DEFAULT_RETRY_COUNT) {
-        try {
+    private fun sendCharacter(elementId: String, singleCharacter: String): String {
+        val sendCharFun: (By, String) -> String = { funBy, funChar ->
             val inputField: WebElement = WebDriverWait(webDriver, Duration.ofSeconds(DEFAULT_WAIT_SECONDS))
-                .until(ExpectedConditions.elementToBeClickable(By.id(elementId)))
-            inputField.sendKeys(character)
-            printDebug("sent character to input id($elementId): $character")
-        } catch (e: Exception) {
-            when(e) {
-                is StaleElementReferenceException,
-                is ElementNotInteractableException -> {
-                    if (retryCount > 0) {
-                        sendCharacter(elementId, character, retryCount-1)
-                        return
-                    }
-                }
-                else -> throw e
-            }
+                .until(ExpectedConditions.elementToBeClickable(funBy))
+            inputField.sendKeys(funChar)
+            printDebug("sent character to input id($funBy): $funChar");""
         }
+
+        return retryActionUntilSuccess(sendCharFun, By.id(elementId), singleCharacter)
     }
 
-    private fun clearField(elementId: String, expectedCharsToByCleared: Int, retryCount: Int = DEFAULT_RETRY_COUNT) {
-        try {
+    private fun clearField(elementId: String, expectedCharsToByCleared: Int): String {
+        val clearFun: (By, String) -> String = { funBy, charCount ->
             val inputField: WebElement = WebDriverWait(webDriver, Duration.ofSeconds(DEFAULT_WAIT_SECONDS))
-                .until(ExpectedConditions.elementToBeClickable(By.id(elementId)))
+                .until(ExpectedConditions.elementToBeClickable(funBy))
             inputField.clear()
-            repeat(expectedCharsToByCleared * 2) {
+            repeat(charCount.toInt() * 2) {
                 inputField.sendKeys(Keys.DELETE)
                 inputField.sendKeys(Keys.BACK_SPACE)
                 Thread.sleep(20)
             }
             Thread.sleep(15)
-            printDebug("cleared text of element id($elementId)")
+            printDebug("cleared text of element id($elementId)");""
+        }
+
+        return retryActionUntilSuccess(clearFun, By.id(elementId), expectedCharsToByCleared.toString())
+    }
+
+    private fun retryActionUntilSuccess(action: (By, String) -> String,
+                                        by: By,
+                                        param: String,
+                                        retryCount: Int = DEFAULT_RETRY_COUNT): String {
+        try {
+            return action(by, param)
         } catch (e: Exception) {
             when(e) {
                 is StaleElementReferenceException,
                 is ElementNotInteractableException -> {
                     if (retryCount > 0) {
-                        clearField(elementId, expectedCharsToByCleared, retryCount-1)
-                        return
+                        return retryActionUntilSuccess(action, by, param, retryCount-1)
                     }
                 }
                 else -> throw e
             }
         }
+        return ""
     }
 }
