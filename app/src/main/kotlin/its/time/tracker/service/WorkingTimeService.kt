@@ -19,7 +19,6 @@ class WorkingTimeService {
             if (referenceDate == null) DateTimeUtil.getPrevious30Days(LocalDate.now())
             else DateTimeUtil.getAllDaysInSameWeekAs(referenceDate)
 
-        val workingTimeNormalizer = WorkingTimeNormalizer()
         val workingTimeResults = HashMap<LocalDate, WorkDaySummary>()
         allDays.forEach{ date ->
             val workDaySummary = WorkDaySummary.toWorkDaySummary(ClockEventsFilter.getEventsBelongingToSameDay(clockEvents, date))
@@ -28,7 +27,7 @@ class WorkingTimeService {
             }
         }
 
-        val normalizedWorkingTimes = workingTimeNormalizer.normalizeWeekWorkingTime(workingTimeResults)
+        val normalizedWorkingTimes = WorkingTimeNormalizer().normalizeWorkingTime(workingTimeResults)
 
         println(" date       │ compliant values            ║ original values")
         println("────────────┼─────────────┼───────────────╬─────────────┼───────")
@@ -62,8 +61,4 @@ class WorkingTimeService {
             WorkingTimeUploader(finalWorkingTimes.toSortedMap()).submit()
         }
     }
-}
-
-enum class Granularity {
-    WEEK, MONTH
 }

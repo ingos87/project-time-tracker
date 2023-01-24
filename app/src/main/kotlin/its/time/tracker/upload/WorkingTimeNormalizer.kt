@@ -6,7 +6,7 @@ import java.util.*
 
 class WorkingTimeNormalizer {
 
-    fun normalizeWeekWorkingTime(workDaySummaries: Map<LocalDate, WorkDaySummary>): SortedMap<LocalDate, List<WorkDaySummary>> {
+    fun normalizeWorkingTime(workDaySummaries: Map<LocalDate, WorkDaySummary>): SortedMap<LocalDate, List<WorkDaySummary>> {
         val workDaySummariesAsList = HashMap<LocalDate, List<WorkDaySummary>>()
         workDaySummaries.forEach { entry ->
             workDaySummariesAsList[entry.key] = listOf(entry.value)

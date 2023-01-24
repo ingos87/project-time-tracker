@@ -9,8 +9,8 @@ import com.github.ajalt.clikt.parameters.options.required
 import its.time.tracker.config.ConfigService
 import its.time.tracker.exception.AbortException
 import its.time.tracker.service.ClockEventService
-import its.time.tracker.service.Granularity
 import its.time.tracker.service.SummaryService
+import its.time.tracker.service.CostAssessmentService
 import its.time.tracker.service.WorkingTimeService
 import its.time.tracker.util.*
 import java.time.LocalDate
@@ -135,12 +135,10 @@ class Timekeeping: CliktCommand(help="export work time for the previous 30 days 
     val configPath by option("--configpath", help = "Defines a custom config file path. That file has to be created before-hand.")
     override fun run() {
         try {
+            val date: LocalDate? = DateTimeUtil.toValidCalendarWeek(calendarWeek) as LocalDate?
             ConfigService.createConfigService(configPath).initConstants(v)
-
-            val date = DateTimeUtil.toValidCalendarWeek(calendarWeek)
-            if (date != null) {
-                // TODO implement
-            }
+            val service = WorkingTimeService()
+            service.captureWorkingTime(date, noop)
         } catch (e: AbortException) {
             e.printMessage()
         }
@@ -153,11 +151,15 @@ class CostAssessment: CliktCommand(help="export project working times for a spec
     val calendarWeek by option("-w", "--week", help="date (format: $WEEK_PATTERN)").required()
     val configPath by option("--configpath", help = "Defines a custom config file path. That file has to be created before-hand")
     override fun run() {
+
         try {
-            val date: LocalDate? = DateTimeUtil.toValidCalendarWeek(calendarWeek) as LocalDate?
             ConfigService.createConfigService(configPath).initConstants(v)
-            val service = WorkingTimeService()
-            service.captureWorkingTime(date, noop)
+
+            val date = DateTimeUtil.toValidCalendarWeek(calendarWeek)
+            if (date != null) {
+                val service = CostAssessmentService()
+                service.captureProjectTimes(date as LocalDate, noop)
+            }
         } catch (e: AbortException) {
             e.printMessage()
         }

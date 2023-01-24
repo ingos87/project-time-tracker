@@ -75,7 +75,7 @@ class SummaryService {
     fun showMonthlySummary(date: LocalDate) {
         val dateFormatter = DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.GERMANY)
             .withResolverStyle(ResolverStyle.STRICT)
-        val yearMonthString = dateFormatter.format(date).substring(0, 7)
+        val yearMonthString = "${date.year}-${date.month.name.take(3)}"
 
         val csvService = CsvService()
         val clockEvents = csvService.loadClockEvents()

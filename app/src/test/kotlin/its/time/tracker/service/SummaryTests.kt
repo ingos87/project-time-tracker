@@ -241,7 +241,7 @@ class SummaryTests : FunSpec({
         }
 
         splitIgnoreBlank(output) shouldBe listOf(
-            "[NO SUMMARY for 2022-11 because there are no clock-in events]")
+            "[NO SUMMARY for 2022-NOV because there are no clock-in events]")
     }
 
     test("monthly summary for one day with lunch break") {
@@ -261,7 +261,7 @@ class SummaryTests : FunSpec({
         }
 
         splitIgnoreBlank(output) shouldBe listOf(
-            "[SUMMARY for 2022-11]",
+            "[SUMMARY for 2022-NOV]",
             "┌──────────────┬──────┐",
             "│ weekday      │  WED │",
             "│ day of month │    2 │",
@@ -364,7 +364,7 @@ class SummaryTests : FunSpec({
         splitIgnoreBlank(output) shouldBe listOf(
             "2022-11-03: No final clock-out found. Will insert one to fill up working time to maximum (09:00 hours).",
             "2022-11-04: No final clock-out found. Will insert one. Work time will be 10:00 hours.",
-            "[SUMMARY for 2022-11]",
+            "[SUMMARY for 2022-NOV]",
             "┌──────────────┬──────┬──────┬──────┬──────╦──────┬──────┬──────┬──────╦──────╦──────┬──────┐",
             "│ weekday      │  TUE │  WED │  THU │  FRI ║  SUN │  MON │  TUE │  WED ║  FRI ║  TUE │  WED │",
             "│ day of month │    1 │    2 │    3 │    4 ║    6 │    7 │    8 │    9 ║   25 ║   29 │   30 │",
