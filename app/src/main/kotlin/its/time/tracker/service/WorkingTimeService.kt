@@ -8,16 +8,16 @@ import its.time.tracker.util.DATE_PATTERN
 import its.time.tracker.util.DateTimeUtil
 import its.time.tracker.util.TIME_PATTERN
 import java.time.LocalDate
+import java.util.SortedSet
 
 class WorkingTimeService {
-    fun captureWorkingTime(localDate: LocalDate, granularity: Granularity, noop: Boolean) {
+    fun captureWorkingTime(referenceDate: LocalDate?, noop: Boolean) {
         val csvService = CsvService()
         val clockEvents = csvService.loadClockEvents()
 
-        val allDays: List<LocalDate> = when(granularity) {
-            Granularity.MONTH -> DateTimeUtil.getAllDaysInSameMonthAs(localDate)
-            else -> DateTimeUtil.getAllDaysInSameWeekAs(localDate)
-        }
+        val allDays: SortedSet<LocalDate> =
+            if (referenceDate == null) DateTimeUtil.getPrevious30Days(LocalDate.now())
+            else DateTimeUtil.getAllDaysInSameWeekAs(referenceDate)
 
         val workingTimeNormalizer = WorkingTimeNormalizer()
         val workingTimeResults = HashMap<LocalDate, WorkDaySummary>()

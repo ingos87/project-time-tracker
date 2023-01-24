@@ -128,29 +128,36 @@ class MonthlySummary: CliktCommand(help="show work time an project summary of a 
     }
 }
 
-class Timekeeping: CliktCommand(help="export work time for a specific calendar week to myHrSelfService") {
+class Timekeeping: CliktCommand(help="export work time for the previous 30 days or a specific calendar week to myHrSelfService") {
     val v: Boolean by option("-v", help = "enable verbose mode").flag()
-    val noop: Boolean by option("--noop", help = "Do not actually upload anything. Just show stats").flag()
-    val calendarWeek by option("-w", "--weeknumber", help="date (format: $WEEK_PATTERN)")
-    val month by option("-m", "--month", help="date (format: $MONTH_PATTERN)")
+    val noop: Boolean by option("--noop", help = "Do not actually upload anything. Just show compliant clock-ins and clock-outs.").flag()
+    val calendarWeek by option("-w", "--week", help="date (format: $WEEK_PATTERN)")
+    val configPath by option("--configpath", help = "Defines a custom config file path. That file has to be created before-hand.")
+    override fun run() {
+        try {
+            ConfigService.createConfigService(configPath).initConstants(v)
+
+            val date = DateTimeUtil.toValidCalendarWeek(calendarWeek)
+            if (date != null) {
+                // TODO implement
+            }
+        } catch (e: AbortException) {
+            e.printMessage()
+        }
+    }
+}
+
+class CostAssessment: CliktCommand(help="export project working times for a specific calendar week to eTime") {
+    val v: Boolean by option("-v", help = "enable verbose mode").flag()
+    val noop: Boolean by option("--noop", help = "Do not actually upload anything. Just show working times per project per day.").flag()
+    val calendarWeek by option("-w", "--week", help="date (format: $WEEK_PATTERN)").required()
     val configPath by option("--configpath", help = "Defines a custom config file path. That file has to be created before-hand")
     override fun run() {
         try {
-            if (calendarWeek == null && month == null || calendarWeek != null && month != null) {
-                throw AbortException("Must provide --weeknumer OR --month")
-            }
+            val date: LocalDate? = DateTimeUtil.toValidCalendarWeek(calendarWeek) as LocalDate?
             ConfigService.createConfigService(configPath).initConstants(v)
-
-            val granularity = if(month != null) Granularity.MONTH else Granularity.WEEK
-            val date = when(granularity) {
-                Granularity.MONTH -> DateTimeUtil.toValidMonth(month)
-                else -> DateTimeUtil.toValidCalendarWeek(calendarWeek)
-            }
-
-            if (date != null) {
-                val service = WorkingTimeService()
-                service.captureWorkingTime(date as LocalDate, granularity, noop)
-            }
+            val service = WorkingTimeService()
+            service.captureWorkingTime(date, noop)
         } catch (e: AbortException) {
             e.printMessage()
         }
@@ -164,5 +171,6 @@ fun main(args: Array<String>) = TimeTracker()
         ClockOut(),
         DailySummary(),
         MonthlySummary(),
-        Timekeeping())
+        Timekeeping(),
+        CostAssessment())
     .main(args)

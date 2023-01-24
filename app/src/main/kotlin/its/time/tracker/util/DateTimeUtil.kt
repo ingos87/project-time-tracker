@@ -49,7 +49,7 @@ class DateTimeUtil {
         }
 
         fun toValidCalendarWeek(dateInput: String?): Temporal? {
-            if (dateInput.isNullOrBlank()) return LocalDate.now()
+            if (dateInput.isNullOrBlank()) return null
             if (dateInput.contains("-") && dateInput.length == 7) {
                 try {
                     val parts = dateInput.split("-")
@@ -134,7 +134,7 @@ class DateTimeUtil {
             return (if (weekNumber < 10) "0" else "") + weekNumber
         }
 
-        fun getAllDaysInSameWeekAs(date: LocalDate): List<LocalDate> {
+        fun getAllDaysInSameWeekAs(date: LocalDate): SortedSet<LocalDate> {
             val weekDayOrdinal: Long = date.dayOfWeek.ordinal.toLong()
             var plusValue = weekDayOrdinal * (-1)
             return listOf(
@@ -145,20 +145,17 @@ class DateTimeUtil {
                 date.plusDays(plusValue++),
                 date.plusDays(plusValue++),
                 date.plusDays(plusValue),
-            )
+            ).toSortedSet()
         }
 
-        fun getAllDaysInSameMonthAs(date: LocalDate): List<LocalDate> {
-            val yearAndMonth = temporalToString(date, DATE_PATTERN).take(8)
+        fun getPrevious30Days(date: LocalDate): SortedSet<LocalDate> {
             val dateList = mutableListOf<LocalDate>()
-
-            var currentDate = toValidDate(yearAndMonth + "01")!! as LocalDate
-            while (currentDate.monthValue == date.monthValue) {
-                dateList.add(currentDate)
-                currentDate = currentDate.plusDays(1)
+            dateList.add(date)
+            repeat(30) {
+                dateList.add(dateList.last().minusDays(1))
             }
 
-            return dateList
+            return dateList.toSortedSet()
         }
 
         fun isWorkingDay(date: LocalDate): Boolean {

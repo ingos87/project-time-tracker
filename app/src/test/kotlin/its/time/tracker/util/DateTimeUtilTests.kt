@@ -149,13 +149,9 @@ class DateTimeUtilTests : StringSpec({
         }
     }
 
-    "toValidCalendarWeek returns today if input is empty" {
-        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-            .withZone(ZoneId.systemDefault())
-        val today = formatter.format(Instant.now())
-
-        formatter.format(DateTimeUtil.toValidCalendarWeek("")) shouldBe today
-        formatter.format(DateTimeUtil.toValidCalendarWeek(null)) shouldBe today
+    "toValidCalendarWeek returns null if input is empty" {
+        DateTimeUtil.toValidCalendarWeek("") shouldBe null
+        DateTimeUtil.toValidCalendarWeek(null) shouldBe null
     }
 
     "toValidCalendarWeek throws exception for invalid input" {
@@ -249,23 +245,27 @@ class DateTimeUtilTests : StringSpec({
         }
     }
 
-    "getAllDaysInSameMonthAs works for ..." {
+    "getPrevious30Days works for ..." {
         listOf(
             LocalDate.parse("2023-04-09") to listOf(
-                LocalDate.parse("2023-04-01"),
-                LocalDate.parse("2023-04-30"),
+                LocalDate.parse("2023-03-10"),
+                LocalDate.parse("2023-04-09"),
             ),
             LocalDate.parse("2024-02-10") to listOf(
-                LocalDate.parse("2024-02-01"),
-                LocalDate.parse("2024-02-29"),
+                LocalDate.parse("2024-01-11"),
+                LocalDate.parse("2024-02-10"),
             ),
             LocalDate.parse("2021-12-15") to listOf(
-                LocalDate.parse("2021-12-01"),
-                LocalDate.parse("2021-12-31"),
+                LocalDate.parse("2021-11-15"),
+                LocalDate.parse("2021-12-15"),
+            ),
+            LocalDate.parse("2023-01-07") to listOf(
+                LocalDate.parse("2022-12-08"),
+                LocalDate.parse("2023-01-07"),
             ),
         ).forAll { (date, firstAndLastDay) ->
-            val result = DateTimeUtil.getAllDaysInSameMonthAs(date)
-            result.size shouldBeGreaterThanOrEqual 28
+            val result = DateTimeUtil.getPrevious30Days(date)
+            result.size shouldBe 31
             result.first() shouldBe firstAndLastDay.first()
             result.last() shouldBe firstAndLastDay.last()
         }
