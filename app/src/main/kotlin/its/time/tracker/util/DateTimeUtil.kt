@@ -164,5 +164,21 @@ class DateTimeUtil {
                 && !Constants.WORK_FREE_DAYS.contains(date)
                 && !Constants.DAYS_OFF.contains(date)
         }
+
+        fun roundToHalfHourWithRemainder(duration: Duration): Pair<Duration, Duration> {
+            var halfHours = duration.toMinutes().toInt() / 30
+            var remainder = duration.toMinutes().toInt() % 30
+
+            if (remainder >= 15) {
+                halfHours++
+                remainder -= 30
+            } else if (remainder < -15) {
+                halfHours--
+                remainder += 30
+            }
+
+            return Pair(Duration.ofMinutes((30 * halfHours).toLong()),
+                Duration.ofMinutes(remainder.toLong()))
+        }
     }
 }

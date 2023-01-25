@@ -4,6 +4,7 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.inspectors.forAll
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
+import its.time.tracker.ensureTestConfig
 import its.time.tracker.exception.AbortException
 import org.junit.jupiter.api.assertThrows
 import java.time.*
@@ -268,6 +269,46 @@ class DateTimeUtilTests : StringSpec({
             result.size shouldBe 31
             result.first() shouldBe firstAndLastDay.first()
             result.last() shouldBe firstAndLastDay.last()
+        }
+    }
+
+    "isWorkingDay works for ..." {
+        ensureTestConfig()
+
+        listOf(
+            LocalDate.parse("2023-04-06") to true,
+            LocalDate.parse("2023-04-07") to false,
+            LocalDate.parse("2023-04-08") to false,
+            LocalDate.parse("2023-04-09") to false,
+            LocalDate.parse("2023-05-01") to false,
+            LocalDate.parse("2023-05-02") to true,
+        ).forAll { (date, isWorkingDay) ->
+            DateTimeUtil.isWorkingDay(date) shouldBe isWorkingDay
+        }
+    }
+
+    "roundToHalfHourWithRemainder works for ..." {
+        listOf(
+            Duration.parse("PT0H") to Pair(Duration.parse("PT0H"), Duration.parse("PT0H")),
+            Duration.parse("PT30M") to Pair(Duration.parse("PT30M"), Duration.parse("PT0H")),
+            Duration.parse("PT1H") to Pair(Duration.parse("PT1H"), Duration.parse("PT0H")),
+            Duration.parse("PT5H30M") to Pair(Duration.parse("PT5H30M"), Duration.parse("PT0H")),
+            Duration.parse("PT31M") to Pair(Duration.parse("PT30M"), Duration.parse("PT1M")),
+            Duration.parse("PT44M") to Pair(Duration.parse("PT30M"), Duration.parse("PT14M")),
+            Duration.parse("PT45M") to Pair(Duration.parse("PT1H"), Duration.parse("PT-15M")),
+            Duration.parse("PT59M") to Pair(Duration.parse("PT1H"), Duration.parse("PT-1M")),
+            Duration.parse("PT1M") to Pair(Duration.parse("PT0M"), Duration.parse("PT1M")),
+            Duration.parse("PT14M") to Pair(Duration.parse("PT0M"), Duration.parse("PT14M")),
+            Duration.parse("PT15M") to Pair(Duration.parse("PT30M"), Duration.parse("PT-15M")),
+            Duration.parse("PT29M") to Pair(Duration.parse("PT30M"), Duration.parse("PT-1M")),
+            Duration.parse("PT7H23M") to Pair(Duration.parse("PT7H30M"), Duration.parse("PT-7M")),
+            Duration.parse("PT-30M") to Pair(Duration.parse("PT-30M"), Duration.parse("PT0M")),
+            Duration.parse("PT-29M") to Pair(Duration.parse("PT-30M"), Duration.parse("PT1M")),
+            Duration.parse("PT-16M") to Pair(Duration.parse("PT-30M"), Duration.parse("PT14M")),
+            Duration.parse("PT-15M") to Pair(Duration.parse("PT0M"), Duration.parse("PT-15M")),
+            Duration.parse("PT-55M") to Pair(Duration.parse("PT-1H"), Duration.parse("PT5M")),
+        ).forAll { (duration, expectedResult) ->
+            DateTimeUtil.roundToHalfHourWithRemainder(duration) shouldBe expectedResult
         }
     }
 })

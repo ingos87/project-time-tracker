@@ -5,7 +5,7 @@ import its.time.tracker.util.TIME_PATTERN
 import java.time.Duration
 import java.time.LocalDate
 
-data class MonthlySummary(
+data class WorkDaySummaryCollection(
     var data: MutableMap<LocalDate, Pair<WorkDaySummary, List<BookingPositionItem>>> = mutableMapOf()
 ) {
     fun addDay(dateTime: LocalDate,
@@ -34,7 +34,7 @@ data class MonthlySummary(
         return data.values.map { DateTimeUtil.durationToString(it.first.workDuration) }
     }
 
-    fun getAllBookingDurationsForKey(bookingKey: String): List<String> {
+    fun getAllBookingDurationsForKeyAsString(bookingKey: String): List<String> {
         var dateDurationsMap: Map<LocalDate, Duration> = HashMap()
         data.forEach{ (key, pair) ->
             val maybeBookingPositionItem = pair.second.find { item -> item.bookingKey == bookingKey }
