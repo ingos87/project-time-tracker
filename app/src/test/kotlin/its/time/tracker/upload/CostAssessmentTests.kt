@@ -1,0 +1,84 @@
+package its.time.tracker.upload
+
+import com.github.stefanbirkner.systemlambda.SystemLambda.tapSystemOut
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldStartWith
+import its.time.tracker.*
+import its.time.tracker.util.DATE_PATTERN
+import its.time.tracker.util.DateTimeUtil
+import java.time.Duration
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit.MINUTES
+
+class CostAssessmentTests : FunSpec({
+
+    beforeEach {
+        ensureTestConfig()
+        ensureCsvEmpty()
+    }
+
+    test("cost assessment is not possible if there is no config file") {
+        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2022-01-03 07:30"))
+        executeClockOutWitArgs(arrayOf(             "--datetime=2022-01-03 16:30"))
+
+        ensureNoConfig()
+
+        val output = tapSystemOut {
+            main(arrayOf("cost-assessment", "-w2022-01"))
+        }
+
+        output shouldStartWith "No config file found in ./app.json\n" +
+                "Use 'java -jar app.jar init' with the according parameters"
+    }
+
+    test("cost assessment shows err message if there are not clock-in events") {
+        executeClockOutWitArgs(arrayOf(             "--datetime=2023-01-02 14:30"))
+
+        val output = tapSystemOut {
+            executeCostAssessmentWitArgs(arrayOf("-w2023-01"))
+        }
+
+        splitIgnoreBlank(output) shouldBe listOf(
+            "[NO SUMMARY for 2023-01-02 - 2023-01-08 because there are no clock-in events]")
+    }
+
+    test("cost assessment for standard week") {
+        // MON (public holiday)
+        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2023-05-01 12:00"))
+        executeClockOutWitArgs(arrayOf(             "--datetime=2023-05-01 14:55"))
+
+        // TUE
+        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2023-05-02 07:00"))
+        executeClockInWitArgs(arrayOf("-tEPP-009",  "--datetime=2023-05-02 08:00"))
+        executeClockInWitArgs(arrayOf("-tcoww",     "--datetime=2023-05-02 09:45"))
+        executeClockInWitArgs(arrayOf("-tEDF-1",    "--datetime=2023-05-02 10:05"))
+        executeClockOutWitArgs(arrayOf(             "--datetime=2023-05-02 12:00"))
+        executeClockInWitArgs(arrayOf("-tEDF-1",    "--datetime=2023-05-02 13:00"))
+        executeClockOutWitArgs(arrayOf(             "--datetime=2023-05-02 13:25"))
+
+        // WED
+        executeClockInWitArgs(arrayOf("-tEPP-008",  "--datetime=2023-05-03 08:00"))
+        executeClockOutWitArgs(arrayOf(             "--datetime=2023-05-03 12:00"))
+
+
+        val output = tapSystemOut {
+            executeCostAssessmentWitArgs(arrayOf("-w2023-18"))
+        }
+
+        splitIgnoreBlank(output) shouldBe listOf(
+            "[SUMMARY for 2023-05-01 - 2023-05-07]",
+            "┌─────────────────┬──────┬──────┬──────┬──────┬──────┬──────┬──────┐",
+            "│ weekday         │  MON │  TUE │  WED │  THU │  FRI │  SAT │  SUN │",
+            "│ day of month    │    1 │    2 │    3 │    4 │    5 │    6 │    7 │",
+            "├─────────────────┼──────┼──────┼──────┼──────┼──────┼──────┼──────┤",
+            "│ ProjectA        │      │ 00:55│ 04:00│      │      │      │      │",
+            "│ ProjectB        │      │ 01:45│      │      │      │      │      │",
+            "│ DoD             │      │ 00:20│      │      │      │      │      │",
+            "│ Wartung         │      │ 02:20│      │      │      │      │      │",
+            "└─────────────────┴──────┴──────┴──────┴──────┴──────┴──────┴──────┘",
+            "NOOP mode. Uploaded nothing")
+    }
+})
+

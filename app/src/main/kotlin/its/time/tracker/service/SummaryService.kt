@@ -25,7 +25,6 @@ class SummaryService {
         val csvService = CsvService()
         val clockEvents = csvService.loadClockEvents()
 
-        //val daysEvents = clockEvents.filter { DateTimeUtil.isSameDay(it.dateTime, date) }.toList()
         val daysEvents = ClockEventsFilter.getEventsBelongingToSameDay(clockEvents, date)
         if (daysEvents.find { it.eventType == EventType.CLOCK_IN } == null) {
             println("[NO SUMMARY for $date because there are no clock-in events]")

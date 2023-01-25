@@ -74,6 +74,11 @@ fun executeUploadWorkingTimeWitArgs(args: Array<String>) {
     main(arrayOf("timekeeping", "--configpath=$TEST_CONFIG_PATH", "--noop").plus(args))
 }
 
+fun executeCostAssessmentWitArgs(args: Array<String>) {
+    // always use noop for tests to not accidentally upload working times to actual website
+    main(arrayOf("cost-assessment", "--configpath=$TEST_CONFIG_PATH", "--noop").plus(args))
+}
+
 fun getTimesCsvContent(): List<String> {
     if (!File(TEST_CSV_PATH).exists()) {
         return emptyList()
