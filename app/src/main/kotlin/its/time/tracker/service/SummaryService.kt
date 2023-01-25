@@ -34,7 +34,7 @@ class SummaryService {
         val showWorkInProgress = date.isEqual(LocalDate.now()) && daysEvents.last().eventType != EventType.CLOCK_OUT
 
         val workDaySummary = WorkDaySummary.toWorkDaySummary(daysEvents, showWorkInProgress)!!
-        val bookingPositionsList = ProjectTimeCalculator().calculateProjectTime(daysEvents, showWorkInProgress)
+        val costAssessmentList = ProjectTimeCalculator().calculateProjectTime(daysEvents, showWorkInProgress)
 
         val cellWidth = 48
         val bookingPosLength = BookingPositionResolver.getMaxBookingPosNameLength()
@@ -62,7 +62,7 @@ class SummaryService {
         }
 
         println("├" + "═".repeat(cellWidth) + "┤")
-        bookingPositionsList.forEach {
+        costAssessmentList.forEach {
             // total width - white space - bookingPosLength - ": " - time - "  " - 1parenthesis
             val availableSpaceForTopicList = cellWidth-1-bookingPosLength-2-5-2-1
             val topicList = ("(${it.topics.joinToString(",")}".take(availableSpaceForTopicList)+")").padEnd(availableSpaceForTopicList+1)
@@ -92,8 +92,8 @@ class SummaryService {
         uniqueDays.forEach { day ->
             val daysEvents = ClockEventsFilter.getEventsBelongingToSameDay(clockEvents, day)
             val workDaySummary = WorkDaySummary.toWorkDaySummary(daysEvents)
-            val bookingPositionsList = ProjectTimeCalculator().calculateProjectTime(daysEvents)
-            summaryData.addDay(day, workDaySummary!!, bookingPositionsList)
+            val costAssessmentList = ProjectTimeCalculator().calculateProjectTime(daysEvents)
+            summaryData.addDay(day, workDaySummary!!, costAssessmentList)
         }
 
         val firstColWidth = BookingPositionResolver.getMaxBookingPosNameLength()+2

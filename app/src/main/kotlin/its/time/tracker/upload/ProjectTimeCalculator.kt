@@ -1,7 +1,7 @@
 package its.time.tracker.upload
 
 import its.time.tracker.config.Constants
-import its.time.tracker.domain.BookingPositionItem
+import its.time.tracker.domain.CostAssessmentPosition
 import its.time.tracker.domain.ClockEvent
 import its.time.tracker.domain.EventType
 import java.time.Duration
@@ -10,7 +10,7 @@ import java.time.temporal.ChronoUnit.MINUTES
 
 class ProjectTimeCalculator {
 
-    fun calculateProjectTime(clockEvents: List<ClockEvent>, useNowAsCLockOut: Boolean = false): List<BookingPositionItem> {
+    fun calculateProjectTime(clockEvents: List<ClockEvent>, useNowAsCLockOut: Boolean = false): List<CostAssessmentPosition> {
         val topicTimes = ArrayList<Pair<String, Duration>>()
         var totalWorkingTime: Duration = Duration.ZERO
 
@@ -61,33 +61,33 @@ class ProjectTimeCalculator {
         return topicTimes2BookingList(topicTimes)
     }
 
-    private fun topicTimes2BookingList(topicTimes: ArrayList<Pair<String, Duration>>): List<BookingPositionItem> {
-        val bookingPositionItems = ArrayList<BookingPositionItem>()
+    private fun topicTimes2BookingList(topicTimes: ArrayList<Pair<String, Duration>>): List<CostAssessmentPosition> {
+        val costAssessmentPositions = ArrayList<CostAssessmentPosition>()
         topicTimes.forEach {
             val topic = it.first
             val workingTime = it.second
             val bookingKey = BookingPositionResolver.resolveTopicToBookingPosition(topic)
 
-            val presentItem = bookingPositionItems.find { item -> item.bookingKey == bookingKey }
+            val presentItem = costAssessmentPositions.find { item -> item.bookingKey == bookingKey }
             if (presentItem != null) {
-                bookingPositionItems.remove(presentItem)
-                val newItem = BookingPositionItem(
+                costAssessmentPositions.remove(presentItem)
+                val newItem = CostAssessmentPosition(
                     bookingKey = bookingKey,
                     totalWorkingTime = presentItem.totalWorkingTime.plus(workingTime),
                     topics = presentItem.topics.plus(topic)
                 )
-                bookingPositionItems.add(newItem)
+                costAssessmentPositions.add(newItem)
             }
             else {
-                val newItem = BookingPositionItem(
+                val newItem = CostAssessmentPosition(
                     bookingKey = bookingKey,
                     totalWorkingTime = workingTime,
                     topics = setOf(topic)
                 )
-                bookingPositionItems.add(newItem)
+                costAssessmentPositions.add(newItem)
             }
         }
 
-        return bookingPositionItems
+        return costAssessmentPositions
     }
 }

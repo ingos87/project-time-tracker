@@ -1,7 +1,6 @@
 package its.time.tracker.service
 
-import its.time.tracker.domain.BookingPositionItem
-import its.time.tracker.domain.EventType
+import its.time.tracker.domain.CostAssessmentPosition
 import its.time.tracker.domain.WorkDaySummary
 import its.time.tracker.domain.WorkDaySummaryCollection
 import its.time.tracker.service.ConsoleTableHelper.Companion.getCellString
@@ -72,7 +71,7 @@ class CostAssessmentService {
     }
 
     private fun getBookingTimesForProject(
-        normalizedWorkingTimes: SortedMap<LocalDate, List<BookingPositionItem>>,
+        normalizedWorkingTimes: SortedMap<LocalDate, List<CostAssessmentPosition>>,
         name: String,
         uniqueDays: SortedSet<LocalDate>
     ): List<String> {

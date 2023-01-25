@@ -1,6 +1,6 @@
 package its.time.tracker.upload
 
-import its.time.tracker.domain.BookingPositionItem
+import its.time.tracker.domain.CostAssessmentPosition
 import its.time.tracker.util.DateTimeUtil
 import java.time.Duration
 import java.time.LocalDate
@@ -8,19 +8,34 @@ import java.util.*
 
 class CostAssessmentRoundingService {
 
-    fun roundProjectTimes(workDaySummaries: SortedMap<LocalDate, List<BookingPositionItem>>)
-            : SortedMap<LocalDate, List<BookingPositionItem>> {
-        val roundedSummaries = mutableMapOf<LocalDate, List<BookingPositionItem>>()
+    fun roundProjectTimes(
+        costAssessments: SortedMap<LocalDate, List<CostAssessmentPosition>>
+    ): SortedMap<LocalDate, List<CostAssessmentPosition>> {
+        val roundingResult = roundDurations(costAssessments)
+
+        val roundingRemainders = roundingResult.second
+        val roundedRoundingRemainders = roundIgnoringRemainders(roundingRemainders)
+
+        val roundedCostAssessments = roundingResult.first
+        addConsolidatedRemainders(roundedCostAssessments, roundedRoundingRemainders)
+
+        return roundedCostAssessments.toSortedMap()
+    }
+
+    private fun roundDurations(
+        costAssessments: SortedMap<LocalDate, List<CostAssessmentPosition>>
+    ): Pair<MutableMap<LocalDate, List<CostAssessmentPosition>>, MutableMap<String, Duration>> {
+        val roundedCostAssessments = mutableMapOf<LocalDate, List<CostAssessmentPosition>>()
 
         val roundingRemainders = mutableMapOf<String, Duration>()
 
-        workDaySummaries.forEach { (date, value) ->
-            val roundedBookingListItems = mutableListOf<BookingPositionItem>()
+        costAssessments.forEach { (date, value) ->
+            val roundedBookingListItems = mutableListOf<CostAssessmentPosition>()
             value.forEach {
                 val roundingResult = DateTimeUtil.roundToHalfHourWithRemainder(it.totalWorkingTime)
                 if (roundingResult.first > Duration.ZERO) {
                     roundedBookingListItems.add(
-                        BookingPositionItem(
+                        CostAssessmentPosition(
                             it.bookingKey,
                             roundingResult.first,
                             it.topics
@@ -29,36 +44,43 @@ class CostAssessmentRoundingService {
                 }
                 roundingRemainders[it.bookingKey] = roundingRemainders.getOrDefault(it.bookingKey, Duration.ZERO) + roundingResult.second
             }
-            roundedSummaries[date] = roundedBookingListItems
+            roundedCostAssessments[date] = roundedBookingListItems
         }
 
-        val roundedRoundingRemainders = roundingRemainders
-            .map { (k, v) -> k to DateTimeUtil.roundToHalfHourWithRemainder(v).first }
-            .filter { (_, v) -> v != Duration.ZERO}
+        return Pair(roundedCostAssessments, roundingRemainders)
+    }
 
-        roundedRoundingRemainders.forEach{ (bookingKey, remainder) ->
-            val key = getDateWithPresentBookingKey(roundedSummaries, bookingKey)?:roundedSummaries.keys.last()
-            val bookingItemsList = roundedSummaries[key]
-            roundedSummaries[key] = bookingItemsList!!.map {
+    private fun addConsolidatedRemainders(
+        costAssessments: MutableMap<LocalDate, List<CostAssessmentPosition>>,
+        remainders: List<Pair<String, Duration>>
+    ) {
+        remainders.forEach { (bookingKey, remainder) ->
+            val key = getDateWithPresentBookingKey(costAssessments, bookingKey) ?: costAssessments.keys.last()
+            val bookingItemsList = costAssessments[key]
+            costAssessments[key] = bookingItemsList!!.map {
                 if (it.bookingKey == bookingKey) {
-                    BookingPositionItem(
+                    CostAssessmentPosition(
                         it.bookingKey,
                         it.totalWorkingTime + remainder,
-                        it.topics)
+                        it.topics
+                    )
                 } else {
                     it
                 }
             }
         }
-
-        return roundedSummaries.toSortedMap()
     }
 
+    private fun roundIgnoringRemainders(roundingRemainders: MutableMap<String, Duration>) =
+        roundingRemainders
+            .map { (k, v) -> k to DateTimeUtil.roundToHalfHourWithRemainder(v).first }
+            .filter { (_, v) -> v != Duration.ZERO }
+
     private fun getDateWithPresentBookingKey(
-        summaries: MutableMap<LocalDate, List<BookingPositionItem>>,
+        costAssessments: MutableMap<LocalDate, List<CostAssessmentPosition>>,
         bookingKey: String
     ): LocalDate? {
-        summaries.forEach { (date, list) ->
+        costAssessments.forEach { (date, list) ->
             val bookingItem = list.find { it.bookingKey == bookingKey }
             if (bookingItem != null) {
                 return date

@@ -6,12 +6,12 @@ import java.time.Duration
 import java.time.LocalDate
 
 data class WorkDaySummaryCollection(
-    var data: MutableMap<LocalDate, Pair<WorkDaySummary, List<BookingPositionItem>>> = mutableMapOf()
+    var data: MutableMap<LocalDate, Pair<WorkDaySummary, List<CostAssessmentPosition>>> = mutableMapOf()
 ) {
     fun addDay(dateTime: LocalDate,
                workDaySummary: WorkDaySummary,
-               bookingPositionItems: List<BookingPositionItem>) {
-        data[dateTime] = Pair(workDaySummary, bookingPositionItems)
+               costAssessmentPositions: List<CostAssessmentPosition>) {
+        data[dateTime] = Pair(workDaySummary, costAssessmentPositions)
     }
 
     fun getAllClockIns(): List<String> {
