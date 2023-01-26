@@ -60,7 +60,7 @@ class CostAssessmentTests : FunSpec({
 
         // WED
         executeClockInWitArgs(arrayOf("-tEPP-008",  "--datetime=2023-05-03 08:00"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2023-05-03 12:00"))
+        executeClockOutWitArgs(arrayOf(             "--datetime=2023-05-03 19:00"))
 
         // FRI
         executeClockInWitArgs(arrayOf("-tEPP-008",  "--datetime=2023-05-05 08:00"))
@@ -81,10 +81,10 @@ class CostAssessmentTests : FunSpec({
             "│ weekday         │  MON │  TUE │  WED │  THU │  FRI │  SAT │  SUN │",
             "│ day of month    │    1 │    2 │    3 │    4 │    5 │    6 │    7 │",
             "├─────────────────┼──────┼──────┼──────┼──────┼──────┼──────┼──────┤",
-            "│ ProjectA        │      │ 01,00│ 04,00│      │ 05,00│      │      │",
-            "│ ProjectB        │      │ 02,00│      │      │      │      │      │",
-            "│ DoD             │      │ 00,50│      │      │      │      │      │",
-            "│ Wartung         │      │ 02,50│      │      │ 02,00│      │      │",
+            "│ ProjectA        │      │  1,00│ 11,00│      │  5,00│      │      │",
+            "│ ProjectB        │      │  2,00│      │      │      │      │      │",
+            "│ DoD             │      │  0,50│      │      │      │      │      │",
+            "│ Wartung         │      │  2,50│      │      │  2,00│      │      │",
             "└─────────────────┴──────┴──────┴──────┴──────┴──────┴──────┴──────┘",
             "NOOP mode. Uploaded nothing")
     }

@@ -79,7 +79,7 @@ class CostAssessmentService {
         uniqueDays.forEach { date ->
             val projectDuration = normalizedWorkingTimes[date]?.find { it -> it.bookingKey == name }?.totalWorkingTime
             times.add(if (projectDuration == null || projectDuration == Duration.ZERO) "     "
-                        else DateTimeUtil.durationToDecimal(projectDuration))
+                        else DateTimeUtil.durationToDecimal(projectDuration).padStart(5, ' '))
         }
 
         return times

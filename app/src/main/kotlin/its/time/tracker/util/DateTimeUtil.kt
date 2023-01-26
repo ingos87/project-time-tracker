@@ -122,9 +122,8 @@ class DateTimeUtil {
         }
 
         fun durationToDecimal(duration: Duration): String {
-            val minutesPart = ((duration.toMinutesPart() / 60.0) * 100.0).roundToInt().toString()
-            return duration.toHours().toString().padStart(2, '0') + "," +
-                    minutesPart.padEnd(2, '0')
+            val minutesPartAsDecimal = ((duration.toMinutesPart() / 60.0) * 100.0).roundToInt().toString()
+            return duration.toHours().toString() + "," + minutesPartAsDecimal.padStart(2, '0')
         }
 
         fun getWeekOfYearFromDate(date: LocalDate): String {

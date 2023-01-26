@@ -213,11 +213,13 @@ class DateTimeUtilTests : StringSpec({
 
     "durationToDecimal works for ..." {
         listOf(
-            Duration.ofHours(3L) to "03,00",
-            Duration.ofMinutes(90L) to "01,50",
-            Duration.ofMinutes(502L) to "08,37",
-            Duration.parse("PT9H28M") to "09,47",
-            Duration.parse("PT8H34M") to "08,57",
+            Duration.ofHours(3L) to "3,00",
+            Duration.ofMinutes(90L) to "1,50",
+            Duration.ofMinutes(502L) to "8,37",
+            Duration.parse("PT2H") to "2,00",
+            Duration.parse("PT9H28M") to "9,47",
+            Duration.parse("PT11H4M") to "11,07",
+            Duration.parse("PT8H34M") to "8,57",
             Duration.ofHours(65L) to "65,00",
         ).forAll { (duration, expectedResult) ->
             DateTimeUtil.durationToDecimal(duration) shouldBe expectedResult

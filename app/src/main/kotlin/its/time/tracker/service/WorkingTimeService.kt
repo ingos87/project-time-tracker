@@ -44,7 +44,7 @@ class WorkingTimeService {
             }
             sb.append(" │")
             sb.append(" " + DateTimeUtil.durationToString(entry.value.last().workDuration))
-            sb.append(" (" + DateTimeUtil.durationToDecimal(entry.value.last().workDuration))
+            sb.append(" (" + DateTimeUtil.durationToDecimal(entry.value.last().workDuration).padStart(5, ' '))
             sb.append(") ║")
             sb.append(" " + DateTimeUtil.temporalToString(entry.value.first().clockIn.toLocalTime(), TIME_PATTERN))
             sb.append("-" + DateTimeUtil.temporalToString(entry.value.first().clockOut.toLocalTime(), TIME_PATTERN))
