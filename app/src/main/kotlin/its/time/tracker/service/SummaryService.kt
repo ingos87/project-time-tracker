@@ -36,39 +36,39 @@ class SummaryService {
         val workDaySummary = WorkDaySummary.toWorkDaySummary(daysEvents, showWorkInProgress)!!
         val costAssessmentList = ProjectTimeCalculator().calculateProjectTime(daysEvents, showWorkInProgress)
 
-        val cellWidth = 48
-        val bookingPosLength = BookingPositionResolver.getMaxBookingPosNameLength()
+        val tableWidth = 72
         if (showWorkInProgress) {
             println("[today's work in progress]")
-            println("┌" + "─".repeat(cellWidth) + "┐")
-            println("│ " + "clock-in:".padEnd(20) + temporalToString(workDaySummary.clockIn.toLocalTime(), TIME_PATTERN).padEnd(cellWidth-21) + "│")
-            println("├" + "─".repeat(cellWidth) + "┤")
-            println("│ " + "current work time:".padEnd(20) + durationToString(workDaySummary.workDuration).padEnd(cellWidth-21) + "│")
-            println("│ " + "current break time:".padEnd(20) + durationToString(workDaySummary.breakDuration).padEnd(cellWidth-21) + "│")
-            println("│ " + "current work topic:".padEnd(20) + daysEvents.last().topic.take(21).padEnd(cellWidth-21) + "│")
+            println("┌" + "─".repeat(tableWidth) + "┐")
+            println("│ " + "clock-in:".padEnd(20) + temporalToString(workDaySummary.clockIn.toLocalTime(), TIME_PATTERN).padEnd(tableWidth-21) + "│")
+            println("├" + "─".repeat(tableWidth) + "┤")
+            println("│ " + "current work time:".padEnd(20) + durationToString(workDaySummary.workDuration).padEnd(tableWidth-21) + "│")
+            println("│ " + "current break time:".padEnd(20) + durationToString(workDaySummary.breakDuration).padEnd(tableWidth-21) + "│")
+            println("│ " + "current work topic:".padEnd(20) + (daysEvents.last().topic.take(21) + " (since ${temporalToString(daysEvents.last().dateTime.toLocalTime(), TIME_PATTERN)})").padEnd(tableWidth-21) + "│")
         }
         else {
             println("[SUMMARY for $date]")
-            println("┌" + "─".repeat(cellWidth) + "┐")
-            println("│ " + "clock-in:".padEnd(18) + temporalToString(workDaySummary.clockIn.toLocalTime(), TIME_PATTERN).padEnd(cellWidth-19) + "│")
+            println("┌" + "─".repeat(tableWidth) + "┐")
+            println("│ " + "clock-in:".padEnd(18) + temporalToString(workDaySummary.clockIn.toLocalTime(), TIME_PATTERN).padEnd(tableWidth-19) + "│")
             var clockOutSupplement = ""
             if (workDaySummary.clockIn.toLocalDate().isBefore(workDaySummary.clockOut.toLocalDate())) {
                 clockOutSupplement = " (${temporalToString(workDaySummary.clockOut.toLocalDate(), DATE_PATTERN)})"
             }
-            println("│ " + "clock-out:".padEnd(18) + (temporalToString(workDaySummary.clockOut.toLocalTime(), TIME_PATTERN) + clockOutSupplement).padEnd(cellWidth-19) + "│")
-            println("├" + "─".repeat(cellWidth) + "┤")
-            println("│ " + "total work time:".padEnd(18) + durationToString(workDaySummary.workDuration).padEnd(cellWidth-19) + "│")
-            println("│ " + "total break time:".padEnd(18) + durationToString(workDaySummary.breakDuration).padEnd(cellWidth-19) + "│")
+            println("│ " + "clock-out:".padEnd(18) + (temporalToString(workDaySummary.clockOut.toLocalTime(), TIME_PATTERN) + clockOutSupplement).padEnd(tableWidth-19) + "│")
+            println("├" + "─".repeat(tableWidth) + "┤")
+            println("│ " + "total work time:".padEnd(18) + durationToString(workDaySummary.workDuration).padEnd(tableWidth-19) + "│")
+            println("│ " + "total break time:".padEnd(18) + durationToString(workDaySummary.breakDuration).padEnd(tableWidth-19) + "│")
         }
 
-        println("├" + "═".repeat(cellWidth) + "┤")
+        println("├" + "═".repeat(tableWidth) + "┤")
+        val bookingPosLength = BookingPositionResolver.getMaxBookingPosNameLength().coerceAtLeast(16)
         costAssessmentList.forEach {
             // total width - white space - bookingPosLength - ": " - time - "  " - 1parenthesis
-            val availableSpaceForTopicList = cellWidth-1-bookingPosLength-2-5-2-1
+            val availableSpaceForTopicList = tableWidth-1-bookingPosLength-2-5-2-1
             val topicList = ("(${it.topics.joinToString(",")}".take(availableSpaceForTopicList)+")").padEnd(availableSpaceForTopicList+1)
             println("│ " + "${it.bookingKey}:".padEnd(bookingPosLength+2) + durationToString(it.totalWorkingTime) + "  " + topicList + "│")
         }
-        println("└" + "─".repeat(cellWidth) + "┘")
+        println("└" + "─".repeat(tableWidth) + "┘")
 
     }
 

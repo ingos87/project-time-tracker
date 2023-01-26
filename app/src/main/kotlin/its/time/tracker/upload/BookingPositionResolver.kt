@@ -12,12 +12,13 @@ class BookingPositionResolver {
             "ProjectB" to       listOf("EPP-009", "EPP-123", "EPP-0815", "EPP-17662"),
 
             // real map
-            "PO PEw Cookbook" to    listOf("orga", "EPP-17899", "sprintwechsel", "EPP-17901", "retro", "EPP-14989", "refinement", "EPP-19251", "postscan_est", "EPP-19253"),
-            "Wartung" to            listOf("cow"),
-            "Training" to           listOf("weiterbildung"),
-            "Line Activity" to      listOf("onboarding"),
-            "Meeting" to            listOf("orga", "sdb-jourfixe", "allhands", "roadshow"),
-            "Dev 2022" to           listOf(),
+            "PEw Cookbook" to   listOf("orga", "sprintwechsel", "retro", "EPP-14989", "refinement", "EPP-19251", "postscan_est", "EPP-19253"),
+            "Rückbau EPP" to    listOf("EPP-17899", "EPP-17901"),
+            "Wartung" to        listOf("cow"),
+            "Training" to       listOf("weiterbildung"),
+            "Line Activity" to  listOf("onboarding"),
+            "Meeting" to        listOf("orga", "sdb-jourfixe", "allhands", "roadshow"),
+            "Dev 2022" to       listOf(),
         )
 
         fun resolveTopicToBookingPosition(topic: String): String {
