@@ -9,6 +9,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
 import java.time.Duration
 
+
 class WebElementService {
 
     private val webDriver: WebDriver
@@ -41,10 +42,18 @@ class WebElementService {
         printDebug("clicked on element with text '$text'")
     }
 
+    fun clickOnAllElementWithTitle(title: String) {
+        val elements: List<WebElement> = webDriver.findElements(By.xpath("//*[@title='$title']"))
+        elements.forEach{
+            val id = it.getAttribute("id")
+            clickOnElementWithId(id)
+            printDebug("clicked on element with id '$id'")
+        }
+    }
+
     private fun clickOnElementBy(by: By): String {
         val clickFun: (By, String) -> String = { funBy, _ ->
-            val elem: WebElement = WebDriverWait(webDriver, Duration.ofSeconds(DEFAULT_WAIT_SECONDS))
-                .until(ExpectedConditions.elementToBeClickable(funBy))
+            val elem = waitForElementToBeClickable(funBy)
             elem.click();""
         }
 
@@ -53,8 +62,7 @@ class WebElementService {
 
     fun getElementTextualContent(elementId: String): String {
         val getTextFun: (By, String) -> String = { funBy, _ ->
-            val div: WebElement = WebDriverWait(webDriver, Duration.ofSeconds(DEFAULT_WAIT_SECONDS))
-                .until(ExpectedConditions.elementToBeClickable(funBy))
+            val div = waitForElementToBeClickable(funBy)
             printDebug("found content of element id($elementId): '${div.text}'")
             div.text
         }
@@ -71,10 +79,14 @@ class WebElementService {
         printDebug("successfully inserted text into input id($elementId): $string")
     }
 
+    fun waitForElementToBeClickable(by: By): WebElement {
+        return WebDriverWait(webDriver, Duration.ofSeconds(DEFAULT_WAIT_SECONDS))
+            .until(ExpectedConditions.elementToBeClickable(by))
+    }
+
     private fun sendCharacter(elementId: String, singleCharacter: String): String {
         val sendCharFun: (By, String) -> String = { funBy, funChar ->
-            val inputField: WebElement = WebDriverWait(webDriver, Duration.ofSeconds(DEFAULT_WAIT_SECONDS))
-                .until(ExpectedConditions.elementToBeClickable(funBy))
+            val inputField = waitForElementToBeClickable(funBy)
             inputField.sendKeys(funChar)
             printDebug("sent character to input id($funBy): $funChar");""
         }
@@ -84,8 +96,7 @@ class WebElementService {
 
     private fun clearField(elementId: String, expectedCharsToByCleared: Int): String {
         val clearFun: (By, String) -> String = { funBy, charCount ->
-            val inputField: WebElement = WebDriverWait(webDriver, Duration.ofSeconds(DEFAULT_WAIT_SECONDS))
-                .until(ExpectedConditions.elementToBeClickable(funBy))
+            val inputField = waitForElementToBeClickable(funBy)
             inputField.clear()
             repeat(charCount.toInt() * 2) {
                 inputField.sendKeys(Keys.DELETE)

@@ -8,6 +8,7 @@ import its.time.tracker.service.ConsoleTableHelper.Companion.getContentLine
 import its.time.tracker.service.ConsoleTableHelper.Companion.getHorizontalSeparator
 import its.time.tracker.upload.BookingPositionResolver
 import its.time.tracker.upload.CostAssessmentNormalizer
+import its.time.tracker.upload.CostAssessmentUploader
 import its.time.tracker.upload.ProjectTimeCalculator
 import its.time.tracker.util.ClockEventsFilter
 import its.time.tracker.util.DateTimeUtil
@@ -66,7 +67,7 @@ class CostAssessmentService {
             println("\nNOOP mode. Uploaded nothing")
         } else {
             println("\nUploading clock-ins and clock-outs to eTime ...")
-            // TODO implement
+            CostAssessmentUploader(normalizedWorkingTimes).submit()
         }
     }
 

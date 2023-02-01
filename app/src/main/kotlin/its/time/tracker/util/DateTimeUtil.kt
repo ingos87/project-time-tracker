@@ -3,10 +3,12 @@ package its.time.tracker.util
 import its.time.tracker.config.Constants
 import its.time.tracker.exception.AbortException
 import java.time.*
+import java.time.DayOfWeek.*
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.time.format.ResolverStyle
 import java.time.temporal.Temporal
+import java.time.temporal.TemporalAdjusters
 import java.time.temporal.WeekFields
 import java.util.*
 import kotlin.math.roundToInt
@@ -160,7 +162,7 @@ class DateTimeUtil {
         fun isWorkingDay(date: LocalDate): Boolean {
             val dayOfWeek = date.dayOfWeek
             return !Constants.WEEKDAYS_OFF.contains(dayOfWeek)
-                && !Constants.WORK_FREE_DAYS.contains(date)
+                && !Constants.PUBLIC_HOLIDAYS.contains(date)
                 && !Constants.DAYS_OFF.contains(date)
         }
 
@@ -178,6 +180,26 @@ class DateTimeUtil {
 
             return Pair(Duration.ofMinutes((30 * halfHours).toLong()),
                 Duration.ofMinutes(remainder.toLong()))
+        }
+
+        /**
+         * returns monday of the given date's week
+         * if that monday is situated in the previous month, the first day of the given date's month is returned
+         * even though it is not a monday
+         * if that first day of a month is on a weekend day, the monday before is returned
+         */
+        fun getFirstBookingDay(date: LocalDate): LocalDate {
+            val startOfWeek = date.with(TemporalAdjusters.previousOrSame(MONDAY))
+            return if (startOfWeek.month == date.month && startOfWeek.dayOfWeek != SATURDAY && startOfWeek.dayOfWeek != SUNDAY) {
+                startOfWeek
+            } else {
+                val firstDayOfMonth = date.with(TemporalAdjusters.firstDayOfMonth())
+                when (firstDayOfMonth.dayOfWeek) {
+                    SATURDAY -> firstDayOfMonth.minusDays(5)
+                    SUNDAY -> firstDayOfMonth.minusDays(6)
+                    else -> firstDayOfMonth
+                }
+            }
         }
     }
 }

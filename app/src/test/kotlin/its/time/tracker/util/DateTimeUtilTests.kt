@@ -313,4 +313,26 @@ class DateTimeUtilTests : StringSpec({
             DateTimeUtil.roundToHalfHourWithRemainder(duration) shouldBe expectedResult
         }
     }
+
+    "startOfWeek works ..." {
+        listOf(
+            LocalDate.parse("2023-01-23") to LocalDate.parse("2023-01-23"),
+            LocalDate.parse("2023-01-26") to LocalDate.parse("2023-01-23"),
+            LocalDate.parse("2023-01-27") to LocalDate.parse("2023-01-23"),
+            LocalDate.parse("2023-01-28") to LocalDate.parse("2023-01-23"),
+            LocalDate.parse("2023-01-02") to LocalDate.parse("2023-01-02"),
+            LocalDate.parse("2023-01-08") to LocalDate.parse("2023-01-02"),
+            LocalDate.parse("2023-01-08") to LocalDate.parse("2023-01-02"),
+            LocalDate.parse("2023-01-30") to LocalDate.parse("2023-01-30"),
+            LocalDate.parse("2023-01-31") to LocalDate.parse("2023-01-30"),
+            LocalDate.parse("2023-02-01") to LocalDate.parse("2023-02-01"),
+            LocalDate.parse("2023-02-05") to LocalDate.parse("2023-02-01"),
+            LocalDate.parse("2023-11-30") to LocalDate.parse("2023-11-27"),
+            LocalDate.parse("2023-12-01") to LocalDate.parse("2023-12-01"),
+            LocalDate.parse("2023-03-31") to LocalDate.parse("2023-03-27"),
+            LocalDate.parse("2023-04-01") to LocalDate.parse("2023-03-27"),
+        ).forAll { (date, startOfBookingWeek) ->
+            DateTimeUtil.getFirstBookingDay(date) shouldBe startOfBookingWeek
+        }
+    }
 })

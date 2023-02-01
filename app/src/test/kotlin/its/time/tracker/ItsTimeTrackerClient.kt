@@ -34,6 +34,7 @@ fun ensureTestConfig(daysOff: String = "") {
         myHrSelfServiceLanguage = "EN",
         maxDailyWorkTillAutoClockOut = "PT9H",
         eTimeUrl = "https://no.second.url",
+        eTimeLanguage = "EN",
         daysOff = daysOff,
         weekdaysOff = "SATURDAY,SUNDAY",
         chromeProfilePath = "/tmp/nowhere"

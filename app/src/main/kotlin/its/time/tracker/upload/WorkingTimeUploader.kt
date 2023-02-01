@@ -10,6 +10,7 @@ import its.time.tracker.webpages.myhrselfservice.MyHrSelfServiceLandingPage
 import its.time.tracker.webpages.myhrselfservice.WorkingTimeCorrectionsPage
 import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
 
@@ -18,15 +19,33 @@ class WorkingTimeUploader(private val workingTimesByDay: SortedMap<LocalDate, Wo
 
     private val webElementService: WebElementService = WebElementService()
 
+    private fun getValidity(entry: Map.Entry<LocalDate, WorkDaySummary>): WorkingDayValidity {
+        val entryAge = ChronoUnit.DAYS.between(entry.key, LocalDate.now())
+        if (entryAge <= 30L) {
+            return WorkingDayValidity.OVER_30_DAYS_AGO
+        }
+
+        if (entry.value.clockOut.isAfter(LocalDateTime.now())) {
+            return WorkingDayValidity.FUTURE_CLOCK_OUT
+        }
+
+        return WorkingDayValidity.VALID
+    }
+
     fun submit() {
         navigateToTimeCorrectionLandingPage()
         workingTimesByDay.forEach{ entry ->
-            if (isWithinValidTimeframeForUpload(entry.key)) {
-                navigateToDay(entry.key)
-                ensureClockInClockOutPresent(entry.value)
-            }
-            else {
-                println("unable to upload working time for ${DateTimeUtil.temporalToString(entry.key, DATE_PATTERN)} because it is longer than 30 days ago.")
+            when(getValidity(entry)) {
+                WorkingDayValidity.OVER_30_DAYS_AGO -> {
+                    println("unable to upload working time for ${DateTimeUtil.temporalToString(entry.key, DATE_PATTERN)} because it is longer than 30 days ago.")
+                }
+                WorkingDayValidity.FUTURE_CLOCK_OUT -> {
+                    println("unable to upload working time for ${DateTimeUtil.temporalToString(entry.key, DATE_PATTERN)} because clock-out is a future date.")
+                }
+                else -> {
+                    navigateToDay(entry.key)
+                    ensureClockInClockOutPresent(entry.value)
+                }
             }
         }
     }
@@ -63,14 +82,13 @@ class WorkingTimeUploader(private val workingTimesByDay: SortedMap<LocalDate, Wo
         timeCorrectionsPage.createClockInAndCLockOut(workDaySummary)
     }
 
-    private fun isWithinValidTimeframeForUpload(date: LocalDate): Boolean {
-        val entryAge = ChronoUnit.DAYS.between(date, LocalDate.now())
-        return entryAge <= 30L
-    }
-
     private fun navigateToDay(date: LocalDate) {
         val timeCorrectionsPage = WorkingTimeCorrectionsPage(webElementService)
         timeCorrectionsPage.selectDate(date)
     }
 
+}
+
+enum class WorkingDayValidity {
+    VALID, OVER_30_DAYS_AGO, FUTURE_CLOCK_OUT
 }

@@ -25,7 +25,7 @@ class Constants {
         val MAX_WORK_BEFORE_BREAK2: Duration = Duration.ofHours(9)
         val MAX_WORK_PER_DAY: Duration = Duration.ofHours(10)
         val MIN_BREAK_BTW_DAYS: Duration = Duration.ofHours(11)
-        val WORK_FREE_DAYS: List<LocalDate> = listOf(
+        val PUBLIC_HOLIDAYS: List<LocalDate> = listOf(
             "2023-01-01",
             "2023-03-08",
             "2023-04-07",
@@ -46,6 +46,7 @@ class Constants {
         var MY_HR_SELF_SERVICE_URL: String = ""
         var MY_HR_SELF_SERVICE_LANGUAGE: String = ""
         var E_TIME_URL: String = ""
+        var E_TIME_LANGUAGE: String = ""
         var MAX_WORK_DURATION_TILL_AUTO_CLOCKOUT: Duration = Duration.ofHours(9)
         var WEEKDAYS_OFF: List<DayOfWeek> = emptyList()
         var DAYS_OFF: List<LocalDate> = emptyList()
@@ -58,6 +59,7 @@ class Constants {
             MY_HR_SELF_SERVICE_LANGUAGE = readStringProperty(properties, Companion::MY_HR_SELF_SERVICE_LANGUAGE.name.lowercase(Locale.GERMANY))
             MAX_WORK_DURATION_TILL_AUTO_CLOCKOUT = Duration.parse(readStringProperty(properties, Companion::MAX_WORK_DURATION_TILL_AUTO_CLOCKOUT.name.lowercase(Locale.GERMANY)))
             E_TIME_URL = readStringProperty(properties, Companion::E_TIME_URL.name.lowercase(Locale.GERMANY))
+            E_TIME_LANGUAGE = readStringProperty(properties, Companion::E_TIME_LANGUAGE.name.lowercase(Locale.GERMANY))
             DAYS_OFF = parseDayList(properties[Companion::DAYS_OFF.name.lowercase(Locale.GERMANY)] as String)
             WEEKDAYS_OFF = parseWeekdayList(properties[Companion::WEEKDAYS_OFF.name.lowercase(Locale.GERMANY)] as String)
             CHROME_PROFILE_PATH = readStringProperty(properties, Companion::CHROME_PROFILE_PATH.name.lowercase(Locale.GERMANY))
