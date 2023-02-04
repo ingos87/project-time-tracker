@@ -3,10 +3,7 @@ package its.time.tracker.config
 import its.time.tracker.config.Constants.Companion.VERBOSE
 import its.time.tracker.exception.AbortException
 import its.time.tracker.util.DateTimeUtil
-import java.time.DayOfWeek
-import java.time.Duration
-import java.time.LocalDate
-import java.time.LocalTime
+import java.time.*
 import java.util.*
 
 class Constants {
@@ -95,5 +92,7 @@ class Constants {
 }
 
 fun printDebug(msg: String) {
-    if (VERBOSE) println("  DEBUG: $msg")
+    if (VERBOSE) {
+        println("  DEBUG: ${LocalDateTime.now()}: $msg")
+    }
 }

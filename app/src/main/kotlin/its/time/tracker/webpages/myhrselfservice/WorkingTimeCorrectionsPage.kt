@@ -1,10 +1,10 @@
 package its.time.tracker.webpages.myhrselfservice
 
 import its.time.tracker.config.Constants
+import its.time.tracker.config.printDebug
 import its.time.tracker.domain.EventType
 import its.time.tracker.domain.WorkDaySummary
 import its.time.tracker.webpages.WebElementService
-import org.openqa.selenium.Keys
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
@@ -106,5 +106,6 @@ class WorkingTimeCorrectionsPage(private val webElementService: WebElementServic
 
     fun doThingyToEnsurePageLoadingFinished() {
         webElementService.setTextualContent(EVENT_TYPE_INPUT_ID, "...")
+        printDebug("WorkingTimeCorrectionsPage finished loading")
     }
 }

@@ -9,7 +9,7 @@ class ETimeLandingPage(private val webElementService: WebElementService) {
         const val E_TIME_TILE_ID = "__tile4"
     }
 
-    fun clickETimeTile() {
-        webElementService.clickOnElementWithId(E_TIME_TILE_ID)
+    fun clickETimeTile(waitSeconds: Long) {
+        webElementService.clickOnElementWithId(E_TIME_TILE_ID, waitSeconds)
     }
 }

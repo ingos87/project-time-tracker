@@ -8,6 +8,7 @@ import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
 import java.time.Duration
+import java.util.regex.Pattern
 
 
 class WebElementService {
@@ -23,7 +24,7 @@ class WebElementService {
         val options = ChromeOptions()
         options.addArguments("user-data-dir=${Constants.CHROME_PROFILE_PATH}")
         webDriver = ChromeDriver(options)
-        webDriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(DEFAULT_WAIT_SECONDS))
+        webDriver.manage().timeouts().implicitlyWait(Duration.ofMillis(500L))
         printDebug(webDriver.toString())
     }
 
@@ -32,28 +33,28 @@ class WebElementService {
         printDebug("navigated to $url")
     }
 
-    fun clickOnElementWithId(id: String) {
-        clickOnElementBy(By.id(id))
+    fun clickOnElementWithId(id: String, waitSeconds: Long = DEFAULT_WAIT_SECONDS) {
+        clickOnElementBy(By.id(id), waitSeconds)
         printDebug("clicked on element with id '$id'")
     }
 
-    fun clickOnElementWithText(text: String) {
-        clickOnElementBy(By.xpath("//*[text()='$text']"))
+    fun clickOnElementWithText(text: String, waitSeconds: Long = DEFAULT_WAIT_SECONDS) {
+        clickOnElementBy(By.xpath("//*[text()='$text']"), waitSeconds)
         printDebug("clicked on element with text '$text'")
     }
 
     fun clickOnAllElementWithTitle(title: String) {
         val elements: List<WebElement> = webDriver.findElements(By.xpath("//*[@title='$title']"))
+        printDebug("found ${elements.size} expand buttons")
         elements.forEach{
-            val id = it.getAttribute("id")
-            clickOnElementWithId(id)
-            printDebug("clicked on element with id '$id'")
+            it.click()
+            printDebug("clicked on expand button $it")
         }
     }
 
-    private fun clickOnElementBy(by: By): String {
+    private fun clickOnElementBy(by: By, waitSeconds: Long = DEFAULT_WAIT_SECONDS): String {
         val clickFun: (By, String) -> String = { funBy, _ ->
-            val elem = waitForElementToBeClickable(funBy)
+            val elem = waitForElementToBeClickable(funBy, waitSeconds)
             elem.click();""
         }
 
@@ -79,8 +80,49 @@ class WebElementService {
         printDebug("successfully inserted text into input id($elementId): $string")
     }
 
-    fun waitForElementToBeClickable(by: By): WebElement {
-        return WebDriverWait(webDriver, Duration.ofSeconds(DEFAULT_WAIT_SECONDS))
+    fun findElementByRegexId(regex: String): WebElement? {
+        val pattern = Pattern.compile(regex)
+
+        val elements = webDriver.findElements(By.xpath("//*[@id]"))
+        printDebug("found ${elements.size} elements by id")
+        printDebug("ids: " + elements.joinToString { it.getAttribute("id") })
+        for (element in elements) {
+            val id = element.getAttribute("id")
+            val matcher = pattern.matcher(id)
+            if (matcher.matches()) {
+                return element
+            }
+        }
+        return null
+    }
+
+    fun findElementByIdComponents(prefix: String, suffix: String, startingIdx: Int): WebElement? {
+        // TODO fix time issues if first found index is too large
+        (startingIdx..200).forEach {
+            val maybeElementId = "$prefix$it$suffix"
+            val webElem = findElementById(maybeElementId)
+            if (webElem != null) {
+                printDebug("found element $maybeElementId")
+                return webElem
+            }
+        }
+        return null
+    }
+
+    fun findElementById(id: String): WebElement? {
+        return try {
+            val by = By.id(id)
+            WebDriverWait(webDriver, Duration.ofMillis(100L)).until(ExpectedConditions.elementToBeClickable(by))
+            webDriver.findElement(by)
+        } catch (e: NoSuchElementException) {
+            null
+        } catch (e: TimeoutException) {
+            null
+        }
+    }
+
+    fun waitForElementToBeClickable(by: By, waitSeconds: Long = DEFAULT_WAIT_SECONDS): WebElement {
+        return WebDriverWait(webDriver, Duration.ofSeconds(waitSeconds))
             .until(ExpectedConditions.elementToBeClickable(by))
     }
 
