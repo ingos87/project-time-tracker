@@ -77,7 +77,7 @@ class ETimeAssessmentPage(private val webElementService: WebElementService) {
         val firstTableIdx = getWildcardPartFromElementId(firstBookingPositionTitle, Regex(firstTableTitleRegexString)).toInt()
 
         // e.g. __input1-Table0-0-inner
-        val firstBookingPositionInput = webElementService.findElementByIdComponents("__input", "-Table0-0-inner", 0)
+        val firstBookingPositionInput = webElementService.findFirstElementInIdSection("__input", "-Table0-0-inner")
             ?: throw AbortException("was unable to find any cost assessment inputs on page")
 
         val firstBookingPositionInputRegexString = "__input(\\d+)-Table0-0-inner"

@@ -20,7 +20,7 @@ class BookingPositionResolverTest : StringSpec({
             "DVR-" to "Line Activity",
             "DVR-7" to "Line Activity",
             "DVR-42" to "Line Activity",
-            "abcdefg" to "UNKNOWN",
+            "abcdefg" to "Project Placeholder",
         ).forAll { (topic, expectedBookingPosition) ->
             BookingPositionResolver.resolveTopicToBookingPosition(topic) shouldBe expectedBookingPosition
         }

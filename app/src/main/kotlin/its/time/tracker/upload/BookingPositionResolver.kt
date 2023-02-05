@@ -4,6 +4,7 @@ import kotlin.math.max
 
 class BookingPositionResolver {
     companion object {
+        // TODO move this to config file
         private val BOOKING_POSITIONS_MAP = mapOf(
             // for testing
             "ITS meetings" to   listOf("f2ff", "allhandss", "townhalll", "jourfixee", "jourfixee"),
@@ -53,8 +54,8 @@ class BookingPositionResolver {
                 }
             }
 
-            println("Found no fitting booking position for work topic '$topic'")
-            return "UNKNOWN"
+            println("Found no fitting booking position for work topic '$topic' -> using cost assessment 'Project Placeholder'")
+            return "Project Placeholder"
         }
 
         fun getMaxBookingPosNameLength(): Int {

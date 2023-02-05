@@ -100,10 +100,10 @@ class ConsoleTableHelper {
                     else -> content.substring(0, cellWidth)
                 }
                 TextOrientation.LEFT -> {
-                    " " + content.padEnd(cellWidth-1)
+                    " " + content.take(cellWidth-2).padEnd(cellWidth-1)
                 }
                 TextOrientation.RIGHT -> {
-                    " " + content.padStart(cellWidth-1)
+                    " " + content.take(cellWidth-2).padStart(cellWidth-1)
                 }
             }
         }

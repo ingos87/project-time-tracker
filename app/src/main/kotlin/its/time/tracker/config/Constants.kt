@@ -93,6 +93,6 @@ class Constants {
 
 fun printDebug(msg: String) {
     if (VERBOSE) {
-        println("  DEBUG: ${LocalDateTime.now()}: $msg")
+        println("  DEBUG: ${LocalDateTime.now().toString().take(22).padEnd(22, ' ')}: $msg")
     }
 }

@@ -109,6 +109,38 @@ class WebElementService {
         return null
     }
 
+    fun findFirstElementInIdSection(prefix: String, suffix: String): WebElement? {
+        var it = 0
+        while (it <= 1000) {
+            val maybeElementId = "$prefix$it$suffix"
+            printDebug("looking for $maybeElementId")
+            val webElem = findElementById(maybeElementId)
+            if (webElem != null) {
+                printDebug("found element($maybeElementId) at index $it")
+                return findFirstElementInIdSubSection(prefix, suffix, it)
+            }
+
+            it += 9
+        }
+        return null
+    }
+
+    private fun findFirstElementInIdSubSection(prefix: String, suffix: String, idx: Int): WebElement? {
+        val maybeElementId = "$prefix$idx$suffix"
+        if (idx == 0) {
+            return findElementById(maybeElementId)
+        }
+
+        val previousElementId = "$prefix${idx-1}$suffix"
+        val prevElem = findElementById(previousElementId)
+        if (prevElem != null) {
+            return findFirstElementInIdSubSection(prefix, suffix, idx-1)
+        }
+
+        printDebug("found final element: $maybeElementId")
+        return findElementById(maybeElementId)
+    }
+
     fun findElementById(id: String): WebElement? {
         return try {
             val by = By.id(id)

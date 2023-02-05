@@ -56,11 +56,12 @@ class CostAssessmentUploader(private val costAssessmentsPerDay: SortedMap<LocalD
             eTimeAssessmentPage.insertHours(it.inputIdMap[dayOfWeek]!!, cellContent)
         }
 
-        if (donePositions.size != costAssessmentPositions.size) {
-            val missingPositionsOnPage = costAssessmentPositions.map { it.bookingKey }.minus(donePositions.toSet())
+        val allCostAssessmentPositions = costAssessmentPositions.map { it.bookingKey }.toSet()
+        if (donePositions.size != allCostAssessmentPositions.size) {
+            val missingPositionsOnPage = allCostAssessmentPositions.minus(donePositions.toSet())
             println("Warning: unable to book hours for these cost assessment positions because they are not among your favorites: ${missingPositionsOnPage.joinToString()}")
             println("done:  $donePositions")
-            println("input: $costAssessmentPositions")
+            println("input: $allCostAssessmentPositions")
         }
     }
 

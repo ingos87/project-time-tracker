@@ -38,9 +38,10 @@ class CostAssessmentService {
             return
         }
 
-        val normalizedWorkingTimes = CostAssessmentNormalizer().normalizeWorkingTime(summaryData)
+        val costAssessmentMap = summaryData.data.map { (k, v) -> k to v.second }.toMap()
+        val normalizedWorkingTimes = CostAssessmentNormalizer().normalizeWorkingTime(costAssessmentMap)
 
-        val firstColWidth = BookingPositionResolver.getMaxBookingPosNameLength()+2
+        val firstColWidth = 18 //BookingPositionResolver.getMaxBookingPosNameLength()+2
         println("[SUMMARY for ${uniqueDays.first()} - ${uniqueDays.last()}]")
         println(getHorizontalSeparator(uniqueDays, SeparatorPosition.TOP, firstColWidth, false))
         println(getContentLine(
