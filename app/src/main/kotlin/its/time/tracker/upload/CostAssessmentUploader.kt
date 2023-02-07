@@ -16,7 +16,7 @@ class CostAssessmentUploader(private val costAssessmentsPerDay: SortedMap<LocalD
 
     private val webElementService: WebElementService = WebElementService()
 
-    fun submit() {
+    fun submit(doSign: Boolean) {
         navigateToTimeCorrectionLandingPage()
 
         val bookingPageKeys = costAssessmentsPerDay.keys.groupBy { DateTimeUtil.getFirstBookingDay(it) }
@@ -27,6 +27,7 @@ class CostAssessmentUploader(private val costAssessmentsPerDay: SortedMap<LocalD
         bookingPageKeys.forEach{ entry ->
             eTimeAssessmentPage.clickAllExpandIcons()
             eTimeAssessmentPage.selectWeek(entry.key)
+            // TODO check, whether page is editable. skip following lines if it is not
             eTimeAssessmentPage.addAllTasksAndStandardActivities()
 
             val availableDaysForThisPage = entry.value
@@ -35,6 +36,9 @@ class CostAssessmentUploader(private val costAssessmentsPerDay: SortedMap<LocalD
             }
 
             eTimeAssessmentPage.clickSaveButton()
+            if (doSign) {
+                eTimeAssessmentPage.clickSignButton()
+            }
         }
     }
 
@@ -48,15 +52,15 @@ class CostAssessmentUploader(private val costAssessmentsPerDay: SortedMap<LocalD
         val donePositions = mutableListOf<String>()
         ids.forEach {
             var cellContent = ""
-            val costAssessmentPosition = costAssessmentPositions.find { pos -> pos.bookingKey == it.bookingPositionKey }
+            val costAssessmentPosition = costAssessmentPositions.find { pos -> pos.project == it.bookingPositionKey }
             if (costAssessmentPosition != null) {
                 cellContent = DateTimeUtil.durationToDecimal(costAssessmentPosition.totalWorkingTime)
-                donePositions.add(costAssessmentPosition.bookingKey)
+                donePositions.add(costAssessmentPosition.project)
             }
             eTimeAssessmentPage.insertHours(it.inputIdMap[dayOfWeek]!!, cellContent)
         }
 
-        val allCostAssessmentPositions = costAssessmentPositions.map { it.bookingKey }.toSet()
+        val allCostAssessmentPositions = costAssessmentPositions.map { it.project }.toSet()
         if (donePositions.size != allCostAssessmentPositions.size) {
             val missingPositionsOnPage = allCostAssessmentPositions.minus(donePositions.toSet())
             println("Warning: unable to book hours for these cost assessment positions because they are not among your favorites: ${missingPositionsOnPage.joinToString()}")
@@ -69,6 +73,7 @@ class CostAssessmentUploader(private val costAssessmentsPerDay: SortedMap<LocalD
         webElementService.navigateToUrl(Constants.E_TIME_URL)
 
         val eTimeLandingPage = ETimeLandingPage(webElementService)
+        // very long wait in order to give human observer time to insert htaccess credentials
         eTimeLandingPage.clickETimeTile(120L)
 
         val eTimeAssessmentPage = ETimeAssessmentPage(webElementService)

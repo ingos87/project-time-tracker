@@ -3,8 +3,14 @@ package its.time.tracker.upload
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.inspectors.forAll
 import io.kotest.matchers.shouldBe
+import its.time.tracker.config.Constants
+import its.time.tracker.ensureTestConfig
 
 class BookingPositionResolverTest : StringSpec({
+
+    beforeEach {
+        ensureTestConfig()
+    }
 
     "getTimeDiff works for ..." {
         listOf(
@@ -22,7 +28,7 @@ class BookingPositionResolverTest : StringSpec({
             "DVR-42" to "Line Activity",
             "abcdefg" to "Project Placeholder",
         ).forAll { (topic, expectedBookingPosition) ->
-            BookingPositionResolver.resolveTopicToBookingPosition(topic) shouldBe expectedBookingPosition
+            Constants.COST_ASSESSMENTS.resolveTopicToProject(topic) shouldBe expectedBookingPosition
         }
     }
 })

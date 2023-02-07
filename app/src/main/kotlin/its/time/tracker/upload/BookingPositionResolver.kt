@@ -6,12 +6,6 @@ class BookingPositionResolver {
     companion object {
         // TODO move this to config file
         private val BOOKING_POSITIONS_MAP = mapOf(
-            // for testing
-            "ITS meetings" to   listOf("f2ff", "allhandss", "townhalll", "jourfixee", "jourfixee"),
-            "DoD" to            listOf("coww"),
-            "ProjectA" to       listOf("EPP-007", "EPP-008"),
-            "ProjectB" to       listOf("EPP-009", "EPP-123", "EPP-0815", "EPP-17662"),
-
             // actual projects
             "Laufzeitrabatt"                            to listOf(),
             "Update InfBrok100"                         to listOf(),
@@ -39,27 +33,5 @@ class BookingPositionResolver {
             "Work.Time Compensation"                    to listOf(),
             "Other absence"                             to listOf(),
         )
-
-        fun resolveTopicToBookingPosition(topic: String): String {
-            if (topic.startsWith("EDF-")) {
-                return "Wartung"
-            }
-            if (topic.startsWith("DVR-")) {
-                return "Line Activity"
-            }
-
-            BOOKING_POSITIONS_MAP.forEach { (bookingPos, possibleTopics) ->
-                if (possibleTopics.any { it.equals(topic, ignoreCase = true) }) {
-                    return bookingPos
-                }
-            }
-
-            println("Found no fitting booking position for work topic '$topic' -> using cost assessment 'Project Placeholder'")
-            return "Project Placeholder"
-        }
-
-        fun getMaxBookingPosNameLength(): Int {
-            return max(12, BOOKING_POSITIONS_MAP.keys.maxOf { it.length })
-        }
     }
 }

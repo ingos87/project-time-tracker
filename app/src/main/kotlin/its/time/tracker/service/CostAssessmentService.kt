@@ -6,7 +6,6 @@ import its.time.tracker.domain.WorkDaySummaryCollection
 import its.time.tracker.service.ConsoleTableHelper.Companion.getCellString
 import its.time.tracker.service.ConsoleTableHelper.Companion.getContentLine
 import its.time.tracker.service.ConsoleTableHelper.Companion.getHorizontalSeparator
-import its.time.tracker.upload.BookingPositionResolver
 import its.time.tracker.upload.CostAssessmentNormalizer
 import its.time.tracker.upload.CostAssessmentUploader
 import its.time.tracker.upload.ProjectTimeCalculator
@@ -18,7 +17,7 @@ import java.util.*
 
 class CostAssessmentService {
 
-    fun captureProjectTimes(referenceDate: LocalDate, noop: Boolean) {
+    fun captureProjectTimes(referenceDate: LocalDate, calculateForcast: Boolean, noop: Boolean, doSign: Boolean) {
         val csvService = CsvService()
         val clockEvents = csvService.loadClockEvents()
 
@@ -68,7 +67,7 @@ class CostAssessmentService {
             println("\nNOOP mode. Uploaded nothing")
         } else {
             println("\nUploading clock-ins and clock-outs to eTime ...")
-            CostAssessmentUploader(normalizedWorkingTimes).submit()
+            CostAssessmentUploader(normalizedWorkingTimes).submit(doSign)
         }
     }
 
@@ -79,7 +78,7 @@ class CostAssessmentService {
     ): List<String> {
         val times = mutableListOf<String>()
         uniqueDays.forEach { date ->
-            val projectDuration = normalizedWorkingTimes[date]?.find { it -> it.bookingKey == name }?.totalWorkingTime
+            val projectDuration = normalizedWorkingTimes[date]?.find { it -> it.project == name }?.totalWorkingTime
             times.add(if (projectDuration == null || projectDuration == Duration.ZERO) "     "
                         else DateTimeUtil.durationToDecimal(projectDuration).padStart(5, ' '))
         }

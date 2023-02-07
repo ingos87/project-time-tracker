@@ -10,6 +10,7 @@ import java.time.temporal.ChronoUnit.MINUTES
 
 class ProjectTimeCalculator {
 
+    // TODO refactor. method is too long
     fun calculateProjectTime(clockEvents: List<ClockEvent>, useNowAsCLockOut: Boolean = false): List<CostAssessmentPosition> {
         val topicTimes = ArrayList<Pair<String, Duration>>()
         var totalWorkingTime: Duration = Duration.ZERO
@@ -66,13 +67,13 @@ class ProjectTimeCalculator {
         topicTimes.forEach {
             val topic = it.first
             val workingTime = it.second
-            val bookingKey = BookingPositionResolver.resolveTopicToBookingPosition(topic)
+            val bookingKey = Constants.COST_ASSESSMENTS.resolveTopicToProject(topic)
 
-            val presentItem = costAssessmentPositions.find { item -> item.bookingKey == bookingKey }
+            val presentItem = costAssessmentPositions.find { item -> item.project == bookingKey }
             if (presentItem != null) {
                 costAssessmentPositions.remove(presentItem)
                 val newItem = CostAssessmentPosition(
-                    bookingKey = bookingKey,
+                    project = bookingKey,
                     totalWorkingTime = presentItem.totalWorkingTime.plus(workingTime),
                     topics = presentItem.topics.plus(topic)
                 )
@@ -80,7 +81,7 @@ class ProjectTimeCalculator {
             }
             else {
                 val newItem = CostAssessmentPosition(
-                    bookingKey = bookingKey,
+                    project = bookingKey,
                     totalWorkingTime = workingTime,
                     topics = setOf(topic)
                 )

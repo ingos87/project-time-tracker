@@ -27,7 +27,7 @@ data class WorkDaySummaryCollection(
     }
 
     fun getAllBookingPositionNames(): List<String> {
-        return data.values.map { it.second.map { item -> item.bookingKey } }.flatten().distinct()
+        return data.values.map { it.second.map { item -> item.project } }.flatten().distinct()
     }
 
     fun getAllTotalWorkingTimes(): List<String> {
@@ -37,7 +37,7 @@ data class WorkDaySummaryCollection(
     fun getAllBookingDurationsForKeyAsString(bookingKey: String): List<String> {
         var dateDurationsMap: Map<LocalDate, Duration> = HashMap()
         data.forEach{ (key, pair) ->
-            val maybeBookingPositionItem = pair.second.find { item -> item.bookingKey == bookingKey }
+            val maybeBookingPositionItem = pair.second.find { item -> item.project == bookingKey }
             dateDurationsMap = dateDurationsMap.plus(Pair(key, maybeBookingPositionItem?.totalWorkingTime ?: Duration.ZERO))
         }
 

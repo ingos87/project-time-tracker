@@ -22,6 +22,12 @@ class ETimeAssessmentPage(private val webElementService: WebElementService) {
                 else -> "Save"
             }
         }
+        fun getLocalizedSignButtonText(): String {
+            return when(Constants.E_TIME_LANGUAGE) {
+                "DE" -> "..." // TODO
+                else -> "Sign"
+            }
+        }
     }
 
     fun selectWeek(date: LocalDate) {
@@ -42,8 +48,6 @@ class ETimeAssessmentPage(private val webElementService: WebElementService) {
         Thread.sleep(4000)
         webElementService.clickOnElementWithId("application-YUI_193_ETIME-change-component---idAppControl--myFavButtonID")
         Thread.sleep(500)
-        //webElementService.clickOnElementWithText(getLocalizedAddFromFavoritesButtonText())
-        //doThingyToEnsurePageLoadingFinished()
     }
 
     fun clickAllExpandIcons() {
@@ -56,6 +60,15 @@ class ETimeAssessmentPage(private val webElementService: WebElementService) {
     fun clickSaveButton() {
         try {
             webElementService.clickOnElementWithText(getLocalizedSaveButtonText(), 1L)
+            Thread.sleep(5000)
+        } catch (e: org.openqa.selenium.TimeoutException) {
+            // ignore because page seems to be non-editable
+        }
+    }
+
+    fun clickSignButton() {
+        try {
+            webElementService.clickOnElementWithText(getLocalizedSignButtonText())
             Thread.sleep(5000)
         } catch (e: org.openqa.selenium.TimeoutException) {
             // ignore because page seems to be non-editable

@@ -28,6 +28,7 @@ class ConfigService private constructor(private var configFilePath: String) {
             weekdaysOff: String = "",
             daysOff: String = "",
             chromeProfilePath: String = "",
+            standardDailyWorkDuration: String,
         ) {
             if (File(configFilePath).exists()) {
                 println("$configFilePath already exists.")
@@ -42,6 +43,7 @@ class ConfigService private constructor(private var configFilePath: String) {
                 "  \"${Constants::E_TIME_URL.name.lowercase(Locale.GERMANY)}\":\"$eTimeUrl\",",
                 "  \"${Constants::E_TIME_LANGUAGE.name.lowercase(Locale.GERMANY)}\":\"$eTimeLanguage\",",
                 "  \"${Constants::MAX_WORK_DURATION_TILL_AUTO_CLOCKOUT.name.lowercase(Locale.GERMANY)}\":\"$maxDailyWorkTillAutoClockOut\",",
+                "  \"${Constants::STANDARD_WORK_DURATION_PER_DAY.name.lowercase(Locale.GERMANY)}\":\"$standardDailyWorkDuration\",",
                 "  \"${Constants::WEEKDAYS_OFF.name.lowercase(Locale.GERMANY)}\":\"$weekdaysOff\",",
                 "  \"${Constants::DAYS_OFF.name.lowercase(Locale.GERMANY)}\":\"$daysOff\",",
                 "  \"${Constants::CHROME_PROFILE_PATH.name.lowercase(Locale.GERMANY)}\":\"$chromeProfilePath\"",

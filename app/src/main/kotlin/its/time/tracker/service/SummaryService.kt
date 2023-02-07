@@ -6,7 +6,6 @@ import its.time.tracker.domain.WorkDaySummary
 import its.time.tracker.service.ConsoleTableHelper.Companion.getCellString
 import its.time.tracker.service.ConsoleTableHelper.Companion.getContentLine
 import its.time.tracker.service.ConsoleTableHelper.Companion.getHorizontalSeparator
-import its.time.tracker.upload.BookingPositionResolver
 import its.time.tracker.upload.ProjectTimeCalculator
 import its.time.tracker.util.ClockEventsFilter
 import its.time.tracker.util.DATE_PATTERN
@@ -66,7 +65,7 @@ class SummaryService {
             // total width - white space - bookingPosLength - ": " - time - "  " - 1parenthesis
             val availableSpaceForTopicList = tableWidth-1-bookingPosLength-2-5-2-1
             val topicList = ("(${it.topics.joinToString(",")}".take(availableSpaceForTopicList)+")").padEnd(availableSpaceForTopicList+1)
-            println("│ " + "${it.bookingKey.take(bookingPosLength)}:".padEnd(bookingPosLength+2) + durationToString(it.totalWorkingTime) + "  " + topicList + "│")
+            println("│ " + "${it.project.take(bookingPosLength)}:".padEnd(bookingPosLength+2) + durationToString(it.totalWorkingTime) + "  " + topicList + "│")
         }
         println("└" + "─".repeat(tableWidth) + "┘")
 

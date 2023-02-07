@@ -1,8 +1,6 @@
 package its.time.tracker.upload
 
 import its.time.tracker.domain.CostAssessmentPosition
-import its.time.tracker.domain.WorkDaySummary
-import its.time.tracker.domain.WorkDaySummaryCollection
 import its.time.tracker.util.DateTimeUtil
 import java.time.Duration
 import java.time.LocalDate
@@ -42,7 +40,7 @@ class CostAssessmentValidator {
 
     private fun combineByBookingId(list: MutableList<CostAssessmentPosition>)
     : List<CostAssessmentPosition>{
-        return list.groupBy{it.bookingKey}
+        return list.groupBy{it.project}
             .map { (_, group) ->
                 val minutesSum = group.sumOf { it.totalWorkingTime.toMinutes() }
                 val allTopics = mutableSetOf<String>()
@@ -50,7 +48,7 @@ class CostAssessmentValidator {
                     allTopics.addAll(it.topics)
                 }
                 CostAssessmentPosition(
-                    group.first().bookingKey,
+                    group.first().project,
                     Duration.ofMinutes(minutesSum),
                     allTopics
                 )

@@ -33,6 +33,7 @@ class Init: CliktCommand(help="initializes App by writing custom properties to a
     val myHrSelfServiceLanguage by option("-l", "--myselfhrlang", help="Language (EN,DE) of MyHRSelfService").default("EN")
     val eTimeUrl by option("-e", "--etime", help="Url to project booking landing page").required()
     val maxWorkDuration by option("-h", "--maxworkdurationperday", help="Maximum work duration per day, to which app is to fill up working time in case no explicit clock-out was submitted (e.g.: PT9H, PT8H30M)").default("PT7H42M")
+    val stdWorkDuration by option("-s", "--stdworkdurationperday", help="Standard work duration per day (e.g.: PT7H42M, PT8H)").default("PT7H42M")
     val weekdaysOff by option("-w", "--weekdaysoff", help="Comma seperated list of weekdays (MONDAY,TUESDAY,..,SATURDAY,SUNDAY) when no work time is to be transferred to external systems").default("SATURDAY,SUNDAY")
     val daysOff by option("-d", "--daysoff", help="Comma seperated list of days (format: $DATE_PATTERN) when no work time is to be transferred to external systems")
     val chromeProfilePath by option("-b", "--browserprofilepath", help="Path to Chrome browser profile path (open chrome://version/)")
@@ -47,6 +48,7 @@ class Init: CliktCommand(help="initializes App by writing custom properties to a
             weekdaysOff = weekdaysOff,
             daysOff = daysOff?:"",
             chromeProfilePath = chromeProfilePath?:"",
+            standardDailyWorkDuration = stdWorkDuration,
         )
     }
 }
@@ -148,17 +150,22 @@ class Timekeeping: CliktCommand(help="export work time for the previous 30 days 
 class CostAssessment: CliktCommand(help="export project working times for a specific calendar week to eTime") {
     val v: Boolean by option("-v", help = "enable verbose mode").flag()
     val noop: Boolean by option("--noop", help = "Do not actually upload anything. Just show working times per project per day.").flag()
+    val sign: Boolean by option("-s", "--sign", help = "If set, cost assessments are automatically signed. WARNING: This cannot be undone!").flag()
+    val forecast: Boolean by option("-f", "--forecast", help = "Calculate and submit cost assessment forecast for final days of billing period. This usually applies to the last 2-3 days of the last full week of every month.").flag()
     val calendarWeek by option("-w", "--week", help="date (format: $WEEK_PATTERN)").required()
     val configPath by option("--configpath", help = "Defines a custom config file path. That file has to be created before-hand")
     override fun run() {
-
+        if (noop && sign) {
+            echo("Signing cost assessments is not possible in noop mode.")
+            return
+        }
         try {
             ConfigService.createConfigService(configPath).initConstants(v)
 
             val date = DateTimeUtil.toValidCalendarWeek(calendarWeek)
             if (date != null) {
                 val service = CostAssessmentService()
-                service.captureProjectTimes(date as LocalDate, noop)
+                service.captureProjectTimes(date as LocalDate, forecast, noop, sign)
             }
         } catch (e: AbortException) {
             e.printMessage()

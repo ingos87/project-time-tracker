@@ -32,12 +32,14 @@ fun ensureTestConfig(daysOff: String = "") {
         csvPath = TEST_CSV_PATH,
         myHrSelfServiceUrl = "https://no.url",
         myHrSelfServiceLanguage = "EN",
-        maxDailyWorkTillAutoClockOut = "PT9H",
         eTimeUrl = "https://no.second.url",
         eTimeLanguage = "EN",
-        daysOff = daysOff,
+        maxDailyWorkTillAutoClockOut = "PT9H",
         weekdaysOff = "SATURDAY,SUNDAY",
-        chromeProfilePath = "/tmp/nowhere"
+        daysOff = daysOff,
+        chromeProfilePath = "/tmp/nowhere",
+        standardDailyWorkDuration = "PT8H",
+        // TODO add yaml content
     )
 
     // set constants
