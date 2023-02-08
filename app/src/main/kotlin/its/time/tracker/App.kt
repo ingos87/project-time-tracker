@@ -7,6 +7,7 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import its.time.tracker.config.ConfigService
+import its.time.tracker.domain.CostAssessmentSetup
 import its.time.tracker.exception.AbortException
 import its.time.tracker.service.ClockEventService
 import its.time.tracker.service.SummaryService
@@ -49,6 +50,7 @@ class Init: CliktCommand(help="initializes App by writing custom properties to a
             daysOff = daysOff?:"",
             chromeProfilePath = chromeProfilePath?:"",
             standardDailyWorkDuration = stdWorkDuration,
+            costAssessmentSetup = CostAssessmentSetup.getEmptyInstance()
         )
     }
 }

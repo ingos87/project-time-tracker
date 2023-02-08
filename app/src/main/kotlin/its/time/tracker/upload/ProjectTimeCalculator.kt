@@ -67,7 +67,7 @@ class ProjectTimeCalculator {
         topicTimes.forEach {
             val topic = it.first
             val workingTime = it.second
-            val bookingKey = Constants.COST_ASSESSMENTS.resolveTopicToProject(topic)
+            val bookingKey = Constants.COST_ASSESSMENT_SETUP.resolveTopicToProject(topic)
 
             val presentItem = costAssessmentPositions.find { item -> item.project == bookingKey }
             if (presentItem != null) {

@@ -6,6 +6,17 @@ data class CostAssessmentSetup (
     val internalProjects: List<CostAssessmentProject>,
     val absenceProjects: List<CostAssessmentProject>,
 ) {
+
+    companion object {
+        fun getEmptyInstance(): CostAssessmentSetup {
+            return CostAssessmentSetup(
+                developmentProjects = emptyList(),
+                maintenanceProjects = emptyList(),
+                internalProjects = emptyList(),
+                absenceProjects = emptyList()
+            )
+        }
+    }
     fun resolveTopicToProject(topic: String): String {
         if (topic.startsWith("EDF-")) {
             return "Wartung"

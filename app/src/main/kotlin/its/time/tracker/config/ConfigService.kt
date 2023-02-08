@@ -2,7 +2,9 @@ package its.time.tracker.config
 
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Parser
+import its.time.tracker.domain.CostAssessmentSetup
 import its.time.tracker.exception.AbortException
+import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -29,40 +31,43 @@ class ConfigService private constructor(private var configFilePath: String) {
             daysOff: String = "",
             chromeProfilePath: String = "",
             standardDailyWorkDuration: String,
+            costAssessmentSetup: CostAssessmentSetup,
         ) {
             if (File(configFilePath).exists()) {
                 println("$configFilePath already exists.")
                 return
             }
 
-            val defaultConfig = listOf(
-                "{",
-                "  \"${Constants::CSV_PATH.name.lowercase(Locale.GERMANY)}\":\"$csvPath\",",
-                "  \"${Constants::MY_HR_SELF_SERVICE_URL.name.lowercase(Locale.GERMANY)}\":\"$myHrSelfServiceUrl\",",
-                "  \"${Constants::MY_HR_SELF_SERVICE_LANGUAGE.name.lowercase(Locale.GERMANY)}\":\"$myHrSelfServiceLanguage\",",
-                "  \"${Constants::E_TIME_URL.name.lowercase(Locale.GERMANY)}\":\"$eTimeUrl\",",
-                "  \"${Constants::E_TIME_LANGUAGE.name.lowercase(Locale.GERMANY)}\":\"$eTimeLanguage\",",
-                "  \"${Constants::MAX_WORK_DURATION_TILL_AUTO_CLOCKOUT.name.lowercase(Locale.GERMANY)}\":\"$maxDailyWorkTillAutoClockOut\",",
-                "  \"${Constants::STANDARD_WORK_DURATION_PER_DAY.name.lowercase(Locale.GERMANY)}\":\"$standardDailyWorkDuration\",",
-                "  \"${Constants::WEEKDAYS_OFF.name.lowercase(Locale.GERMANY)}\":\"$weekdaysOff\",",
-                "  \"${Constants::DAYS_OFF.name.lowercase(Locale.GERMANY)}\":\"$daysOff\",",
-                "  \"${Constants::CHROME_PROFILE_PATH.name.lowercase(Locale.GERMANY)}\":\"$chromeProfilePath\"",
-                "}")
+            val configMap = mapOf(
+                Constants::CSV_PATH.name.lowercase(Locale.GERMANY) to csvPath,
+                Constants::MY_HR_SELF_SERVICE_URL.name.lowercase(Locale.GERMANY) to myHrSelfServiceUrl,
+                Constants::MY_HR_SELF_SERVICE_LANGUAGE.name.lowercase(Locale.GERMANY) to myHrSelfServiceLanguage,
+                Constants::E_TIME_URL.name.lowercase(Locale.GERMANY) to eTimeUrl,
+                Constants::E_TIME_LANGUAGE.name.lowercase(Locale.GERMANY) to eTimeLanguage,
+                Constants::MAX_WORK_DURATION_TILL_AUTO_CLOCKOUT.name.lowercase(Locale.GERMANY) to maxDailyWorkTillAutoClockOut,
+                Constants::STANDARD_WORK_DURATION_PER_DAY.name.lowercase(Locale.GERMANY) to standardDailyWorkDuration,
+                Constants::WEEKDAYS_OFF.name.lowercase(Locale.GERMANY) to weekdaysOff,
+                Constants::DAYS_OFF.name.lowercase(Locale.GERMANY) to daysOff,
+                Constants::CHROME_PROFILE_PATH.name.lowercase(Locale.GERMANY) to chromeProfilePath,
+                Constants::COST_ASSESSMENT_SETUP.name.lowercase(Locale.GERMANY) to mapOf<String, Any>(
+                    COST_ASSMNT_DEV_KEY to costAssessmentSetup.developmentProjects.associate { it.title to it.possibleTopics },
+                    COST_ASSMNT_MAINT_KEY to costAssessmentSetup.maintenanceProjects.associate { it.title to it.possibleTopics },
+                    COST_ASSMNT_INT_KEY to costAssessmentSetup.internalProjects.associate { it.title to it.possibleTopics },
+                    COST_ASSMNT_ABSC_KEY to costAssessmentSetup.absenceProjects.associate { it.title to it.possibleTopics },
+                ),
+            )
 
             Files.createDirectories(Paths.get(
                 configFilePath.split("/").toList().dropLast(1).joinToString("/")))
             File(configFilePath).createNewFile()
-            FileOutputStream(configFilePath).apply { writeJson(defaultConfig) }
+            FileOutputStream(configFilePath).apply { writeJson(JSONObject(configMap).toString()) }
 
             println("Successfully created config file: $configFilePath")
         }
 
-        private fun OutputStream.writeJson(lines: List<String>) {
+        private fun OutputStream.writeJson(json: String) {
             val writer = bufferedWriter()
-            lines.forEach {
-                writer.write(it)
-                writer.newLine()
-            }
+            writer.write(json)
             writer.flush()
         }
     }

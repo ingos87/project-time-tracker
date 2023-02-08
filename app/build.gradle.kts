@@ -18,6 +18,8 @@ dependencies {
     implementation("com.beust:klaxon:5.5")
     implementation("org.seleniumhq.selenium:selenium-java:4.7.2")
     implementation("io.github.bonigarcia:webdrivermanager:5.3.1")
+    implementation("org.json:json:20090211")
+
 
     testImplementation("io.kotest:kotest-runner-junit5-jvm:4.6.0")
     testImplementation("com.github.stefanbirkner:system-lambda:1.2.0")

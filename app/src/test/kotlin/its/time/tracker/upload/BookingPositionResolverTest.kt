@@ -28,7 +28,7 @@ class BookingPositionResolverTest : StringSpec({
             "DVR-42" to "Line Activity",
             "abcdefg" to "Project Placeholder",
         ).forAll { (topic, expectedBookingPosition) ->
-            Constants.COST_ASSESSMENTS.resolveTopicToProject(topic) shouldBe expectedBookingPosition
+            Constants.COST_ASSESSMENT_SETUP.resolveTopicToProject(topic) shouldBe expectedBookingPosition
         }
     }
 })

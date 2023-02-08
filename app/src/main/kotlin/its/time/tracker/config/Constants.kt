@@ -8,6 +8,11 @@ import its.time.tracker.util.DateTimeUtil
 import java.time.*
 import java.util.*
 
+const val COST_ASSMNT_DEV_KEY = "development_projects"
+const val COST_ASSMNT_MAINT_KEY = "maintenance_projects"
+const val COST_ASSMNT_INT_KEY = "internal_projects"
+const val COST_ASSMNT_ABSC_KEY = "absence_projects"
+
 class Constants {
     companion object {
         /**
@@ -51,19 +56,7 @@ class Constants {
         var WEEKDAYS_OFF: List<DayOfWeek> = emptyList()
         var DAYS_OFF: List<LocalDate> = emptyList()
         var CHROME_PROFILE_PATH: String = ""
-        var COST_ASSESSMENTS: CostAssessmentSetup = CostAssessmentSetup(
-            developmentProjects = listOf(
-                CostAssessmentProject("ProjectA", setOf("EPP-007", "EPP-008")),
-                CostAssessmentProject("ProjectB", setOf("EPP-009", "EPP-123", "EPP-0815", "EPP-17662"))
-            ),
-            maintenanceProjects = listOf(
-                CostAssessmentProject("DoD", setOf("coww"))
-            ),
-            internalProjects = listOf(
-                CostAssessmentProject("ITS meetings", setOf("f2ff", "allhandss", "townhalll", "jourfixee", "jourfixee"))
-            ),
-            absenceProjects = emptyList()
-        )
+        var COST_ASSESSMENT_SETUP: CostAssessmentSetup = CostAssessmentSetup.getEmptyInstance()
 
         fun setApplicationProperties(verbose: Boolean, properties: Map<String, Any?>) {
             VERBOSE = verbose
@@ -77,7 +70,7 @@ class Constants {
             DAYS_OFF = parseDayList(properties[Companion::DAYS_OFF.name.lowercase(Locale.GERMANY)] as String)
             WEEKDAYS_OFF = parseWeekdayList(properties[Companion::WEEKDAYS_OFF.name.lowercase(Locale.GERMANY)] as String)
             CHROME_PROFILE_PATH = readStringProperty(properties, Companion::CHROME_PROFILE_PATH.name.lowercase(Locale.GERMANY))
-            COST_ASSESSMENTS = readCostAssessmentMap(properties)
+            COST_ASSESSMENT_SETUP = readCostAssessmentMap(properties)
         }
 
         private fun readStringProperty(map: Map<String, Any?>,
@@ -108,7 +101,7 @@ class Constants {
         }
 
         private fun readCostAssessmentMap(map: Map<String, Any?>): CostAssessmentSetup {
-            val topLevelKey = Companion::COST_ASSESSMENTS.name.lowercase(Locale.GERMANY)
+            val topLevelKey = Companion::COST_ASSESSMENT_SETUP.name.lowercase(Locale.GERMANY)
 
             if (!map.containsKey(topLevelKey)) {
                 return CostAssessmentSetup(emptyList(), emptyList(), emptyList(), emptyList())
@@ -116,10 +109,10 @@ class Constants {
 
             val all = map[topLevelKey] as Map<*, *>
             return CostAssessmentSetup(
-                developmentProjects = toCostAssessmentProjectList(all["development_projects"]),
-                maintenanceProjects = toCostAssessmentProjectList(all["maintenance_projects"]),
-                internalProjects = toCostAssessmentProjectList(all["internal_projects"]),
-                absenceProjects = toCostAssessmentProjectList(all["absence_projects"]),
+                developmentProjects = toCostAssessmentProjectList(all[COST_ASSMNT_DEV_KEY]),
+                maintenanceProjects = toCostAssessmentProjectList(all[COST_ASSMNT_MAINT_KEY]),
+                internalProjects = toCostAssessmentProjectList(all[COST_ASSMNT_INT_KEY]),
+                absenceProjects = toCostAssessmentProjectList(all[COST_ASSMNT_ABSC_KEY]),
             )
         }
 
@@ -129,9 +122,10 @@ class Constants {
             }
 
             try {
-                val setupMap: Map<String, Set<String>> = any as Map<String, Set<String>>
-                return setupMap.map { (k, v) -> CostAssessmentProject(k, v) }
+                val setupMap: Map<String, Iterable<String>> = any as Map<String, Iterable<String>>
+                return setupMap.map { (k, v) -> CostAssessmentProject(k, v.toSet()) }
             } catch (e: java.lang.Exception) {
+                e.printStackTrace()
                 throw AbortException("invalid cost assessment config")
             }
         }

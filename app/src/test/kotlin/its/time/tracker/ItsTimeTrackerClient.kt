@@ -1,6 +1,8 @@
 package its.time.tracker
 
 import its.time.tracker.config.ConfigService
+import its.time.tracker.domain.CostAssessmentProject
+import its.time.tracker.domain.CostAssessmentSetup
 import org.junit.platform.commons.util.StringUtils
 import java.io.File
 import java.io.IOException
@@ -39,7 +41,19 @@ fun ensureTestConfig(daysOff: String = "") {
         daysOff = daysOff,
         chromeProfilePath = "/tmp/nowhere",
         standardDailyWorkDuration = "PT8H",
-        // TODO add yaml content
+        CostAssessmentSetup(
+            developmentProjects = listOf(
+                CostAssessmentProject("ProjectA", setOf("EPP-007", "EPP-008")),
+                CostAssessmentProject("ProjectB", setOf("EPP-009", "EPP-123", "EPP-0815", "EPP-17662"))
+            ),
+            maintenanceProjects = listOf(
+                CostAssessmentProject("DoD", setOf("coww"))
+            ),
+            internalProjects = listOf(
+                CostAssessmentProject("ITS meetings", setOf("f2ff", "allhandss", "townhalll", "jourfixee", "jourfixee"))
+            ),
+            absenceProjects = emptyList()
+        )
     )
 
     // set constants
