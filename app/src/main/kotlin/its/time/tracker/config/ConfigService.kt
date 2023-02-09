@@ -28,7 +28,7 @@ class ConfigService private constructor(private var configFilePath: String) {
             eTimeLanguage: String = "EN",
             maxDailyWorkTillAutoClockOut: String = "",
             weekdaysOff: String = "",
-            daysOff: String = "",
+            daysOff: List<String> = emptyList(),
             chromeProfilePath: String = "",
             standardDailyWorkDuration: String,
             costAssessmentSetup: CostAssessmentSetup,
@@ -60,7 +60,7 @@ class ConfigService private constructor(private var configFilePath: String) {
             Files.createDirectories(Paths.get(
                 configFilePath.split("/").toList().dropLast(1).joinToString("/")))
             File(configFilePath).createNewFile()
-            FileOutputStream(configFilePath).apply { writeJson(JSONObject(configMap).toString()) }
+            FileOutputStream(configFilePath).apply { writeJson(JSONObject(configMap).toString(4)) }
 
             println("Successfully created config file: $configFilePath")
         }

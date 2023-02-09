@@ -13,6 +13,7 @@ import its.time.tracker.service.ClockEventService
 import its.time.tracker.service.SummaryService
 import its.time.tracker.service.CostAssessmentService
 import its.time.tracker.service.WorkingTimeService
+import its.time.tracker.upload.CostAssessmentUploader
 import its.time.tracker.util.*
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -47,7 +48,7 @@ class Init: CliktCommand(help="initializes App by writing custom properties to a
             eTimeUrl = eTimeUrl,
             maxDailyWorkTillAutoClockOut = maxWorkDuration,
             weekdaysOff = weekdaysOff,
-            daysOff = daysOff?:"",
+            daysOff = daysOff?.split(",")?: emptyList(),
             chromeProfilePath = chromeProfilePath?:"",
             standardDailyWorkDuration = stdWorkDuration,
             costAssessmentSetup = CostAssessmentSetup.getEmptyInstance()
@@ -167,7 +168,17 @@ class CostAssessment: CliktCommand(help="export project working times for a spec
             val date = DateTimeUtil.toValidCalendarWeek(calendarWeek)
             if (date != null) {
                 val service = CostAssessmentService()
-                service.captureProjectTimes(date as LocalDate, forecast, noop, sign)
+                val uniqueDays = DateTimeUtil.getAllDaysInSameWeekAs(date as LocalDate)
+                val normalizedWorkingTimes = service.getNormalizedCostAssessmentsForDays(uniqueDays, forecast)
+
+                service.showCostAssessments(uniqueDays, normalizedWorkingTimes)
+
+                if (noop) {
+                    println("\nNOOP mode. Uploaded nothing")
+                } else {
+                    println("\nUploading clock-ins and clock-outs to eTime ...")
+                    CostAssessmentUploader(normalizedWorkingTimes).submit(sign)
+                }
             }
         } catch (e: AbortException) {
             e.printMessage()

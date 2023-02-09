@@ -67,7 +67,7 @@ class Constants {
             STANDARD_WORK_DURATION_PER_DAY = Duration.parse(readStringProperty(properties, Companion::STANDARD_WORK_DURATION_PER_DAY.name.lowercase(Locale.GERMANY)))
             E_TIME_URL = readStringProperty(properties, Companion::E_TIME_URL.name.lowercase(Locale.GERMANY))
             E_TIME_LANGUAGE = readStringProperty(properties, Companion::E_TIME_LANGUAGE.name.lowercase(Locale.GERMANY))
-            DAYS_OFF = parseDayList(properties[Companion::DAYS_OFF.name.lowercase(Locale.GERMANY)] as String)
+            DAYS_OFF = parseDayList(properties[Companion::DAYS_OFF.name.lowercase(Locale.GERMANY)] as List<String>)
             WEEKDAYS_OFF = parseWeekdayList(properties[Companion::WEEKDAYS_OFF.name.lowercase(Locale.GERMANY)] as String)
             CHROME_PROFILE_PATH = readStringProperty(properties, Companion::CHROME_PROFILE_PATH.name.lowercase(Locale.GERMANY))
             COST_ASSESSMENT_SETUP = readCostAssessmentMap(properties)
@@ -84,12 +84,8 @@ class Constants {
             return map[fieldName] as String
         }
 
-        private fun parseDayList(daysOff: String?): List<LocalDate> {
-            if (daysOff.isNullOrBlank()) {
-                return emptyList()
-            }
-            return daysOff.split(",")
-                          .map { DateTimeUtil.toValidDate(it) as LocalDate }
+        private fun parseDayList(daysOff: List<String>): List<LocalDate> {
+            return daysOff.map { DateTimeUtil.toValidDate(it) as LocalDate }
         }
 
         private fun parseWeekdayList(daysOff: String?): List<DayOfWeek> {

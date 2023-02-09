@@ -38,7 +38,7 @@ fun ensureTestConfig(daysOff: String = "") {
         eTimeLanguage = "EN",
         maxDailyWorkTillAutoClockOut = "PT9H",
         weekdaysOff = "SATURDAY,SUNDAY",
-        daysOff = daysOff,
+        daysOff = daysOff.split(","),
         chromeProfilePath = "/tmp/nowhere",
         standardDailyWorkDuration = "PT8H",
         CostAssessmentSetup(

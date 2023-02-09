@@ -41,7 +41,8 @@ class CostAssessmentTests : FunSpec({
         }
 
         splitIgnoreBlank(output) shouldBe listOf(
-            "[NO SUMMARY for 2023-01-02 - 2023-01-08 because there are no clock-in events]")
+            "[NO SUMMARY for 2023-01-02 - 2023-01-08 because there are no clock-in events]",
+            "NOOP mode. Uploaded nothing")
     }
 
     test("cost assessment for standard week") {

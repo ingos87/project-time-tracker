@@ -6,8 +6,8 @@ import its.time.tracker.domain.WorkDaySummaryCollection
 import its.time.tracker.service.ConsoleTableHelper.Companion.getCellString
 import its.time.tracker.service.ConsoleTableHelper.Companion.getContentLine
 import its.time.tracker.service.ConsoleTableHelper.Companion.getHorizontalSeparator
-import its.time.tracker.upload.CostAssessmentNormalizer
-import its.time.tracker.upload.CostAssessmentUploader
+import its.time.tracker.upload.CostAssessmentRoundingService
+import its.time.tracker.upload.CostAssessmentValidator
 import its.time.tracker.upload.ProjectTimeCalculator
 import its.time.tracker.util.ClockEventsFilter
 import its.time.tracker.util.DateTimeUtil
@@ -17,11 +17,9 @@ import java.util.*
 
 class CostAssessmentService {
 
-    fun captureProjectTimes(referenceDate: LocalDate, calculateForcast: Boolean, noop: Boolean, doSign: Boolean) {
+    fun getNormalizedCostAssessmentsForDays(uniqueDays: SortedSet<LocalDate>, forecast: Boolean): SortedMap<LocalDate, List<CostAssessmentPosition>> {
         val csvService = CsvService()
         val clockEvents = csvService.loadClockEvents()
-
-        val uniqueDays: SortedSet<LocalDate> = DateTimeUtil.getAllDaysInSameWeekAs(referenceDate)
 
         val summaryData = WorkDaySummaryCollection()
         uniqueDays.forEach { day ->
@@ -34,13 +32,26 @@ class CostAssessmentService {
         }
         if (summaryData.data.isEmpty()) {
             println("[NO SUMMARY for ${uniqueDays.first()} - ${uniqueDays.last()} because there are no clock-in events]")
-            return
+            return emptyMap<LocalDate, List<CostAssessmentPosition>>().toSortedMap()
         }
 
         val costAssessmentMap = summaryData.data.map { (k, v) -> k to v.second }.toMap()
-        val normalizedWorkingTimes = CostAssessmentNormalizer().normalizeWorkingTime(costAssessmentMap)
+        val compliantWorkDaySummaries = CostAssessmentValidator().moveProjectTimesToValidDays(costAssessmentMap)
+        val roundedProjectTimes = CostAssessmentRoundingService().roundProjectTimes(compliantWorkDaySummaries)
+        //val withAddedAbsentDays =
 
-        val firstColWidth = 18 //BookingPositionResolver.getMaxBookingPosNameLength()+2
+        // TODO add absence cost assessments for days of, which are standard working days (mo-fr)
+
+        // TODO add forecast if requested
+        return roundedProjectTimes.toSortedMap()
+    }
+
+    fun showCostAssessments(uniqueDays: SortedSet<LocalDate>, normalizedWorkingTimes: SortedMap<LocalDate, List<CostAssessmentPosition>>) {
+        if (normalizedWorkingTimes.isEmpty()) {
+            return
+        }
+
+        val firstColWidth = 18
         println("[SUMMARY for ${uniqueDays.first()} - ${uniqueDays.last()}]")
         println(getHorizontalSeparator(uniqueDays, SeparatorPosition.TOP, firstColWidth, false))
         println(getContentLine(
@@ -53,7 +64,7 @@ class CostAssessmentService {
             uniqueDays))
         println(getHorizontalSeparator(uniqueDays, SeparatorPosition.MIDDLE, firstColWidth, false))
 
-        val allBookingPositionNames = summaryData.getAllBookingPositionNames()
+        val allBookingPositionNames = normalizedWorkingTimes.values.flatten().map { it.project }.toSet()
         allBookingPositionNames.forEach { name ->
             println(getContentLine(
                 getCellString(name, firstColWidth, TextOrientation.LEFT),
@@ -62,13 +73,6 @@ class CostAssessmentService {
         }
 
         println(getHorizontalSeparator(uniqueDays, SeparatorPosition.BOTTOM, firstColWidth, false))
-
-        if (noop) {
-            println("\nNOOP mode. Uploaded nothing")
-        } else {
-            println("\nUploading clock-ins and clock-outs to eTime ...")
-            CostAssessmentUploader(normalizedWorkingTimes).submit(doSign)
-        }
     }
 
     private fun getBookingTimesForProject(

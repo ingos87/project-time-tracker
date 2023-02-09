@@ -45,7 +45,7 @@ class InitTests : FunSpec({
         cfgContent[Constants::E_TIME_URL.name.lowercase(Locale.getDefault())] shouldBe "https://blah.de"
         cfgContent[Constants::MY_HR_SELF_SERVICE_URL.name.lowercase(Locale.getDefault())] shouldBe "https://blubb.de"
         cfgContent[Constants::WEEKDAYS_OFF.name.lowercase(Locale.getDefault())] shouldBe "MONDAY,SATURDAY,SUNDAY"
-        cfgContent[Constants::DAYS_OFF.name.lowercase(Locale.getDefault())] shouldBe "2023-05-01,2024-12-12"
+        cfgContent[Constants::DAYS_OFF.name.lowercase(Locale.getDefault())] shouldBe listOf("2023-05-01", "2024-12-12")
         cfgContent["quark"] shouldBe null
     }
 
