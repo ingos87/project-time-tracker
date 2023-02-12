@@ -8,13 +8,13 @@ import its.time.tracker.util.DateTimeUtil
 import java.time.*
 import java.util.*
 
-const val COST_ASSMNT_DEV_KEY = "development_projects"
-const val COST_ASSMNT_MAINT_KEY = "maintenance_projects"
-const val COST_ASSMNT_INT_KEY = "internal_projects"
-const val COST_ASSMNT_ABSC_KEY = "absence_projects"
-
 class Constants {
     companion object {
+        const val COST_ASSMNT_DEV_KEY = "development_projects"
+        const val COST_ASSMNT_MAINT_KEY = "maintenance_projects"
+        const val COST_ASSMNT_INT_KEY = "internal_projects"
+        const val COST_ASSMNT_ABSC_KEY = "absence_projects"
+
         /**
          * MySelfHr/ArbSG rules
          * no work before 06:00

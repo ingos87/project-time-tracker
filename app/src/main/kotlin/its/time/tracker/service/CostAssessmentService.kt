@@ -17,6 +17,26 @@ import java.util.*
 
 class CostAssessmentService {
 
+    companion object {
+
+        fun combineByBookingId(list: MutableList<CostAssessmentPosition>)
+                : List<CostAssessmentPosition>{
+            return list.groupBy{it.project}
+                .map { (_, group) ->
+                    val minutesSum = group.sumOf { it.totalWorkingTime.toMinutes() }
+                    val allTopics = mutableSetOf<String>()
+                    group.forEach {
+                        allTopics.addAll(it.topics)
+                    }
+                    CostAssessmentPosition(
+                        group.first().project,
+                        Duration.ofMinutes(minutesSum),
+                        allTopics
+                    )
+                }
+        }
+    }
+
     fun getNormalizedCostAssessmentsForDays(uniqueDays: SortedSet<LocalDate>, forecast: Boolean): SortedMap<LocalDate, List<CostAssessmentPosition>> {
         val csvService = CsvService()
         val clockEvents = csvService.loadClockEvents()
