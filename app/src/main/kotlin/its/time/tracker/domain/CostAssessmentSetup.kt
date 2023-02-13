@@ -54,4 +54,14 @@ data class CostAssessmentSetup (
 
         return Constants.COST_ASSMNT_DEV_KEY
     }
+
+    fun getDefaultProjectFor(superiorProject: String): String {
+        return when (superiorProject) {
+            Constants.COST_ASSMNT_DEV_KEY -> "Project Placeholder"
+            Constants.COST_ASSMNT_MAINT_KEY -> "Wartung"
+            Constants.COST_ASSMNT_INT_KEY -> "Meeting"
+            Constants.COST_ASSMNT_ABSC_KEY -> "Other absence"
+            else -> "-error-"
+        }
+    }
 }

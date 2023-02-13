@@ -82,6 +82,7 @@ class CostAssessmentTests : FunSpec({
             "│ weekday          │  MON │  TUE │  WED │  THU │  FRI │  SAT │  SUN │",
             "│ day of month     │    1 │    2 │    3 │    4 │    5 │    6 │    7 │",
             "├──────────────────┼──────┼──────┼──────┼──────┼──────┼──────┼──────┤",
+            "│ Other absence    │  8,00│      │      │  8,00│      │      │      │",
             "│ ProjectA         │      │  4,00│ 11,00│      │  5,00│      │      │",
             "│ ProjectB         │      │  2,00│      │      │      │      │      │",
             "│ DoD              │      │  0,50│      │      │      │      │      │",

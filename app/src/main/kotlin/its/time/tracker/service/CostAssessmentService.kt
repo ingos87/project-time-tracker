@@ -6,9 +6,7 @@ import its.time.tracker.domain.WorkDaySummaryCollection
 import its.time.tracker.service.ConsoleTableHelper.Companion.getCellString
 import its.time.tracker.service.ConsoleTableHelper.Companion.getContentLine
 import its.time.tracker.service.ConsoleTableHelper.Companion.getHorizontalSeparator
-import its.time.tracker.upload.CostAssessmentRoundingService
-import its.time.tracker.upload.CostAssessmentValidator
-import its.time.tracker.upload.ProjectTimeCalculator
+import its.time.tracker.upload.*
 import its.time.tracker.util.ClockEventsFilter
 import its.time.tracker.util.DateTimeUtil
 import java.time.Duration
@@ -58,12 +56,12 @@ class CostAssessmentService {
         val costAssessmentMap = summaryData.data.map { (k, v) -> k to v.second }.toMap()
         val compliantWorkDaySummaries = CostAssessmentValidator().moveProjectTimesToValidDays(costAssessmentMap)
         val roundedProjectTimes = CostAssessmentRoundingService().roundProjectTimes(compliantWorkDaySummaries)
-        //val withAddedAbsentDays =
+        val withAddedAbsentDays = CostAssessmentAbsenceService().addAbsenceProjects(roundedProjectTimes, uniqueDays)
 
-        // TODO add absence cost assessments for days of, which are standard working days (mo-fr)
-
-        // TODO add forecast if requested
-        return roundedProjectTimes.toSortedMap()
+        if (forecast) {
+            return CostAssessmentForecastService().applyForecast(uniqueDays, withAddedAbsentDays)
+        }
+        return withAddedAbsentDays
     }
 
     fun showCostAssessments(uniqueDays: SortedSet<LocalDate>, normalizedWorkingTimes: SortedMap<LocalDate, List<CostAssessmentPosition>>) {
