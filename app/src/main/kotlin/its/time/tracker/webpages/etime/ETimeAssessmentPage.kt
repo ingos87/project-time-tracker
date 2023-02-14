@@ -84,10 +84,11 @@ class ETimeAssessmentPage(private val webElementService: WebElementService) {
     // __link10-Table4-0 -> Table4-0 input91 ... 97 (same within section)
     fun getRelevantWebElementIds(): List<CostAssessmentPositionIds> {
         // e.g. __link0-Table0-0
-        val firstBookingPositionTitle = webElementService.findElementByIdComponents("__link", "-Table0-0", 0)
-            ?: throw AbortException("was unable to find any cost assessment keys on page")
-        val firstTableTitleRegexString = "__link(\\d+)-Table0-0"
-        val firstTableIdx = getWildcardPartFromElementId(firstBookingPositionTitle, Regex(firstTableTitleRegexString)).toInt()
+        val firstBookingPositionTitle = webElementService.findElementByIdComponents("__link", "-Table0-0", 0, 200)
+        if (firstBookingPositionTitle.first == null) {
+            throw AbortException("was unable to find any cost assessment keys on page")
+        }
+        val firstTableIdx = firstBookingPositionTitle.second
 
         // e.g. __input1-Table0-0-inner
         val firstBookingPositionInput = webElementService.findFirstElementInIdSection("__input", "-Table0-0-inner")

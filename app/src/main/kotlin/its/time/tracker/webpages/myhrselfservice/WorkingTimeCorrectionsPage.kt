@@ -14,14 +14,19 @@ import java.util.*
 class WorkingTimeCorrectionsPage(private val webElementService: WebElementService) {
 
     companion object {
-        private const val DATE_INPUT_FIELD_ID           = "__xmlview2--CICO_DATE_PICKER-inner"
+        private var idIndex = "2"
 
-        private const val CURRENT_EVENTS_TITLE_DIV_ID   = "__xmlview2--CICO_PREVIOUS_EVENTS_FORM_CONTAINER--title"
-        private const val ITEM_X_TIME_ID                = "__item4-__xmlview2--CICO_TIME_EVENT_LIST-%s-ObjectNumber"
-        private const val ITEM_0_DEL_BUTTON_ID          = "__item4-__xmlview2--CICO_TIME_EVENT_LIST-0-imgDel"
+        private const val DATE_INPUT_FIELD_ID           = "__xmlview--CICO_DATE_PICKER-inner"
+        private const val CURRENT_EVENTS_TITLE_DIV_ID   = "__xmlview--CICO_PREVIOUS_EVENTS_FORM_CONTAINER--title"
+        private const val ITEM_X_TIME_ID                = "__item4-__xmlview--CICO_TIME_EVENT_LIST-%s-ObjectNumber"
+        private const val ITEM_0_DEL_BUTTON_ID          = "__item4-__xmlview--CICO_TIME_EVENT_LIST-0-imgDel"
 
-        private const val EVENT_TYPE_INPUT_ID           = "__xmlview2--CICO_EVENT_TYPES-inner"
-        private const val TIME_INPUT_ID                 = "__xmlview2--CICO_TIME-Picker-inner"
+        private const val EVENT_TYPE_INPUT_ID           = "__xmlview--CICO_EVENT_TYPES-inner"
+        private const val TIME_INPUT_ID                 = "__xmlview--CICO_TIME-Picker-inner"
+
+        private fun getElementKey(key: String): String {
+            return key.replace("__xmlview", "__xmlview$idIndex")
+        }
 
         fun getLocalizedConfirmButtonText(): String {
             return when(Constants.MY_HR_SELF_SERVICE_LANGUAGE) {
@@ -51,8 +56,19 @@ class WorkingTimeCorrectionsPage(private val webElementService: WebElementServic
         }
     }
 
+    fun recalibrateElementIds() {
+        (0..10).forEach {
+            val finding = webElementService.findElementByIdComponents("__xmlview", "--CICO_DATE_PICKER-inner", 0, 9)
+            if (finding.first != null) {
+                idIndex = "" + finding.second
+                return
+            }
+            Thread.sleep(500)
+        }
+    }
+
     fun getCurrentEventCount(): Int {
-        val text = webElementService.getElementTextualContent(CURRENT_EVENTS_TITLE_DIV_ID)
+        val text = webElementService.getElementTextualContent(getElementKey(CURRENT_EVENTS_TITLE_DIV_ID))
         if (!text.contains("(")) {
             return 0
         }
@@ -64,13 +80,13 @@ class WorkingTimeCorrectionsPage(private val webElementService: WebElementServic
             .withZone(ZoneId.systemDefault())
         val dateString = formatter.format(date)
 
-        webElementService.setTextualContent(DATE_INPUT_FIELD_ID, dateString)
+        webElementService.setTextualContent(getElementKey( DATE_INPUT_FIELD_ID), dateString)
         doThingyToEnsurePageLoadingFinished()
     }
 
     fun clearAllEvents(maxListIdx: Int) {
         repeat(maxListIdx) {
-            webElementService.clickOnElementWithId(ITEM_0_DEL_BUTTON_ID)
+            webElementService.clickOnElementWithId(getElementKey(ITEM_0_DEL_BUTTON_ID))
             webElementService.clickOnElementWithText(getLocalizedConfirmButtonText()) // modal dialog has rotating ids
         }
     }
@@ -85,9 +101,9 @@ class WorkingTimeCorrectionsPage(private val webElementService: WebElementServic
             .withZone(ZoneId.systemDefault())
         val timeString = formatter.format(clockTime)
 
-        webElementService.setTextualContent(EVENT_TYPE_INPUT_ID, getLocalizedEventText(eventType))
+        webElementService.setTextualContent(getElementKey(EVENT_TYPE_INPUT_ID), getLocalizedEventText(eventType))
 
-        webElementService.setTextualContent(TIME_INPUT_ID, timeString.replace(":", ""))
+        webElementService.setTextualContent(getElementKey(TIME_INPUT_ID), timeString.replace(":", ""))
 
         webElementService.clickOnElementWithText(getLocalizedCreateButtonText())
 
@@ -95,17 +111,17 @@ class WorkingTimeCorrectionsPage(private val webElementService: WebElementServic
     }
 
     fun getClockInTime(): LocalTime? {
-        val timeString = webElementService.getElementTextualContent(String.format(ITEM_X_TIME_ID, 1))
+        val timeString = webElementService.getElementTextualContent(String.format(getElementKey(ITEM_X_TIME_ID), 1))
         return LocalTime.parse(timeString)
     }
 
     fun getClockOutTime(): Any? {
-        val timeString = webElementService.getElementTextualContent(String.format(ITEM_X_TIME_ID, 0))
+        val timeString = webElementService.getElementTextualContent(String.format(getElementKey(ITEM_X_TIME_ID), 0))
         return LocalTime.parse(timeString)
     }
 
     fun doThingyToEnsurePageLoadingFinished() {
-        webElementService.setTextualContent(EVENT_TYPE_INPUT_ID, "...")
+        webElementService.setTextualContent(getElementKey(EVENT_TYPE_INPUT_ID), "...")
         printDebug("WorkingTimeCorrectionsPage finished loading")
     }
 }

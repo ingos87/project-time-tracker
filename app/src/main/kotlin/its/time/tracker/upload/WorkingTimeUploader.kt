@@ -21,7 +21,7 @@ class WorkingTimeUploader(private val workingTimesByDay: SortedMap<LocalDate, Wo
 
     private fun getValidity(entry: Map.Entry<LocalDate, WorkDaySummary>): WorkingDayValidity {
         val entryAge = ChronoUnit.DAYS.between(entry.key, LocalDate.now())
-        if (entryAge <= 30L) {
+        if (entryAge > 30L) {
             return WorkingDayValidity.OVER_30_DAYS_AGO
         }
 
@@ -54,9 +54,11 @@ class WorkingTimeUploader(private val workingTimesByDay: SortedMap<LocalDate, Wo
         webElementService.navigateToUrl(Constants.MY_HR_SELF_SERVICE_URL)
 
         val myHrSelfServiceLandingPage = MyHrSelfServiceLandingPage(webElementService)
+        myHrSelfServiceLandingPage.ensureAllModalsAreClosed()
         myHrSelfServiceLandingPage.clickTimeCorrectionsTile()
 
         val workingTimeCorrectionsPage = WorkingTimeCorrectionsPage(webElementService)
+        workingTimeCorrectionsPage.recalibrateElementIds()
         workingTimeCorrectionsPage.doThingyToEnsurePageLoadingFinished()
     }
 
@@ -84,6 +86,7 @@ class WorkingTimeUploader(private val workingTimesByDay: SortedMap<LocalDate, Wo
 
     private fun navigateToDay(date: LocalDate) {
         val timeCorrectionsPage = WorkingTimeCorrectionsPage(webElementService)
+        timeCorrectionsPage.recalibrateElementIds()
         timeCorrectionsPage.selectDate(date)
     }
 

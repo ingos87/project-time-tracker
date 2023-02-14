@@ -80,33 +80,17 @@ class WebElementService {
         printDebug("successfully inserted text into input id($elementId): $string")
     }
 
-    fun findElementByRegexId(regex: String): WebElement? {
-        val pattern = Pattern.compile(regex)
-
-        val elements = webDriver.findElements(By.xpath("//*[@id]"))
-        printDebug("found ${elements.size} elements by id")
-        printDebug("ids: " + elements.joinToString { it.getAttribute("id") })
-        for (element in elements) {
-            val id = element.getAttribute("id")
-            val matcher = pattern.matcher(id)
-            if (matcher.matches()) {
-                return element
-            }
-        }
-        return null
-    }
-
-    fun findElementByIdComponents(prefix: String, suffix: String, startingIdx: Int): WebElement? {
+    fun findElementByIdComponents(prefix: String, suffix: String, startingIdx: Int, maxIdx: Int): Pair<WebElement?, Int> {
         // TODO fix time issues if first found index is too large
-        (startingIdx..200).forEach {
+        (startingIdx..maxIdx).forEach {
             val maybeElementId = "$prefix$it$suffix"
             val webElem = findElementById(maybeElementId)
             if (webElem != null) {
                 printDebug("found element $maybeElementId")
-                return webElem
+                return Pair(webElem, it)
             }
         }
-        return null
+        return Pair(null, -1)
     }
 
     fun findFirstElementInIdSection(prefix: String, suffix: String): WebElement? {
