@@ -6,14 +6,15 @@ import java.time.LocalDateTime
 data class ClockEvent(
     val dateTime: LocalDateTime,
     val eventType: EventType,
+    val project: String,
     val topic: String,
 ) {
     companion object {
         fun getCsvHeaderLine(): String {
-            return "dateTime;eventType;topic"
+            return "dateTime;eventType;project;topic"
         }
     }
     fun toCsvLine(): String {
-        return "${DateTimeUtil.temporalToString(dateTime)};${eventType.name};$topic"
+        return "${DateTimeUtil.temporalToString(dateTime)};${eventType.name};$project;$topic"
     }
 }

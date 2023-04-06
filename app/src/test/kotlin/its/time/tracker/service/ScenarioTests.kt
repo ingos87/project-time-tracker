@@ -11,21 +11,21 @@ class ScenarioTests : BehaviorSpec({
         ensureCsvEmpty()
         getTimesCsvContent() shouldBe emptyList()
         `when`("clock-in is triggered") {
-            executeClockInWitArgs(arrayOf("-tEPP-007", "--datetime=2022-01-03 07:30"))
+            executeClockInWitArgs(arrayOf("-pwartung", "-tEPP-007", "--datetime=2022-01-03 07:30"))
             then("event was inserted into csv") {
                 getTimesCsvContent() shouldBe listOf(
-                    "dateTime;eventType;topic",
-                    "2022-01-03 07:30;CLOCK_IN;EPP-007")
+                    "dateTime;eventType;project;topic",
+                    "2022-01-03 07:30;CLOCK_IN;wartung;EPP-007")
             }
         }
 
         `when`("another clock-in is triggered") {
-            executeClockInWitArgs(arrayOf("--topic=EPP-123", "--datetime=2022-01-03 10:00"))
+            executeClockInWitArgs(arrayOf("--project=wartung", "--topic=EPP-123", "--datetime=2022-01-03 10:00"))
             then("event was inserted into csv") {
                 getTimesCsvContent() shouldBe listOf(
-                    "dateTime;eventType;topic",
-                    "2022-01-03 07:30;CLOCK_IN;EPP-007",
-                    "2022-01-03 10:00;CLOCK_IN;EPP-123")
+                    "dateTime;eventType;project;topic",
+                    "2022-01-03 07:30;CLOCK_IN;wartung;EPP-007",
+                    "2022-01-03 10:00;CLOCK_IN;wartung;EPP-123")
             }
         }
 
@@ -33,10 +33,10 @@ class ScenarioTests : BehaviorSpec({
             executeClockOutWitArgs(arrayOf("-d2022-01-03 17:00"))
             then("event was inserted into csv") {
                 getTimesCsvContent() shouldBe listOf(
-                    "dateTime;eventType;topic",
-                    "2022-01-03 07:30;CLOCK_IN;EPP-007",
-                    "2022-01-03 10:00;CLOCK_IN;EPP-123",
-                    "2022-01-03 17:00;CLOCK_OUT;MANUAL_CLOCK_OUT")
+                    "dateTime;eventType;project;topic",
+                    "2022-01-03 07:30;CLOCK_IN;wartung;EPP-007",
+                    "2022-01-03 10:00;CLOCK_IN;wartung;EPP-123",
+                    "2022-01-03 17:00;CLOCK_OUT;;MANUAL_CLOCK_OUT")
             }
         }
     }

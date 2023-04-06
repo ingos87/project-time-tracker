@@ -9,11 +9,11 @@ import java.time.LocalDateTime
 class ClockEventService {
 
     fun addClockOut(dateTime: LocalDateTime, clockOutType: ClockOutType = ClockOutType.MANUAL_CLOCK_OUT) {
-        return addClockEvent(ClockEvent(dateTime, EventType.CLOCK_OUT, clockOutType.name))
+        return addClockEvent(ClockEvent(dateTime, EventType.CLOCK_OUT, "", clockOutType.name))
     }
 
-    fun addClockIn(topic: String, dateTime: LocalDateTime) {
-        return addClockEvent(ClockEvent(dateTime, EventType.CLOCK_IN, topic))
+    fun addClockIn(project: String, topic: String?, dateTime: LocalDateTime) {
+        return addClockEvent(ClockEvent(dateTime, EventType.CLOCK_IN, project, topic?:""))
     }
 
     private fun addClockEvent(clockEvent: ClockEvent) {

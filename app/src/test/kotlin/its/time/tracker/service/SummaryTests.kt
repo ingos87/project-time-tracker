@@ -20,8 +20,8 @@ class SummaryTests : FunSpec({
     }
 
     test("summary is not possible if there is no config file") {
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2022-01-03 07:30"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-01-03 16:30"))
+        executeClockInWitArgs(arrayOf("-pwartung", "-tEPP-007",  "--datetime=2022-01-03 07:30"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-01-03 16:30"))
 
         ensureNoConfig()
 
@@ -41,7 +41,7 @@ class SummaryTests : FunSpec({
     }
 
     test("today's summary shows err message if there are not clock-in events") {
-        executeClockOutWitArgs(arrayOf(             "--datetime=2023-01-02 14:30"))
+        executeClockOutWitArgs(arrayOf("--datetime=2023-01-02 14:30"))
 
         val output = tapSystemOut {
             executeDailySummaryWitArgs(arrayOf("-d2023-01-02"))
@@ -52,8 +52,8 @@ class SummaryTests : FunSpec({
     }
 
     test("simple clock-in and clock-out") {
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2022-01-03 07:30"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-01-03 16:30"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2022-01-03 07:30"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-01-03 16:30"))
 
         val output = tapSystemOut {
             executeDailySummaryWitArgs(arrayOf("-d2022-01-03"))
@@ -73,10 +73,10 @@ class SummaryTests : FunSpec({
     }
 
     test("working day ends on following day") {
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2022-01-03 16:30"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-01-03 20:30"))
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2022-01-03 23:00"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-01-04 01:30"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2022-01-03 16:30"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-01-03 20:30"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2022-01-03 23:00"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-01-04 01:30"))
 
         val output = tapSystemOut {
             executeDailySummaryWitArgs(arrayOf("-d2022-01-03"))
@@ -98,11 +98,11 @@ class SummaryTests : FunSpec({
     test("today's summary if working day is in progress") {
         val today = LocalDate.now()
         val todayString = DateTimeUtil.temporalToString(today, DATE_PATTERN)
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=$todayString 01:30"))
-        executeClockInWitArgs(arrayOf("-tEPP-123",  "--datetime=$todayString 03:45"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=$todayString 04:30"))
-        executeClockInWitArgs(arrayOf("-tEPP-123",  "--datetime=$todayString 04:45"))
-        executeClockInWitArgs(arrayOf("-tEDF-777",  "--datetime=$todayString 05:55"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=$todayString 01:30"))
+        executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-123",  "--datetime=$todayString 03:45"))
+        executeClockOutWitArgs(arrayOf("--datetime=$todayString 04:30"))
+        executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-123",  "--datetime=$todayString 04:45"))
+        executeClockInWitArgs(arrayOf("-pWartung",  "-tEDF-777",  "--datetime=$todayString 05:55"))
 
         val startOfWorkDay = LocalDateTime.parse("${todayString}T01:30")
         val now = LocalDateTime.now()
@@ -130,9 +130,9 @@ class SummaryTests : FunSpec({
     test("today's summary if working day is ended") {
         val today = LocalDate.now()
         val todayString = DateTimeUtil.temporalToString(today, DATE_PATTERN)
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=$todayString 01:30"))
-        executeClockInWitArgs(arrayOf("-tEPP-123",  "--datetime=$todayString 03:45"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=$todayString 04:30"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=$todayString 01:30"))
+        executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-123",  "--datetime=$todayString 03:45"))
+        executeClockOutWitArgs(arrayOf("--datetime=$todayString 04:30"))
 
         val output = tapSystemOut {
             executeDailySummaryWitArgs(emptyArray())
@@ -153,17 +153,17 @@ class SummaryTests : FunSpec({
     }
 
     test("day with breaks and several projects") {
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2022-01-03 07:30"))
-        executeClockInWitArgs(arrayOf("-tEPP-008",  "--datetime=2022-01-03 09:00")) // workingtime 1:30
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-01-03 11:25")) // workingtime 3:55
-        executeClockInWitArgs(arrayOf("-tEPP-123",  "--datetime=2022-01-03 13:30")) // break 2:05
-        executeClockInWitArgs(arrayOf("-tEPP-009",  "--datetime=2022-01-03 13:40")) // workingtime 0:10
-        executeClockInWitArgs(arrayOf("-tEPP-0815", "--datetime=2022-01-03 13:50")) // workingtime 0:10
-        executeClockInWitArgs(arrayOf("-tEPP-17662","--datetime=2022-01-03 14:00")) // workingtime 0:10
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-01-03 15:30")) // workingtime 1:30
-        executeClockInWitArgs(arrayOf("-tallhandss","--datetime=2022-01-03 17:05")) // break 1:35
-        executeClockInWitArgs(arrayOf("-tEDF-99",   "--datetime=2022-01-03 18:05")) // workingtime 1:00
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-01-03 20:52")) // workingtime 2:47
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2022-01-03 07:30"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-008",  "--datetime=2022-01-03 09:00")) // workingtime 1:30
+        executeClockOutWitArgs(arrayOf("--datetime=2022-01-03 11:25")) // workingtime 3:55
+        executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-123",  "--datetime=2022-01-03 13:30")) // break 2:05
+        executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-009",  "--datetime=2022-01-03 13:40")) // workingtime 0:10
+        executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-0815", "--datetime=2022-01-03 13:50")) // workingtime 0:10
+        executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-17662","--datetime=2022-01-03 14:00")) // workingtime 0:10
+        executeClockOutWitArgs(arrayOf("--datetime=2022-01-03 15:30")) // workingtime 1:30
+        executeClockInWitArgs(arrayOf("--project=\"ITS meetings\"", "-tallhandss","--datetime=2022-01-03 17:05")) // break 1:35
+        executeClockInWitArgs(arrayOf("-pWartung", "-tEDF-99",   "--datetime=2022-01-03 18:05")) // workingtime 1:00
+        executeClockOutWitArgs(arrayOf("--datetime=2022-01-03 20:52")) // workingtime 2:47
 
         val output = tapSystemOut {
             executeDailySummaryWitArgs(arrayOf("-d2022-01-03"))
@@ -186,10 +186,10 @@ class SummaryTests : FunSpec({
     }
 
     test("missing clock-out is set beyond max working hours per day") {
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2022-01-03 07:30"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-01-03 16:30"))
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2022-01-03 17:30"))
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2022-01-04 07:30")) // ignored
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2022-01-03 07:30"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-01-03 16:30"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2022-01-03 17:30"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2022-01-04 07:30")) // ignored
 
         val output = tapSystemOut {
             executeDailySummaryWitArgs(arrayOf("-d2022-01-03"))
@@ -210,10 +210,10 @@ class SummaryTests : FunSpec({
     }
 
     test("missing clock-out is set to max working hours per day") {
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2022-01-03 09:30"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-01-03 16:30"))
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2022-01-03 17:30"))
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2022-01-04 07:30")) // ignored
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2022-01-03 09:30"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-01-03 16:30"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2022-01-03 17:30"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2022-01-04 07:30")) // ignored
 
         val output = tapSystemOut {
             executeDailySummaryWitArgs(arrayOf("-d2022-01-03"))
@@ -234,7 +234,7 @@ class SummaryTests : FunSpec({
     }
 
     test("month's summary shows err message if there are not clock-in events") {
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-11-02 14:30"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-11-02 14:30"))
 
         val output = tapSystemOut {
             executeMonthlySummaryWitArgs(arrayOf("-m2022-11"))
@@ -245,16 +245,16 @@ class SummaryTests : FunSpec({
     }
 
     test("monthly summary for one day with lunch break") {
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2022-11-02 07:30"))
-        executeClockInWitArgs(arrayOf("-tEPP-009",  "--datetime=2022-11-02 08:20"))
-        executeClockInWitArgs(arrayOf("-tcoww",     "--datetime=2022-11-02 09:45"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-11-02 12:00"))
-        executeClockInWitArgs(arrayOf("-tEDF-0815", "--datetime=2022-11-02 13:15"))
-        executeClockInWitArgs(arrayOf("-tEDF-1234", "--datetime=2022-11-02 13:30"))
-        executeClockInWitArgs(arrayOf("-tDVR-7",    "--datetime=2022-11-02 14:00"))
-        executeClockInWitArgs(arrayOf("-tf2ff",     "--datetime=2022-11-02 15:00"))
-        executeClockInWitArgs(arrayOf("-tDVR-7",    "--datetime=2022-11-02 15:45"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-11-02 16:45"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2022-11-02 07:30"))
+        executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-009",  "--datetime=2022-11-02 08:20"))
+        executeClockInWitArgs(arrayOf("-pWartung",  "-tcoww",     "--datetime=2022-11-02 09:45"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-11-02 12:00"))
+        executeClockInWitArgs(arrayOf("-pWartung",  "-tEDF-0815", "--datetime=2022-11-02 13:15"))
+        executeClockInWitArgs(arrayOf("-pWartung",  "-tEDF-1234", "--datetime=2022-11-02 13:30"))
+        executeClockInWitArgs(arrayOf("--project=\"Line Activity\"", "-tDVR-7",    "--datetime=2022-11-02 14:00"))
+        executeClockInWitArgs(arrayOf("--project=\"ITS meetings\"", "-tf2ff",     "--datetime=2022-11-02 15:00"))
+        executeClockInWitArgs(arrayOf("--project=\"Line Activity\"", "-tDVR-7",    "--datetime=2022-11-02 15:45"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-11-02 16:45"))
 
         val output = tapSystemOut {
             executeMonthlySummaryWitArgs(arrayOf("-m2022-11"))
@@ -283,78 +283,78 @@ class SummaryTests : FunSpec({
 
     test("monthly summary") {
         // NOV-01
-        executeClockInWitArgs(arrayOf("-tcoww",     "--datetime=2022-11-01 07:30"))
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2022-11-01 09:00"))
-        executeClockInWitArgs(arrayOf("-tjourfixee","--datetime=2022-11-01 14:00"))
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2022-11-01 15:00"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-11-01 17:30"))
+        executeClockInWitArgs(arrayOf("-pWartung", "-tcoww",     "--datetime=2022-11-01 07:30"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2022-11-01 09:00"))
+        executeClockInWitArgs(arrayOf("--project=\"ITS meetings\"", "-tjourfixee","--datetime=2022-11-01 14:00"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2022-11-01 15:00"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-11-01 17:30"))
 
         // NOV-02
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2022-11-02 07:45"))
-        executeClockInWitArgs(arrayOf("-tEPP-123",  "--datetime=2022-11-02 09:45"))
-        executeClockInWitArgs(arrayOf("-tEDF-2223", "--datetime=2022-11-02 10:45"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-11-02 12:00"))
-        executeClockInWitArgs(arrayOf("-tEDF-2223", "--datetime=2022-11-02 13:15"))
-        executeClockInWitArgs(arrayOf("-tDVR-3",    "--datetime=2022-11-02 14:00"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-11-02 17:30"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2022-11-02 07:45"))
+        executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-123",  "--datetime=2022-11-02 09:45"))
+        executeClockInWitArgs(arrayOf("-pWartung", "-tEDF-2223", "--datetime=2022-11-02 10:45"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-11-02 12:00"))
+        executeClockInWitArgs(arrayOf("-pWartung", "-tEDF-2223", "--datetime=2022-11-02 13:15"))
+        executeClockInWitArgs(arrayOf("--project=\"Line Activity\"", "-tDVR-3",    "--datetime=2022-11-02 14:00"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-11-02 17:30"))
 
         // NOV-03
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2022-11-03 07:45"))
-        executeClockInWitArgs(arrayOf("-tcoww",     "--datetime=2022-11-03 08:45"))
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2022-11-03 09:15"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2022-11-03 07:45"))
+        executeClockInWitArgs(arrayOf("-pWartung", "-tcoww",     "--datetime=2022-11-03 08:45"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2022-11-03 09:15"))
 
         // NOV-04
-        executeClockInWitArgs(arrayOf("-tcoww",     "--datetime=2022-11-04 08:30"))
-        executeClockInWitArgs(arrayOf("-tEDF-0815", "--datetime=2022-11-04 09:30"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-11-04 12:00"))
-        executeClockInWitArgs(arrayOf("-tEDF-0815", "--datetime=2022-11-04 13:00"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-11-04 17:30"))
-        executeClockInWitArgs(arrayOf("-tEDF-0815", "--datetime=2022-11-04 20:00"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-11-04 21:30"))
-        executeClockInWitArgs(arrayOf("-tEDF-0815", "--datetime=2022-11-04 22:00"))
+        executeClockInWitArgs(arrayOf("-pWartung", "-tcoww",     "--datetime=2022-11-04 08:30"))
+        executeClockInWitArgs(arrayOf("-pWartung", "-tEDF-0815", "--datetime=2022-11-04 09:30"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-11-04 12:00"))
+        executeClockInWitArgs(arrayOf("-pWartung", "-tEDF-0815", "--datetime=2022-11-04 13:00"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-11-04 17:30"))
+        executeClockInWitArgs(arrayOf("-pWartung", "-tEDF-0815", "--datetime=2022-11-04 20:00"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-11-04 21:30"))
+        executeClockInWitArgs(arrayOf("-pWartung", "-tEDF-0815", "--datetime=2022-11-04 22:00"))
 
         // NOV-06 .. work on sunday
-        executeClockInWitArgs(arrayOf("-tEDF-0815", "--datetime=2022-11-06 20:00"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-11-06 22:45"))
+        executeClockInWitArgs(arrayOf("-pWartung", "-tEDF-0815", "--datetime=2022-11-06 20:00"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-11-06 22:45"))
 
         // NOV-08
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2022-11-08 08:30"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-11-08 11:55"))
-        executeClockInWitArgs(arrayOf("-tEPP-0815", "--datetime=2022-11-08 12:45"))
-        executeClockInWitArgs(arrayOf("-tallhandss","--datetime=2022-11-08 15:20"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-11-08 16:50"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2022-11-08 08:30"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-11-08 11:55"))
+        executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-0815", "--datetime=2022-11-08 12:45"))
+        executeClockInWitArgs(arrayOf("--project=\"ITS meetings\"", "-tallhandss","--datetime=2022-11-08 15:20"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-11-08 16:50"))
 
         // NOV-07 ... insert after NOV-08
-        executeClockInWitArgs(arrayOf("-tEDF-0815", "--datetime=2022-11-07 09:30"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-11-07 11:00"))
+        executeClockInWitArgs(arrayOf("-pWartung", "-tEDF-0815", "--datetime=2022-11-07 09:30"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-11-07 11:00"))
 
         // NOV-09
-        executeClockInWitArgs(arrayOf("-tcoww",     "--datetime=2022-11-09 09:00"))
-        executeClockInWitArgs(arrayOf("-tEPP-123",  "--datetime=2022-11-09 11:00"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-11-09 12:00"))
-        executeClockInWitArgs(arrayOf("-tEPP-123",  "--datetime=2022-11-09 13:00"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-11-09 22:00"))
+        executeClockInWitArgs(arrayOf("-pWartung", "-tcoww",     "--datetime=2022-11-09 09:00"))
+        executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-123",  "--datetime=2022-11-09 11:00"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-11-09 12:00"))
+        executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-123",  "--datetime=2022-11-09 13:00"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-11-09 22:00"))
 
         // NOV-25
-        executeClockInWitArgs(arrayOf("-tcoww",     "--datetime=2022-11-25 09:30"))
-        executeClockInWitArgs(arrayOf("-tEPP-123",  "--datetime=2022-11-25 09:45"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-11-25 10:55"))
+        executeClockInWitArgs(arrayOf("-pWartung", "-tcoww",     "--datetime=2022-11-25 09:30"))
+        executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-123",  "--datetime=2022-11-25 09:45"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-11-25 10:55"))
 
         // NOV-29
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2022-11-29 08:30"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-11-29 11:58"))
-        executeClockInWitArgs(arrayOf("-tEPP-123",  "--datetime=2022-11-29 13:00"))
-        executeClockInWitArgs(arrayOf("-tjourfixee","--datetime=2022-11-29 14:00"))
-        executeClockInWitArgs(arrayOf("-tEPP-123",  "--datetime=2022-11-29 15:30"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-11-29 18:03"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2022-11-29 08:30"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-11-29 11:58"))
+        executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-123",  "--datetime=2022-11-29 13:00"))
+        executeClockInWitArgs(arrayOf("--project=\"ITS meetings\"", "-tjourfixee","--datetime=2022-11-29 14:00"))
+        executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-123",  "--datetime=2022-11-29 15:30"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-11-29 18:03"))
 
         // NOV-30
-        executeClockInWitArgs(arrayOf("-tcoww",     "--datetime=2022-11-30 09:30"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-11-30 12:00"))
-        executeClockInWitArgs(arrayOf("-tEPP-0815", "--datetime=2022-11-30 13:00"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-11-30 15:30"))
-        executeClockInWitArgs(arrayOf("-tEPP-0815", "--datetime=2022-11-30 17:00"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2022-11-30 22:45"))
+        executeClockInWitArgs(arrayOf("-pWartung", "-tcoww",     "--datetime=2022-11-30 09:30"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-11-30 12:00"))
+        executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-0815", "--datetime=2022-11-30 13:00"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-11-30 15:30"))
+        executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-0815", "--datetime=2022-11-30 17:00"))
+        executeClockOutWitArgs(arrayOf("--datetime=2022-11-30 22:45"))
 
         val output = tapSystemOut {
             executeMonthlySummaryWitArgs(arrayOf("-m2022-11"))

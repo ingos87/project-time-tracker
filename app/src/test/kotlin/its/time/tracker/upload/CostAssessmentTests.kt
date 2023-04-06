@@ -20,7 +20,7 @@ class CostAssessmentTests : FunSpec({
     }
 
     test("cost assessment is not possible if there is no config file") {
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2022-01-03 07:30"))
+        executeClockInWitArgs(arrayOf("--project=ProjectA", "-tEPP-007",  "--datetime=2022-01-03 07:30"))
         executeClockOutWitArgs(arrayOf(             "--datetime=2022-01-03 16:30"))
 
         ensureNoConfig()
@@ -34,7 +34,7 @@ class CostAssessmentTests : FunSpec({
     }
 
     test("cost assessment shows err message if there are not clock-in events") {
-        executeClockOutWitArgs(arrayOf(             "--datetime=2023-01-02 14:30"))
+        executeClockOutWitArgs(arrayOf("--datetime=2023-01-02 14:30"))
 
         val output = tapSystemOut {
             executeCostAssessmentWitArgs(arrayOf("-w2023-01"))
@@ -47,29 +47,29 @@ class CostAssessmentTests : FunSpec({
 
     test("cost assessment for standard week") {
         // MON (public holiday)
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2023-05-01 12:00"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2023-05-01 14:55"))
+        executeClockInWitArgs(arrayOf("--project=ProjectA", "-tEPP-007",  "--datetime=2023-05-01 12:00"))
+        executeClockOutWitArgs(arrayOf("--datetime=2023-05-01 14:55"))
 
         // TUE
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2023-05-02 07:00"))
-        executeClockInWitArgs(arrayOf("-tEPP-009",  "--datetime=2023-05-02 08:00"))
-        executeClockInWitArgs(arrayOf("-tcoww",     "--datetime=2023-05-02 09:45"))
-        executeClockInWitArgs(arrayOf("-tEDF-1",    "--datetime=2023-05-02 10:05"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2023-05-02 12:00"))
-        executeClockInWitArgs(arrayOf("-tEDF-1",    "--datetime=2023-05-02 13:00"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2023-05-02 13:25"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2023-05-02 07:00"))
+        executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-009",  "--datetime=2023-05-02 08:00"))
+        executeClockInWitArgs(arrayOf("-pDoD", "-tcoww",     "--datetime=2023-05-02 09:45"))
+        executeClockInWitArgs(arrayOf("-pWartung", "-tEDF-1",    "--datetime=2023-05-02 10:05"))
+        executeClockOutWitArgs(arrayOf("--datetime=2023-05-02 12:00"))
+        executeClockInWitArgs(arrayOf("-pWartung", "-tEDF-1",    "--datetime=2023-05-02 13:00"))
+        executeClockOutWitArgs(arrayOf("--datetime=2023-05-02 13:25"))
 
         // WED
-        executeClockInWitArgs(arrayOf("-tEPP-008",  "--datetime=2023-05-03 08:00"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2023-05-03 19:00"))
+        executeClockInWitArgs(arrayOf("--project=ProjectA", "-tEPP-008",  "--datetime=2023-05-03 08:00"))
+        executeClockOutWitArgs(arrayOf("--datetime=2023-05-03 19:00"))
 
         // FRI
-        executeClockInWitArgs(arrayOf("-tEPP-008",  "--datetime=2023-05-05 08:00"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2023-05-05 13:03"))
+        executeClockInWitArgs(arrayOf("--project=ProjectA", "-tEPP-008",  "--datetime=2023-05-05 08:00"))
+        executeClockOutWitArgs(arrayOf("--datetime=2023-05-05 13:03"))
 
         // SAT
-        executeClockInWitArgs(arrayOf("-tEDF-9",    "--datetime=2023-05-06 08:00"))
-        executeClockOutWitArgs(arrayOf(             "--datetime=2023-05-06 10:10"))
+        executeClockInWitArgs(arrayOf("-pWartung", "-tEDF-9",    "--datetime=2023-05-06 08:00"))
+        executeClockOutWitArgs(arrayOf("--datetime=2023-05-06 10:10"))
 
 
         val output = tapSystemOut {

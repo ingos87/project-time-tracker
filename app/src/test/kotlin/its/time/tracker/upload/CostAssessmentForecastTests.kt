@@ -15,30 +15,30 @@ class CostAssessmentForecastTests : FunSpec({
     }
 
     test("cost assessment is not possible if there is no config file") {
-        executeClockInWitArgs(arrayOf("-tcoww",     "--datetime=2023-02-15 07:30"))
-        executeClockInWitArgs(arrayOf("-ttownhalll","--datetime=2023-02-15 09:30"))
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2023-02-15 13:00"))
+        executeClockInWitArgs(arrayOf("-pDoD", "-tcoww",     "--datetime=2023-02-15 07:30"))
+        executeClockInWitArgs(arrayOf("-project=\"ITS meetings\"", "-ttownhalll","--datetime=2023-02-15 09:30"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2023-02-15 13:00"))
         executeClockOutWitArgs(arrayOf(             "--datetime=2023-02-15 16:30"))
 
-        executeClockInWitArgs(arrayOf("-tcoww",     "--datetime=2023-02-16 07:30"))
-        executeClockInWitArgs(arrayOf("-tEPP-009",  "--datetime=2023-02-16 09:30"))
+        executeClockInWitArgs(arrayOf("-pDoD", "-tcoww",     "--datetime=2023-02-16 07:30"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-009",  "--datetime=2023-02-16 09:30"))
         executeClockOutWitArgs(arrayOf(             "--datetime=2023-02-16 16:30"))
 
-        executeClockInWitArgs(arrayOf("-tcoww",     "--datetime=2023-02-17 07:30"))
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2023-02-17 09:30"))
+        executeClockInWitArgs(arrayOf("-pDoD", "-tcoww",     "--datetime=2023-02-17 07:30"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2023-02-17 09:30"))
         executeClockOutWitArgs(arrayOf(             "--datetime=2023-02-17 16:30"))
 
-        executeClockInWitArgs(arrayOf("-tcoww",     "--datetime=2023-02-20 07:30"))
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2023-02-20 09:30"))
+        executeClockInWitArgs(arrayOf("-pDoD", "-tcoww",     "--datetime=2023-02-20 07:30"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2023-02-20 09:30"))
         executeClockOutWitArgs(arrayOf(             "--datetime=2023-02-20 16:30"))
 
-        executeClockInWitArgs(arrayOf("-tcoww",     "--datetime=2023-02-21 07:30"))
-        executeClockInWitArgs(arrayOf("-tEPP-009",  "--datetime=2023-02-21 08:55"))
+        executeClockInWitArgs(arrayOf("-pDoD", "-tcoww",     "--datetime=2023-02-21 07:30"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-009",  "--datetime=2023-02-21 08:55"))
         executeClockOutWitArgs(arrayOf(             "--datetime=2023-02-21 16:30"))
 
-        executeClockInWitArgs(arrayOf("-tf2ff",     "--datetime=2023-02-22 07:30"))
-        executeClockInWitArgs(arrayOf("-ttownhalll","--datetime=2023-02-22 09:00"))
-        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2023-02-22 11:00"))
+        executeClockInWitArgs(arrayOf("-project=\"ITS meetings\"", "-tf2ff",     "--datetime=2023-02-22 07:30"))
+        executeClockInWitArgs(arrayOf("-project=\"ITS meetings\"", "-ttownhalll","--datetime=2023-02-22 09:00"))
+        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2023-02-22 11:00"))
         executeClockOutWitArgs(arrayOf(             "--datetime=2023-02-22 16:30"))
 
         val input = mapOf<LocalDate, List<CostAssessmentPosition>>(

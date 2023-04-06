@@ -11,6 +11,7 @@ import java.time.temporal.ChronoUnit.MINUTES
 class ProjectTimeCalculator {
 
     // TODO refactor. method is too long
+    // TODO use project from clock event ... will make a lot of code obsolete
     fun calculateProjectTime(clockEvents: List<ClockEvent>, useNowAsCLockOut: Boolean = false): List<CostAssessmentPosition> {
         val topicTimes = ArrayList<Pair<String, Duration>>()
         var totalWorkingTime: Duration = Duration.ZERO
