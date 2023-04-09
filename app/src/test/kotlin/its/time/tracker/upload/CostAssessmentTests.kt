@@ -15,7 +15,7 @@ import java.time.temporal.ChronoUnit.MINUTES
 class CostAssessmentTests : FunSpec({
 
     beforeEach {
-        ensureTestConfig()
+        ensureTestConfig("", "", "")
         ensureCsvEmpty()
     }
 
@@ -52,11 +52,11 @@ class CostAssessmentTests : FunSpec({
 
         // TUE
         executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2023-05-02 07:00"))
-        executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-009",  "--datetime=2023-05-02 08:00"))
-        executeClockInWitArgs(arrayOf("-pDoD", "-tcoww",     "--datetime=2023-05-02 09:45"))
-        executeClockInWitArgs(arrayOf("-pWartung", "-tEDF-1",    "--datetime=2023-05-02 10:05"))
+        executeClockInWitArgs(arrayOf("-pprojB", "-tEPP-009",  "--datetime=2023-05-02 08:00"))
+        executeClockInWitArgs(arrayOf("-pwartung", "-tcoww",     "--datetime=2023-05-02 09:45"))
+        executeClockInWitArgs(arrayOf("-pwartung", "-tEDF-1",    "--datetime=2023-05-02 10:05"))
         executeClockOutWitArgs(arrayOf("--datetime=2023-05-02 12:00"))
-        executeClockInWitArgs(arrayOf("-pWartung", "-tEDF-1",    "--datetime=2023-05-02 13:00"))
+        executeClockInWitArgs(arrayOf("-pwartung", "-tEDF-1",    "--datetime=2023-05-02 13:00"))
         executeClockOutWitArgs(arrayOf("--datetime=2023-05-02 13:25"))
 
         // WED
@@ -85,8 +85,7 @@ class CostAssessmentTests : FunSpec({
             "│ Other absence    │  8,00│      │      │  8,00│      │      │      │",
             "│ ProjectA         │      │  4,00│ 11,00│      │  5,00│      │      │",
             "│ ProjectB         │      │  2,00│      │      │      │      │      │",
-            "│ DoD              │      │  0,50│      │      │      │      │      │",
-            "│ Wartung          │      │  2,50│      │      │  2,00│      │      │",
+            "│ Wartung          │      │  3,00│      │      │  2,00│      │      │",
             "└──────────────────┴──────┴──────┴──────┴──────┴──────┴──────┴──────┘",
             "NOOP mode. Uploaded nothing")
     }

@@ -11,7 +11,7 @@ import kotlin.collections.HashMap
 class CostAssessmentRoundingTests : FunSpec({
 
     beforeEach {
-        ensureTestConfig()
+        ensureTestConfig("", "", "")
     }
 
     test("no rounding necessary") {

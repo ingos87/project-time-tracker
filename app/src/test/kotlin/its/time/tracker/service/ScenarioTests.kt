@@ -7,7 +7,7 @@ import its.time.tracker.*
 class ScenarioTests : BehaviorSpec({
 
     given("standard work day") {
-        ensureTestConfig()
+        ensureTestConfig("", "", "")
         ensureCsvEmpty()
         getTimesCsvContent() shouldBe emptyList()
         `when`("clock-in is triggered") {

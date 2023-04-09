@@ -63,7 +63,7 @@ class CostAssessmentUploader(private val costAssessmentsPerDay: SortedMap<LocalD
         val allCostAssessmentPositions = costAssessmentPositions.map { it.project }.toSet()
         if (donePositions.size != allCostAssessmentPositions.size) {
             val missingPositionsOnPage = allCostAssessmentPositions.minus(donePositions.toSet())
-            println("Warning: unable to book hours for these cost assessment positions because they are not among your favorites: ${missingPositionsOnPage.joinToString()}")
+            println("Warning: unable to book hours for these cost assessment positions because they are either not available for you or not among your favorites: ${missingPositionsOnPage.joinToString()}")
             println("done:  $donePositions")
             println("input: $allCostAssessmentPositions")
         }

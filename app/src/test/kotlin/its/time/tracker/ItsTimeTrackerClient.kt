@@ -25,7 +25,9 @@ fun ensureCsvEmpty() {
     File(TEST_CSV_PATH).createNewFile()
 }
 
-fun ensureTestConfig(daysOff: String = "") {
+fun ensureTestConfig(daysOff: String,
+                     sickLeave: String,
+                     vacation: String) {
     ensureNoConfig()
 
     // write config
@@ -39,18 +41,20 @@ fun ensureTestConfig(daysOff: String = "") {
         maxDailyWorkTillAutoClockOut = "PT9H",
         weekdaysOff = "SATURDAY,SUNDAY",
         daysOff = daysOff.split(","),
+        sickLeave = sickLeave.split(","),
+        vacation = vacation.split(","),
         chromeProfilePath = "/tmp/nowhere",
         standardDailyWorkDuration = "PT8H",
         CostAssessmentSetup(
             developmentProjects = listOf(
-                CostAssessmentProject("ProjectA", setOf("EPP-007", "EPP-008")),
-                CostAssessmentProject("ProjectB", setOf("EPP-009", "EPP-123", "EPP-0815", "EPP-17662"))
+                CostAssessmentProject("ProjectA", "projA"),
+                CostAssessmentProject("ProjectB", "projB")
             ),
             maintenanceProjects = listOf(
-                CostAssessmentProject("DoD", setOf("coww"))
+                CostAssessmentProject("Wartung", "wartung")
             ),
             internalProjects = listOf(
-                CostAssessmentProject("ITS meetings", setOf("f2ff", "allhandss", "townhalll", "jourfixee", "jourfixee"))
+                CostAssessmentProject("ITS meetings", "its_meet")
             ),
             absenceProjects = emptyList()
         )

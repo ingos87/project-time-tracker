@@ -55,10 +55,12 @@ class Constants {
         var STANDARD_WORK_DURATION_PER_DAY: Duration = Duration.ofHours(8)
         var WEEKDAYS_OFF: List<DayOfWeek> = emptyList()
         var DAYS_OFF: List<LocalDate> = emptyList()
+        var SICK_LEAVE: List<Pair<LocalDate, LocalDate>> = emptyList()
+        var VACATION: List<Pair<LocalDate, LocalDate>> = emptyList()
         var CHROME_PROFILE_PATH: String = ""
         var COST_ASSESSMENT_SETUP: CostAssessmentSetup = CostAssessmentSetup.getEmptyInstance()
 
-        fun setApplicationProperties(verbose: Boolean, properties: Map<String, Any?>) {
+        fun setApplicationProperties(properties: Map<String, Any?>, verbose: Boolean) {
             VERBOSE = verbose
             CSV_PATH = readStringProperty(properties, Companion::CSV_PATH.name.lowercase(Locale.GERMANY))
             MY_HR_SELF_SERVICE_URL = readStringProperty(properties, Companion::MY_HR_SELF_SERVICE_URL.name.lowercase(Locale.GERMANY))
@@ -68,9 +70,31 @@ class Constants {
             E_TIME_URL = readStringProperty(properties, Companion::E_TIME_URL.name.lowercase(Locale.GERMANY))
             E_TIME_LANGUAGE = readStringProperty(properties, Companion::E_TIME_LANGUAGE.name.lowercase(Locale.GERMANY))
             DAYS_OFF = parseDayList(properties[Companion::DAYS_OFF.name.lowercase(Locale.GERMANY)] as List<String>)
+            SICK_LEAVE = parseDateSpans(properties[Companion::SICK_LEAVE.name.lowercase(Locale.GERMANY)] as List<String>)
+            VACATION = parseDateSpans(properties[Companion::VACATION.name.lowercase(Locale.GERMANY)] as List<String>)
             WEEKDAYS_OFF = parseWeekdayList(properties[Companion::WEEKDAYS_OFF.name.lowercase(Locale.GERMANY)] as String)
             CHROME_PROFILE_PATH = readStringProperty(properties, Companion::CHROME_PROFILE_PATH.name.lowercase(Locale.GERMANY))
             COST_ASSESSMENT_SETUP = readCostAssessmentMap(properties)
+        }
+
+        private fun parseDateSpans(listOfDateRanges: List<String>): List<Pair<LocalDate, LocalDate>> {
+            return listOfDateRanges.mapNotNull { toPairOfDates(it) }
+        }
+
+        private fun toPairOfDates(range: String): Pair<LocalDate, LocalDate>? {
+            val presumedDates = range.split("_")
+            if (presumedDates.size == 2
+                && presumedDates[0].length == 10
+                && presumedDates[1].length == 10) {
+                try {
+                    return Pair(DateTimeUtil.toValidDate(presumedDates[0]) as LocalDate,
+                        DateTimeUtil.toValidDate(presumedDates[1]) as LocalDate)
+                } catch (e: AbortException) {
+                    // ignore
+                }
+            }
+
+            return null
         }
 
         private fun readStringProperty(map: Map<String, Any?>,
@@ -105,25 +129,15 @@ class Constants {
 
             val all = map[topLevelKey] as Map<*, *>
             return CostAssessmentSetup(
-                developmentProjects = toCostAssessmentProjectList(all[COST_ASSMNT_DEV_KEY]),
-                maintenanceProjects = toCostAssessmentProjectList(all[COST_ASSMNT_MAINT_KEY]),
-                internalProjects = toCostAssessmentProjectList(all[COST_ASSMNT_INT_KEY]),
-                absenceProjects = toCostAssessmentProjectList(all[COST_ASSMNT_ABSC_KEY]),
+                developmentProjects = (all[COST_ASSMNT_DEV_KEY] as Map<String, String>)
+                    .map { (k, v) -> CostAssessmentProject(k, v)},
+                maintenanceProjects = (all[COST_ASSMNT_MAINT_KEY] as Map<String, String>)
+                    .map { (k, v) -> CostAssessmentProject(k, v)},
+                internalProjects = (all[COST_ASSMNT_INT_KEY] as Map<String, String>)
+                    .map { (k, v) -> CostAssessmentProject(k, v)},
+                absenceProjects = (all[COST_ASSMNT_ABSC_KEY] as Map<String, String>)
+                    .map { (k, v) -> CostAssessmentProject(k, v)}
             )
-        }
-
-        private fun toCostAssessmentProjectList(any: Any?): List<CostAssessmentProject> {
-            if (any == null) {
-                return emptyList()
-            }
-
-            try {
-                val setupMap: Map<String, Iterable<String>> = any as Map<String, Iterable<String>>
-                return setupMap.map { (k, v) -> CostAssessmentProject(k, v.toSet()) }
-            } catch (e: java.lang.Exception) {
-                e.printStackTrace()
-                throw AbortException("invalid cost assessment config")
-            }
         }
     }
 }

@@ -19,26 +19,13 @@ data class CostAssessmentSetup (
             )
         }
     }
-    fun resolveTopicToProject(topic: String): String {
-        if (topic.startsWith("EDF-")) {
-            return "Wartung"
-        }
-        if (topic.startsWith("DVR-")) {
-            return "Line Activity"
-        }
 
-        (developmentProjects + maintenanceProjects + internalProjects + absenceProjects)
-            .forEach { project ->
-            if (project.possibleTopics.any { it.equals(topic, ignoreCase = true) }) {
-                return project.title
-            }
-        }
-
-        println("Found no fitting booking position for work topic '$topic' -> using cost assessment 'Project Placeholder'")
-        return "Project Placeholder"
+    fun getOfficialProjectName(projectInput: String): String {
+        val unifiedList = developmentProjects + maintenanceProjects + internalProjects + absenceProjects
+        return unifiedList.firstOrNull { it.abbreviation == projectInput }?.title ?: projectInput
     }
 
-    fun getSuperiorProject(project: String): String {
+    fun getProjectCategory(project: String): String {
         val map = mapOf(
             Constants.COST_ASSMNT_DEV_KEY to developmentProjects,
             Constants.COST_ASSMNT_MAINT_KEY to maintenanceProjects,

@@ -11,7 +11,7 @@ import kotlin.collections.HashMap
 class CostAssessmentValidatorTests : FunSpec({
 
     beforeEach {
-        ensureTestConfig()
+        ensureTestConfig("", "", "")
     }
 
     test("no moving of positions necessary") {

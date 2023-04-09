@@ -10,24 +10,29 @@ import java.time.temporal.ChronoUnit.MINUTES
 
 class ProjectTimeCalculator {
 
-    // TODO refactor. method is too long
-    // TODO use project from clock event ... will make a lot of code obsolete
-    fun calculateProjectTime(clockEvents: List<ClockEvent>, useNowAsCLockOut: Boolean = false): List<CostAssessmentPosition> {
-        val topicTimes = ArrayList<Pair<String, Duration>>()
+    fun calculateProjectTime(clockEvents: List<ClockEvent>, useNowAsClockOut: Boolean = false): List<CostAssessmentPosition> {
+        val singleCostAssessments = collectSingleProjectTimes(clockEvents, useNowAsClockOut)
+        return unifyPositions(singleCostAssessments)
+    }
+
+    private fun collectSingleProjectTimes(clockEvents: List<ClockEvent>, useNowAsClockOut: Boolean): List<CostAssessmentPosition> {
+        val singleCostAssessments = mutableListOf<CostAssessmentPosition>()
         var totalWorkingTime: Duration = Duration.ZERO
 
         var mostRecentClockIn: LocalDateTime? = null
         var currentClockStatus = EventType.CLOCK_OUT
+        var currentProject = ""
         var currentTopic = ""
 
         clockEvents.forEach {
             if (it.eventType == EventType.CLOCK_IN) {
                 if (currentClockStatus == EventType.CLOCK_IN) {
                     val taskTime = Duration.between(mostRecentClockIn, it.dateTime)
-                    topicTimes.add(Pair(currentTopic, taskTime))
+                    singleCostAssessments.add(CostAssessmentPosition(currentProject, taskTime, setOf(currentTopic)))
                     totalWorkingTime = totalWorkingTime.plus(taskTime)
                 }
 
+                currentProject = Constants.COST_ASSESSMENT_SETUP.getOfficialProjectName(it.project)
                 currentTopic = it.topic
                 mostRecentClockIn = it.dateTime
                 currentClockStatus = EventType.CLOCK_IN
@@ -35,7 +40,7 @@ class ProjectTimeCalculator {
             else if (it.eventType == EventType.CLOCK_OUT) {
                 if (currentClockStatus == EventType.CLOCK_IN) {
                     val taskTime = Duration.between(mostRecentClockIn, it.dateTime)
-                    topicTimes.add(Pair(currentTopic, taskTime))
+                    singleCostAssessments.add(CostAssessmentPosition(currentProject, taskTime, setOf(currentTopic)))
                     totalWorkingTime = totalWorkingTime.plus(taskTime)
                 }
 
@@ -44,52 +49,34 @@ class ProjectTimeCalculator {
         }
 
         if (currentClockStatus != EventType.CLOCK_OUT) {
-            if (useNowAsCLockOut) {
+            if (useNowAsClockOut) {
                 val now = LocalDateTime.now()
                 val durationTillNow = Duration.ofMinutes(MINUTES.between(mostRecentClockIn, now))
-                topicTimes.add(Pair(currentTopic, durationTillNow))
+                singleCostAssessments.add(CostAssessmentPosition(currentProject, durationTillNow, setOf(currentTopic)))
             }
             else if (totalWorkingTime >= Constants.MAX_WORK_DURATION_TILL_AUTO_CLOCKOUT) {
                 // although, this is beyond the max hours per day, any new tasks will take at least half an hour
                 val imaginaryTaskTime = Duration.ofMinutes(30)
-                topicTimes.add(Pair(currentTopic, imaginaryTaskTime))
+                singleCostAssessments.add(CostAssessmentPosition(currentProject, imaginaryTaskTime, setOf(currentTopic)))
             }
             else {
                 val imaginaryTaskDuration = Constants.MAX_WORK_DURATION_TILL_AUTO_CLOCKOUT - totalWorkingTime
-                topicTimes.add(Pair(currentTopic, imaginaryTaskDuration))
+                singleCostAssessments.add(CostAssessmentPosition(currentProject, imaginaryTaskDuration, setOf(currentTopic)))
             }
         }
 
-        return topicTimes2BookingList(topicTimes)
+        return singleCostAssessments.toList()
     }
 
-    private fun topicTimes2BookingList(topicTimes: ArrayList<Pair<String, Duration>>): List<CostAssessmentPosition> {
-        val costAssessmentPositions = ArrayList<CostAssessmentPosition>()
-        topicTimes.forEach {
-            val topic = it.first
-            val workingTime = it.second
-            val bookingKey = Constants.COST_ASSESSMENT_SETUP.resolveTopicToProject(topic)
+    private fun unifyPositions(positions: List<CostAssessmentPosition>): List<CostAssessmentPosition> {
+        val groupedPositions = positions.groupBy { it.project }
 
-            val presentItem = costAssessmentPositions.find { item -> item.project == bookingKey }
-            if (presentItem != null) {
-                costAssessmentPositions.remove(presentItem)
-                val newItem = CostAssessmentPosition(
-                    project = bookingKey,
-                    totalWorkingTime = presentItem.totalWorkingTime.plus(workingTime),
-                    topics = presentItem.topics.plus(topic)
-                )
-                costAssessmentPositions.add(newItem)
-            }
-            else {
-                val newItem = CostAssessmentPosition(
-                    project = bookingKey,
-                    totalWorkingTime = workingTime,
-                    topics = setOf(topic)
-                )
-                costAssessmentPositions.add(newItem)
-            }
+        val unifiedPositions = groupedPositions.map { (_, positions) ->
+            val totalWorkingTime = positions.fold(Duration.ZERO) { acc, position -> acc.plus(position.totalWorkingTime) }
+            val topics = positions.flatMap { it.topics }.toSet()
+            CostAssessmentPosition(positions.first().project, totalWorkingTime, topics)
         }
 
-        return costAssessmentPositions
+        return unifiedPositions
     }
 }

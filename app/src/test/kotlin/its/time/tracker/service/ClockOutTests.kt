@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter
 class ClockOutTests : FunSpec({
 
     beforeEach {
-        ensureTestConfig()
+        ensureTestConfig("", "", "")
         ensureCsvEmpty()
     }
 

@@ -164,7 +164,14 @@ class DateTimeUtil {
             return !Constants.WEEKDAYS_OFF.contains(dayOfWeek)
                 && !Constants.PUBLIC_HOLIDAYS.contains(date)
                 && !Constants.DAYS_OFF.contains(date)
+                && !isWithinDateRanges(Constants.SICK_LEAVE, date)
+                && !isWithinDateRanges(Constants.VACATION, date)
         }
+
+        private fun isWithinDateRanges(ranges: List<Pair<LocalDate, LocalDate>>, date: LocalDate): Boolean =
+            ranges.any { (firstDay, lastDay) ->
+                date in firstDay..lastDay
+            }
 
         fun roundToHalfHourWithRemainder(duration: Duration): Pair<Duration, Duration> {
             var halfHours = duration.toMinutes().toInt() / 30

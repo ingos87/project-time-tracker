@@ -10,7 +10,7 @@ import java.time.LocalDate
 class WorkingTimeDistributionOverDaysTests : StringSpec({
 
     beforeEach {
-        ensureTestConfig()
+        ensureTestConfig("", "", "")
     }
 
     "ensureMaxWorkingTimePerDay returns empty map" {
@@ -127,7 +127,7 @@ class WorkingTimeDistributionOverDaysTests : StringSpec({
     }
 
     "move working time from non-working days to working days" {
-        ensureTestConfig("2023-05-03,2023-02-02")
+        ensureTestConfig("2023-05-03,2023-02-02", "", "")
 
         val input = HashMap<LocalDate, List<WorkDaySummary>>()
         input[LocalDate.parse("2023-05-01")] = listOf(

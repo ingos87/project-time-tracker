@@ -15,7 +15,7 @@ import java.time.temporal.ChronoUnit.MINUTES
 class SummaryTests : FunSpec({
 
     beforeEach {
-        ensureTestConfig()
+        ensureTestConfig("", "", "")
         ensureCsvEmpty()
     }
 
@@ -161,7 +161,7 @@ class SummaryTests : FunSpec({
         executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-0815", "--datetime=2022-01-03 13:50")) // workingtime 0:10
         executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-17662","--datetime=2022-01-03 14:00")) // workingtime 0:10
         executeClockOutWitArgs(arrayOf("--datetime=2022-01-03 15:30")) // workingtime 1:30
-        executeClockInWitArgs(arrayOf("--project=\"ITS meetings\"", "-tallhandss","--datetime=2022-01-03 17:05")) // break 1:35
+        executeClockInWitArgs(arrayOf("--project=ITS meetings", "-tallhandss","--datetime=2022-01-03 17:05")) // break 1:35
         executeClockInWitArgs(arrayOf("-pWartung", "-tEDF-99",   "--datetime=2022-01-03 18:05")) // workingtime 1:00
         executeClockOutWitArgs(arrayOf("--datetime=2022-01-03 20:52")) // workingtime 2:47
 
@@ -251,9 +251,9 @@ class SummaryTests : FunSpec({
         executeClockOutWitArgs(arrayOf("--datetime=2022-11-02 12:00"))
         executeClockInWitArgs(arrayOf("-pWartung",  "-tEDF-0815", "--datetime=2022-11-02 13:15"))
         executeClockInWitArgs(arrayOf("-pWartung",  "-tEDF-1234", "--datetime=2022-11-02 13:30"))
-        executeClockInWitArgs(arrayOf("--project=\"Line Activity\"", "-tDVR-7",    "--datetime=2022-11-02 14:00"))
-        executeClockInWitArgs(arrayOf("--project=\"ITS meetings\"", "-tf2ff",     "--datetime=2022-11-02 15:00"))
-        executeClockInWitArgs(arrayOf("--project=\"Line Activity\"", "-tDVR-7",    "--datetime=2022-11-02 15:45"))
+        executeClockInWitArgs(arrayOf("--project=Line Activity", "-tDVR-7",    "--datetime=2022-11-02 14:00"))
+        executeClockInWitArgs(arrayOf("--project=ITS meetings", "-tf2ff",     "--datetime=2022-11-02 15:00"))
+        executeClockInWitArgs(arrayOf("--project=Line Activity", "-tDVR-7",    "--datetime=2022-11-02 15:45"))
         executeClockOutWitArgs(arrayOf("--datetime=2022-11-02 16:45"))
 
         val output = tapSystemOut {
@@ -272,10 +272,9 @@ class SummaryTests : FunSpec({
             "├══════════════════┼══════┤",
             "│ ProjectA         │ 00:50│",
             "│ ProjectB         │ 01:25│",
-            "│ DoD              │ 02:15│",
-            "│ Wartung          │ 00:45│",
-            "│ ITS meetings     │ 00:45│",
+            "│ Wartung          │ 03:00│",
             "│ Line Activity    │ 02:00│",
+            "│ ITS meetings     │ 00:45│",
             "├──────────────────┼──────┤",
             "│ total            │ 08:00│",
             "└──────────────────┴──────┘")
@@ -285,7 +284,7 @@ class SummaryTests : FunSpec({
         // NOV-01
         executeClockInWitArgs(arrayOf("-pWartung", "-tcoww",     "--datetime=2022-11-01 07:30"))
         executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2022-11-01 09:00"))
-        executeClockInWitArgs(arrayOf("--project=\"ITS meetings\"", "-tjourfixee","--datetime=2022-11-01 14:00"))
+        executeClockInWitArgs(arrayOf("--project=ITS meetings", "-tjourfixee","--datetime=2022-11-01 14:00"))
         executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2022-11-01 15:00"))
         executeClockOutWitArgs(arrayOf("--datetime=2022-11-01 17:30"))
 
@@ -295,7 +294,7 @@ class SummaryTests : FunSpec({
         executeClockInWitArgs(arrayOf("-pWartung", "-tEDF-2223", "--datetime=2022-11-02 10:45"))
         executeClockOutWitArgs(arrayOf("--datetime=2022-11-02 12:00"))
         executeClockInWitArgs(arrayOf("-pWartung", "-tEDF-2223", "--datetime=2022-11-02 13:15"))
-        executeClockInWitArgs(arrayOf("--project=\"Line Activity\"", "-tDVR-3",    "--datetime=2022-11-02 14:00"))
+        executeClockInWitArgs(arrayOf("--project=Line Activity", "-tDVR-3",    "--datetime=2022-11-02 14:00"))
         executeClockOutWitArgs(arrayOf("--datetime=2022-11-02 17:30"))
 
         // NOV-03
@@ -321,7 +320,7 @@ class SummaryTests : FunSpec({
         executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2022-11-08 08:30"))
         executeClockOutWitArgs(arrayOf("--datetime=2022-11-08 11:55"))
         executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-0815", "--datetime=2022-11-08 12:45"))
-        executeClockInWitArgs(arrayOf("--project=\"ITS meetings\"", "-tallhandss","--datetime=2022-11-08 15:20"))
+        executeClockInWitArgs(arrayOf("--project=ITS meetings", "-tallhandss","--datetime=2022-11-08 15:20"))
         executeClockOutWitArgs(arrayOf("--datetime=2022-11-08 16:50"))
 
         // NOV-07 ... insert after NOV-08
@@ -344,7 +343,7 @@ class SummaryTests : FunSpec({
         executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2022-11-29 08:30"))
         executeClockOutWitArgs(arrayOf("--datetime=2022-11-29 11:58"))
         executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-123",  "--datetime=2022-11-29 13:00"))
-        executeClockInWitArgs(arrayOf("--project=\"ITS meetings\"", "-tjourfixee","--datetime=2022-11-29 14:00"))
+        executeClockInWitArgs(arrayOf("--project=ITS meetings", "-tjourfixee","--datetime=2022-11-29 14:00"))
         executeClockInWitArgs(arrayOf("-pProjectB", "-tEPP-123",  "--datetime=2022-11-29 15:30"))
         executeClockOutWitArgs(arrayOf("--datetime=2022-11-29 18:03"))
 
@@ -372,11 +371,10 @@ class SummaryTests : FunSpec({
             "│ clock-in         │ 07:30│ 07:45│ 07:45│ 08:30║ 20:00│ 09:30│ 08:30│ 09:00║ 09:30║ 08:30│ 09:30│",
             "│ clock-out        │ 17:30│ 17:30│ 16:45│ 22:30║ 22:45│ 11:00│ 16:50│ 22:00║ 10:55║ 18:03│ 22:45│",
             "├══════════════════┼══════┼══════┼══════┼══════╬══════┼══════┼══════┼══════╬══════╬══════┼══════┤",
-            "│ DoD              │ 01:30│      │ 00:30│ 01:00║      │      │      │ 02:00║ 00:15║      │ 02:30│",
-            "│ ITS meetings     │ 01:00│      │      │      ║      │      │ 01:30│      ║      ║ 01:30│      │",
+            "│ Wartung          │ 01:30│ 02:00│ 00:30│ 10:00║ 02:45│ 01:30│      │ 02:00║ 00:15║      │ 02:30│",
             "│ ProjectA         │ 07:30│ 02:00│ 08:30│      ║      │      │ 03:25│      ║      ║ 03:28│      │",
+            "│ ITS meetings     │ 01:00│      │      │      ║      │      │ 01:30│      ║      ║ 01:30│      │",
             "│ ProjectB         │      │ 01:00│      │      ║      │      │ 02:35│ 10:00║ 01:10║ 03:33│ 08:15│",
-            "│ Wartung          │      │ 02:00│      │ 09:00║ 02:45│ 01:30│      │      ║      ║      │      │",
             "│ Line Activity    │      │ 03:30│      │      ║      │      │      │      ║      ║      │      │",
             "├──────────────────┼──────┼──────┼──────┼──────╬──────┼──────┼──────┼──────╬──────╬──────┼──────┤",
             "│ total            │ 10:00│ 08:30│ 09:00│ 10:00║ 02:45│ 01:30│ 07:30│ 12:00║ 01:25║ 08:31│ 10:45│",

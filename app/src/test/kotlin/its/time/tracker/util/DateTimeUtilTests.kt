@@ -275,15 +275,39 @@ class DateTimeUtilTests : StringSpec({
     }
 
     "isWorkingDay works for ..." {
-        ensureTestConfig()
+        ensureTestConfig(
+            "2023-05-12,2023-05-19,2023-05-26",
+            "2023-05-01_2023-05-05,2023-05-10_2023-05-10",
+            "2023-05-22_2023-06-01")
 
         listOf(
             LocalDate.parse("2023-04-06") to true,
-            LocalDate.parse("2023-04-07") to false,
-            LocalDate.parse("2023-04-08") to false,
-            LocalDate.parse("2023-04-09") to false,
-            LocalDate.parse("2023-05-01") to false,
-            LocalDate.parse("2023-05-02") to true,
+            LocalDate.parse("2023-04-07") to false, // public holiday
+            LocalDate.parse("2023-04-08") to false, // weekend day
+            LocalDate.parse("2023-04-09") to false, // public holiday
+
+            LocalDate.parse("2023-05-01") to false, // public holiday, sick
+            LocalDate.parse("2023-05-02") to false, // sick
+            LocalDate.parse("2023-05-03") to false, // sick
+            LocalDate.parse("2023-05-04") to false, // sick
+            LocalDate.parse("2023-05-05") to false, // sick
+
+            LocalDate.parse("2023-05-08") to true,
+            LocalDate.parse("2023-05-09") to true,
+            LocalDate.parse("2023-05-10") to false, // sick
+            LocalDate.parse("2023-05-11") to true,
+            LocalDate.parse("2023-05-12") to false, // day off
+            LocalDate.parse("2023-05-13") to false, // weekend day
+            LocalDate.parse("2023-05-14") to false, // weekend day
+            LocalDate.parse("2023-05-15") to true,
+            LocalDate.parse("2023-05-16") to true,
+            LocalDate.parse("2023-05-17") to true,
+            LocalDate.parse("2023-05-18") to false, // public holiday
+            LocalDate.parse("2023-05-19") to false, // day off
+            LocalDate.parse("2023-05-20") to false, // weekend day
+            LocalDate.parse("2023-05-21") to false, // weekend day
+            LocalDate.parse("2023-05-22") to false, // vacation
+            LocalDate.parse("2023-05-23") to false, // vacation
         ).forAll { (date, isWorkingDay) ->
             DateTimeUtil.isWorkingDay(date) shouldBe isWorkingDay
         }

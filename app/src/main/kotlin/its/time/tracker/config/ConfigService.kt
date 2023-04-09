@@ -33,6 +33,8 @@ class ConfigService private constructor(private var configFilePath: String) {
             maxDailyWorkTillAutoClockOut: String = "",
             weekdaysOff: String = "",
             daysOff: List<String> = emptyList(),
+            sickLeave: List<String> = emptyList(),
+            vacation: List<String> = emptyList(),
             chromeProfilePath: String = "",
             standardDailyWorkDuration: String,
             costAssessmentSetup: CostAssessmentSetup,
@@ -52,12 +54,14 @@ class ConfigService private constructor(private var configFilePath: String) {
                 Constants::STANDARD_WORK_DURATION_PER_DAY.name.lowercase(Locale.GERMANY) to standardDailyWorkDuration,
                 Constants::WEEKDAYS_OFF.name.lowercase(Locale.GERMANY) to weekdaysOff,
                 Constants::DAYS_OFF.name.lowercase(Locale.GERMANY) to daysOff,
+                Constants::SICK_LEAVE.name.lowercase(Locale.GERMANY) to sickLeave,
+                Constants::VACATION.name.lowercase(Locale.GERMANY) to vacation,
                 Constants::CHROME_PROFILE_PATH.name.lowercase(Locale.GERMANY) to chromeProfilePath,
                 Constants::COST_ASSESSMENT_SETUP.name.lowercase(Locale.GERMANY) to mapOf<String, Any>(
-                    COST_ASSMNT_DEV_KEY to costAssessmentSetup.developmentProjects.associate { it.title to it.possibleTopics },
-                    COST_ASSMNT_MAINT_KEY to costAssessmentSetup.maintenanceProjects.associate { it.title to it.possibleTopics },
-                    COST_ASSMNT_INT_KEY to costAssessmentSetup.internalProjects.associate { it.title to it.possibleTopics },
-                    COST_ASSMNT_ABSC_KEY to costAssessmentSetup.absenceProjects.associate { it.title to it.possibleTopics },
+                    COST_ASSMNT_DEV_KEY to costAssessmentSetup.developmentProjects.associate { it.title to it.abbreviation },
+                    COST_ASSMNT_MAINT_KEY to costAssessmentSetup.maintenanceProjects.associate { it.title to it.abbreviation },
+                    COST_ASSMNT_INT_KEY to costAssessmentSetup.internalProjects.associate { it.title to it.abbreviation },
+                    COST_ASSMNT_ABSC_KEY to costAssessmentSetup.absenceProjects.associate { it.title to it.abbreviation },
                 ),
             )
 
@@ -80,7 +84,7 @@ class ConfigService private constructor(private var configFilePath: String) {
         checkConfig()
         val reader = File(configFilePath).inputStream().bufferedReader()
         val map = Parser.default().parse(reader) as JsonObject
-        Constants.setApplicationProperties(verbose, map)
+        Constants.setApplicationProperties(map, verbose)
     }
 
     private fun checkConfig() {

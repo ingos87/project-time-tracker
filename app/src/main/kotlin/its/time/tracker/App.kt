@@ -38,6 +38,8 @@ class Init: CliktCommand(help="initializes App by writing custom properties to a
     val stdWorkDuration by option("-s", "--stdworkdurationperday", help="Standard work duration per day (e.g.: PT7H42M, PT8H)").default("PT7H42M")
     val weekdaysOff by option("-w", "--weekdaysoff", help="Comma seperated list of weekdays (MONDAY,TUESDAY,..,SATURDAY,SUNDAY) when no work time is to be transferred to external systems").default("SATURDAY,SUNDAY")
     val daysOff by option("-d", "--daysoff", help="Comma seperated list of days (format: $DATE_PATTERN) when no work time is to be transferred to external systems")
+    val sickLeave by option("-sl", "--sickleave", help="Comma seperated list of day ranges (format: ${DATE_PATTERN}_$DATE_PATTERN) when no work time is to be transferred to external systems")
+    val vacation by option("-v", "--vacation", help="Comma seperated list of day ranges (format: ${DATE_PATTERN}_$DATE_PATTERN) when no work time is to be transferred to external systems")
     val chromeProfilePath by option("-b", "--browserprofilepath", help="Path to Chrome browser profile path (open chrome://version/)")
     override fun run() {
         ConfigService.createConfigFileWithParams(
@@ -49,6 +51,8 @@ class Init: CliktCommand(help="initializes App by writing custom properties to a
             maxDailyWorkTillAutoClockOut = maxWorkDuration,
             weekdaysOff = weekdaysOff,
             daysOff = daysOff?.split(",")?: emptyList(),
+            sickLeave = sickLeave?.split(",")?: emptyList(),
+            vacation = vacation?.split(",")?: emptyList(),
             chromeProfilePath = chromeProfilePath?:"",
             standardDailyWorkDuration = stdWorkDuration,
             costAssessmentSetup = CostAssessmentSetup.getEmptyInstance()

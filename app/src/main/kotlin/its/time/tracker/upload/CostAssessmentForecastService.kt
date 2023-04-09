@@ -26,9 +26,9 @@ class CostAssessmentForecastService {
             uniqueDays.first().minusDays(30),
             normalizedCostAssessments.lastKey())
 
-        val superiorCostAssessments = toMapOfRoundedSuperiorCostAssessments(allCostAssessments)
+        val costAssessmentsCategories = toMapOfRoundedCostAssessmentsCategories(allCostAssessments)
 
-        val forecastedCostAssessments = getForecastedCostAssessments(normalizedCostAssessments, superiorCostAssessments)
+        val forecastedCostAssessments = getForecastedCostAssessments(normalizedCostAssessments, costAssessmentsCategories)
 
         val resultingMap = mutableMapOf<LocalDate, List<CostAssessmentPosition>>()
         resultingMap.putAll(normalizedCostAssessments)
@@ -39,11 +39,11 @@ class CostAssessmentForecastService {
 
     private fun getForecastedCostAssessments(
         normalizedCostAssessments: SortedMap<LocalDate, List<CostAssessmentPosition>>,
-        superiorCostAssessments: Map<String, Duration>
+        costAssessmentsCategories: Map<String, Duration>
     ): List<CostAssessmentPosition> {
         val costAssessments = mutableListOf<CostAssessmentPosition>()
-        superiorCostAssessments.forEach { (superiorProject, duration) ->
-            val project = getLastWorkedOnProject(normalizedCostAssessments, superiorProject)
+        costAssessmentsCategories.forEach { (projectCategory, duration) ->
+            val project = getLastWorkedOnProject(normalizedCostAssessments, projectCategory)
 
             costAssessments.add(
                 CostAssessmentPosition(
@@ -59,19 +59,19 @@ class CostAssessmentForecastService {
 
     private fun getLastWorkedOnProject(
         normalizedCostAssessments: SortedMap<LocalDate, List<CostAssessmentPosition>>,
-        superiorProject: String
+        projectCategory: String
     ): String {
         normalizedCostAssessments.keys.reversed().forEach { day ->
             val costAssessments = normalizedCostAssessments[day]!!
             val costAssessment = costAssessments
-                .filter { Constants.COST_ASSESSMENT_SETUP.getSuperiorProject(it.project) == superiorProject }
+                .filter { Constants.COST_ASSESSMENT_SETUP.getProjectCategory(it.project) == projectCategory }
                 .maxByOrNull { it.totalWorkingTime.toMinutes() }
             if (costAssessment != null) {
                 return costAssessment.project
             }
         }
 
-        return Constants.COST_ASSESSMENT_SETUP.getDefaultProjectFor(superiorProject)
+        return Constants.COST_ASSESSMENT_SETUP.getDefaultProjectFor(projectCategory)
     }
 
     private fun summedUpCostAssessments(firstDay: LocalDate, lastDay: LocalDate): List<CostAssessmentPosition> {
@@ -91,26 +91,26 @@ class CostAssessmentForecastService {
         return allCostAssessments.toList()
     }
 
-    private fun toMapOfRoundedSuperiorCostAssessments(allCostAssessments: List<CostAssessmentPosition>): Map<String, Duration> {
-        val superiorCostAssessments = mutableMapOf<String, Duration>()
+    private fun toMapOfRoundedCostAssessmentsCategories(allCostAssessments: List<CostAssessmentPosition>): Map<String, Duration> {
+        val costAssessmentsCategories = mutableMapOf<String, Duration>()
         var totalDuration = Duration.ZERO
 
         allCostAssessments.forEach {
-            val superiorProject = Constants.COST_ASSESSMENT_SETUP.getSuperiorProject(it.project)
-            val value = superiorCostAssessments.getOrDefault(superiorProject, Duration.ZERO)
+            val projectCategory = Constants.COST_ASSESSMENT_SETUP.getProjectCategory(it.project)
+            val value = costAssessmentsCategories.getOrDefault(projectCategory, Duration.ZERO)
             totalDuration += it.totalWorkingTime
 
-            superiorCostAssessments[superiorProject] = value.plus(it.totalWorkingTime)
+            costAssessmentsCategories[projectCategory] = value.plus(it.totalWorkingTime)
         }
 
         if (totalDuration == Duration.ZERO) {
             return emptyMap()
         }
 
-        val avgDevMinutes = (superiorCostAssessments.getOrDefault(Constants.COST_ASSMNT_DEV_KEY, Duration.ZERO).toMinutes().toDouble() / totalDuration.toMinutes().toDouble() * Constants.STANDARD_WORK_DURATION_PER_DAY.toMinutes().toDouble()).toLong()
-        val avgMaintMinutes = (superiorCostAssessments.getOrDefault(Constants.COST_ASSMNT_MAINT_KEY, Duration.ZERO).toMinutes().toDouble() / totalDuration.toMinutes().toDouble() * Constants.STANDARD_WORK_DURATION_PER_DAY.toMinutes().toDouble()).toLong()
-        val avgIntMinutes = (superiorCostAssessments.getOrDefault(Constants.COST_ASSMNT_INT_KEY, Duration.ZERO).toMinutes().toDouble() / totalDuration.toMinutes().toDouble() * Constants.STANDARD_WORK_DURATION_PER_DAY.toMinutes().toDouble()).toLong()
-        val avgAbscMinutes = (superiorCostAssessments.getOrDefault(Constants.COST_ASSMNT_ABSC_KEY, Duration.ZERO).toMinutes().toDouble() / totalDuration.toMinutes().toDouble() * Constants.STANDARD_WORK_DURATION_PER_DAY.toMinutes().toDouble()).toLong()
+        val avgDevMinutes = (costAssessmentsCategories.getOrDefault(Constants.COST_ASSMNT_DEV_KEY, Duration.ZERO).toMinutes().toDouble() / totalDuration.toMinutes().toDouble() * Constants.STANDARD_WORK_DURATION_PER_DAY.toMinutes().toDouble()).toLong()
+        val avgMaintMinutes = (costAssessmentsCategories.getOrDefault(Constants.COST_ASSMNT_MAINT_KEY, Duration.ZERO).toMinutes().toDouble() / totalDuration.toMinutes().toDouble() * Constants.STANDARD_WORK_DURATION_PER_DAY.toMinutes().toDouble()).toLong()
+        val avgIntMinutes = (costAssessmentsCategories.getOrDefault(Constants.COST_ASSMNT_INT_KEY, Duration.ZERO).toMinutes().toDouble() / totalDuration.toMinutes().toDouble() * Constants.STANDARD_WORK_DURATION_PER_DAY.toMinutes().toDouble()).toLong()
+        val avgAbscMinutes = (costAssessmentsCategories.getOrDefault(Constants.COST_ASSMNT_ABSC_KEY, Duration.ZERO).toMinutes().toDouble() / totalDuration.toMinutes().toDouble() * Constants.STANDARD_WORK_DURATION_PER_DAY.toMinutes().toDouble()).toLong()
 
         return mapOf(
             Constants.COST_ASSMNT_DEV_KEY to Duration.ofMinutes(avgDevMinutes),

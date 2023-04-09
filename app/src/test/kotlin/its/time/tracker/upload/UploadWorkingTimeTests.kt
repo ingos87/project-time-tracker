@@ -9,7 +9,7 @@ import its.time.tracker.*
 class UploadWorkingTimeTests : FunSpec({
 
     beforeEach {
-        ensureTestConfig()
+        ensureTestConfig("", "", "")
         ensureCsvEmpty()
     }
 
