@@ -2,11 +2,17 @@ package its.time.tracker.upload
 
 import its.time.tracker.config.Constants
 import its.time.tracker.domain.CostAssessmentPosition
+import its.time.tracker.util.DateTimeUtil
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.util.*
 
 class CostAssessmentAbsenceService {
+
+    private val PUBLIC_HOLIDAY = "Holidays"
+    private val VACATION = "Holidays"
+    private val SICK_LEAVE = "Sickness"
+    private val OTHER = "Other absence"
 
     fun addAbsenceProjects(costAssessmentMap: Map<LocalDate, List<CostAssessmentPosition>>, uniqueDays: SortedSet<LocalDate>)
     : SortedMap<LocalDate, List<CostAssessmentPosition>> {
@@ -15,19 +21,34 @@ class CostAssessmentAbsenceService {
         resultingMap.putAll(costAssessmentMap)
 
         uniqueDays.forEach { date ->
-            if (date.dayOfWeek != DayOfWeek.SUNDAY && date.dayOfWeek != DayOfWeek.SATURDAY) {
-                if (!costAssessmentMap.keys.contains(date)) {
-                    resultingMap[date] = listOf(
-                        CostAssessmentPosition(
-                            project = "Other absence",
-                            totalWorkingTime = Constants.STANDARD_WORK_DURATION_PER_DAY,
-                            topics = emptySet()
-                        )
+            if (date.dayOfWeek != DayOfWeek.SUNDAY
+                && date.dayOfWeek != DayOfWeek.SATURDAY
+                && !costAssessmentMap.keys.contains(date)) {
+
+                resultingMap[date] = listOf(
+                    CostAssessmentPosition(
+                        project = getAbsenceProject(date),
+                        totalWorkingTime = Constants.STANDARD_WORK_DURATION_PER_DAY,
+                        topics = emptySet()
                     )
-                }
+                )
             }
         }
 
         return resultingMap.toSortedMap()
+    }
+
+    private fun getAbsenceProject(date: LocalDate): String {
+        if (DateTimeUtil.isPublicHoliday(date)) {
+            return PUBLIC_HOLIDAY
+        }
+        else if (DateTimeUtil.isVacationDay(date)) {
+            return VACATION
+        }
+        else if (DateTimeUtil.isSickLeaveDay(date)) {
+            return SICK_LEAVE
+        }
+
+        return OTHER
     }
 }

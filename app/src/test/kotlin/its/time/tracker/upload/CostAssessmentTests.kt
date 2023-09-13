@@ -82,7 +82,54 @@ class CostAssessmentTests : FunSpec({
             "│ weekday          │  MON │  TUE │  WED │  THU │  FRI │  SAT │  SUN │",
             "│ day of month     │    1 │    2 │    3 │    4 │    5 │    6 │    7 │",
             "├──────────────────┼──────┼──────┼──────┼──────┼──────┼──────┼──────┤",
-            "│ Other absence    │  8,00│      │      │  8,00│      │      │      │",
+            "│ Holidays         │  8,00│      │      │      │      │      │      │",
+            "│ ProjectA         │      │  4,00│ 11,00│      │  5,00│      │      │",
+            "│ ProjectB         │      │  2,00│      │      │      │      │      │",
+            "│ Wartung          │      │  3,00│      │      │  2,00│      │      │",
+            "│ Other absence    │      │      │      │  8,00│      │      │      │",
+            "└──────────────────┴──────┴──────┴──────┴──────┴──────┴──────┴──────┘",
+            "NOOP mode. Uploaded nothing")
+    }
+
+    // TODO add projects and stories
+    xtest("cost assessment for empty week with forecast") {
+        // MON
+        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2023-04-24 12:00"))
+        executeClockOutWitArgs(arrayOf(             "--datetime=2023-04-24 14:55"))
+
+        // TUE
+        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2023-04-25 07:00"))
+        executeClockInWitArgs(arrayOf("-tEPP-009",  "--datetime=2023-04-25 08:00"))
+        executeClockInWitArgs(arrayOf("-tcoww",     "--datetime=2023-04-25 09:45"))
+        executeClockInWitArgs(arrayOf("-tEDF-1",    "--datetime=2023-04-25 10:05"))
+        executeClockOutWitArgs(arrayOf(             "--datetime=2023-04-25 12:00"))
+        executeClockInWitArgs(arrayOf("-tEDF-1",    "--datetime=2023-04-25 13:00"))
+        executeClockOutWitArgs(arrayOf(             "--datetime=2023-04-25 13:25"))
+
+        // WED
+        executeClockInWitArgs(arrayOf("-tEPP-008",  "--datetime=2023-04-26 08:00"))
+        executeClockInWitArgs(arrayOf("-tcoww",     "--datetime=2023-04-26 12:45"))
+        executeClockOutWitArgs(arrayOf(             "--datetime=2023-04-26 19:00"))
+
+        // FRI
+        executeClockInWitArgs(arrayOf("-tEPP-008",  "--datetime=2023-04-28 08:00"))
+        executeClockOutWitArgs(arrayOf(             "--datetime=2023-04-28 13:03"))
+
+        // SAT
+        executeClockInWitArgs(arrayOf("-tEPP-007",  "--datetime=2023-04-29 08:00"))
+        executeClockOutWitArgs(arrayOf(             "--datetime=2023-04-29 10:10"))
+
+        val output = tapSystemOut {
+            executeCostAssessmentWitArgs(arrayOf("-w2023-18", "--forecast"))
+        }
+
+        splitIgnoreBlank(output) shouldBe listOf(
+            "[SUMMARY for 2023-05-01 - 2023-05-07]",
+            "┌──────────────────┬──────┬──────┬──────┬──────┬──────┬──────┬──────┐",
+            "│ weekday          │  MON │  TUE │  WED │  THU │  FRI │  SAT │  SUN │",
+            "│ day of month     │    1 │    2 │    3 │    4 │    5 │    6 │    7 │",
+            "├──────────────────┼──────┼──────┼──────┼──────┼──────┼──────┼──────┤",
+            "│ Other absence    │  8,00│      │      │      │      │      │      │",
             "│ ProjectA         │      │  4,00│ 11,00│      │  5,00│      │      │",
             "│ ProjectB         │      │  2,00│      │      │      │      │      │",
             "│ Wartung          │      │  3,00│      │      │  2,00│      │      │",

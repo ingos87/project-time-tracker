@@ -34,8 +34,8 @@ class ClockInTests : FunSpec({
             executeClockInWitArgs(arrayOf("-pwartung"))
         }
 
-        output shouldStartWith "clock-in for project 'wartung', topic 'null' saved: 20"
-        output.length shouldBeExactly 69
+        output shouldStartWith "clock-in for project 'wartung', topic 'null', story 'null' saved: 20"
+        output.length shouldBeExactly 83
     }
 
     test("clock-in is saved with manual time") {
@@ -43,10 +43,10 @@ class ClockInTests : FunSpec({
             executeClockInWitArgs(arrayOf("-pwartung", "-tEPP-007", "--datetime=2022-12-23 17:30"))
         }
 
-        output shouldBe "clock-in for project 'wartung', topic 'EPP-007' saved: 2022-12-23 17:30\n"
+        output shouldBe "clock-in for project 'wartung', topic 'EPP-007', story 'null' saved: 2022-12-23 17:30\n"
         getTimesCsvContent() shouldBe listOf(
-            "dateTime;eventType;project;topic",
-            "2022-12-23 17:30;CLOCK_IN;wartung;EPP-007")
+            "dateTime;eventType;project;topic;story",
+            "2022-12-23 17:30;CLOCK_IN;wartung;EPP-007;")
     }
 
     test("clock-in is saved with today's date if only time is given") {
@@ -58,10 +58,10 @@ class ClockInTests : FunSpec({
             .withZone(ZoneId.systemDefault())
         val today = formatter.format(Instant.now())
 
-        output shouldBe "clock-in for project 'wartung', topic 'EPP-007' saved: $today 05:34\n"
+        output shouldBe "clock-in for project 'wartung', topic 'EPP-007', story 'null' saved: $today 05:34\n"
         getTimesCsvContent() shouldBe listOf(
-            "dateTime;eventType;project;topic",
-            "$today 05:34;CLOCK_IN;wartung;EPP-007")
+            "dateTime;eventType;project;topic;story",
+            "$today 05:34;CLOCK_IN;wartung;EPP-007;")
     }
 
     test("clock-in is discarded if date is invalid") {
@@ -86,11 +86,11 @@ class ClockInTests : FunSpec({
             executeClockInWitArgs(arrayOf("-pfeature", "-tEPP-123", "--datetime=2022-12-23 17:30"))
         }
 
-        output shouldBe "Will overwrite current event with identical time stamp: ClockEvent(dateTime=2022-12-23T17:30, eventType=CLOCK_IN, project=wartung, topic=EPP-007)\n" +
-                "clock-in for project 'feature', topic 'EPP-123' saved: 2022-12-23 17:30\n"
+        output shouldBe "Will overwrite current event with identical time stamp: ClockEvent(dateTime=2022-12-23T17:30, eventType=CLOCK_IN, project=wartung, topic=EPP-007, story=)\n" +
+                "clock-in for project 'feature', topic 'EPP-123', story 'null' saved: 2022-12-23 17:30\n"
         getTimesCsvContent() shouldBe listOf(
-            "dateTime;eventType;project;topic",
-            "2022-12-23 17:30;CLOCK_IN;feature;EPP-123")
+            "dateTime;eventType;project;topic;story",
+            "2022-12-23 17:30;CLOCK_IN;feature;EPP-123;")
     }
 
     test("cannot overwrite clock-out with clock-in") {
@@ -100,11 +100,11 @@ class ClockInTests : FunSpec({
         }
 
         output shouldBe "Cannot overwrite event of different type. You must remove the present event before.\n" +
-                "present: ClockEvent(dateTime=2022-12-23T17:30, eventType=CLOCK_OUT, project=, topic=MANUAL_CLOCK_OUT)\n" +
-                "new    : ClockEvent(dateTime=2022-12-23T17:30, eventType=CLOCK_IN, project=wartung, topic=EPP-007)\n"
+                "present: ClockEvent(dateTime=2022-12-23T17:30, eventType=CLOCK_OUT, project=, topic=MANUAL_CLOCK_OUT, story=)\n" +
+                "new    : ClockEvent(dateTime=2022-12-23T17:30, eventType=CLOCK_IN, project=wartung, topic=EPP-007, story=)\n"
         getTimesCsvContent() shouldBe listOf(
-            "dateTime;eventType;project;topic",
-            "2022-12-23 17:30;CLOCK_OUT;;MANUAL_CLOCK_OUT")
+            "dateTime;eventType;project;topic;story",
+            "2022-12-23 17:30;CLOCK_OUT;;MANUAL_CLOCK_OUT;")
     }
 })
 

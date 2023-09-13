@@ -63,7 +63,7 @@ class CostAssessmentForecastTests : FunSpec({
         output.keys.last() shouldBe LocalDate.parse("2023-02-24")
 
         output[LocalDate.parse("2023-02-23")] shouldBe listOf(
-            CostAssessmentPosition("ProjectA", Duration.parse("PT6H30M"), emptySet()),
+            CostAssessmentPosition("ProjectA", Duration.parse("PT5H30M"), emptySet()),
             CostAssessmentPosition("Wartung", Duration.parse("PT1H30M"), emptySet()),
             // TODO assert ITS meetings
         )

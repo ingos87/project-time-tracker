@@ -21,8 +21,8 @@ class ProjectTimeCalculatorTests : FunSpec({
 
     test("one element list") {
         val list = listOf(
-            ClockEvent(LocalDateTime.parse("2023-01-03T12:00"), EventType.CLOCK_IN, "p1", "blubb"),
-            ClockEvent(LocalDateTime.parse("2023-01-03T14:00"), EventType.CLOCK_OUT, "n/a", ""),
+            ClockEvent(LocalDateTime.parse("2023-01-03T12:00"), EventType.CLOCK_IN, "p1", "blubb", "epp-123"),
+            ClockEvent(LocalDateTime.parse("2023-01-03T14:00"), EventType.CLOCK_OUT, "n/a", "", "epp-123"),
         )
 
         val expectedProjectTimes = listOf(
@@ -34,7 +34,7 @@ class ProjectTimeCalculatorTests : FunSpec({
 
     test("no clockout") {
         val list = listOf(
-            ClockEvent(LocalDateTime.parse("2023-01-03T12:00"), EventType.CLOCK_IN, "p1", "blubb"),
+            ClockEvent(LocalDateTime.parse("2023-01-03T12:00"), EventType.CLOCK_IN, "p1", "blubb", "epp-123"),
         )
 
         val expectedProjectTimes = listOf(
@@ -46,8 +46,8 @@ class ProjectTimeCalculatorTests : FunSpec({
 
     test("no clockout with overtime") {
         val list = listOf(
-            ClockEvent(LocalDateTime.parse("2023-01-03T07:00"), EventType.CLOCK_IN, "p1", "blubb"),
-            ClockEvent(LocalDateTime.parse("2023-01-03T18:30"), EventType.CLOCK_IN, "p1", "blubb"),
+            ClockEvent(LocalDateTime.parse("2023-01-03T07:00"), EventType.CLOCK_IN, "p1", "blubb", "epp-123"),
+            ClockEvent(LocalDateTime.parse("2023-01-03T18:30"), EventType.CLOCK_IN, "p1", "blubb", "epp-123"),
         )
 
         val expectedProjectTimes = listOf(
@@ -59,7 +59,7 @@ class ProjectTimeCalculatorTests : FunSpec({
 
     test("no clockout, so clock-out now") {
         val list = listOf(
-            ClockEvent(LocalDateTime.now().minusHours(1), EventType.CLOCK_IN, "p1", "blubb"),
+            ClockEvent(LocalDateTime.now().minusHours(1), EventType.CLOCK_IN, "p1", "blubb", "epp-123"),
         )
 
         val expectedProjectTimes = listOf(
@@ -71,10 +71,10 @@ class ProjectTimeCalculatorTests : FunSpec({
 
     test("multiple clock-outs") {
         val list = listOf(
-            ClockEvent(LocalDateTime.parse("2023-01-03T12:00"), EventType.CLOCK_IN, "p1", "blubb"),
-            ClockEvent(LocalDateTime.parse("2023-01-03T14:00"), EventType.CLOCK_OUT, "n/a", ""),
-            ClockEvent(LocalDateTime.parse("2023-01-03T15:00"), EventType.CLOCK_IN, "p2", "blah"),
-            ClockEvent(LocalDateTime.parse("2023-01-03T18:00"), EventType.CLOCK_OUT, "n/a", ""),
+            ClockEvent(LocalDateTime.parse("2023-01-03T12:00"), EventType.CLOCK_IN, "p1", "blubb", "epp-123"),
+            ClockEvent(LocalDateTime.parse("2023-01-03T14:00"), EventType.CLOCK_OUT, "n/a", "", "epp-123"),
+            ClockEvent(LocalDateTime.parse("2023-01-03T15:00"), EventType.CLOCK_IN, "p2", "blah", "epp-123"),
+            ClockEvent(LocalDateTime.parse("2023-01-03T18:00"), EventType.CLOCK_OUT, "n/a", "", "epp-123"),
         )
 
         val expectedProjectTimes = listOf(
@@ -87,14 +87,14 @@ class ProjectTimeCalculatorTests : FunSpec({
 
     test("unify works") {
         val list = listOf(
-            ClockEvent(LocalDateTime.parse("2023-01-03T08:00"), EventType.CLOCK_IN, "p1", "blubb"),
-            ClockEvent(LocalDateTime.parse("2023-01-03T09:00"), EventType.CLOCK_IN, "p2", "bums"),
-            ClockEvent(LocalDateTime.parse("2023-01-03T10:00"), EventType.CLOCK_IN, "p3", "blubber"),
-            ClockEvent(LocalDateTime.parse("2023-01-03T11:00"), EventType.CLOCK_IN, "p2", "blubb"),
-            ClockEvent(LocalDateTime.parse("2023-01-03T12:00"), EventType.CLOCK_IN, "p1", "blah"),
-            ClockEvent(LocalDateTime.parse("2023-01-03T13:00"), EventType.CLOCK_IN, "p1", "blaha"),
-            ClockEvent(LocalDateTime.parse("2023-01-03T14:00"), EventType.CLOCK_IN, "p3", "blubber"),
-            ClockEvent(LocalDateTime.parse("2023-01-03T15:00"), EventType.CLOCK_OUT, "n/a", ""),
+            ClockEvent(LocalDateTime.parse("2023-01-03T08:00"), EventType.CLOCK_IN, "p1", "blubb", "epp-123"),
+            ClockEvent(LocalDateTime.parse("2023-01-03T09:00"), EventType.CLOCK_IN, "p2", "bums", "epp-123"),
+            ClockEvent(LocalDateTime.parse("2023-01-03T10:00"), EventType.CLOCK_IN, "p3", "blubber", "epp-123"),
+            ClockEvent(LocalDateTime.parse("2023-01-03T11:00"), EventType.CLOCK_IN, "p2", "blubb", "epp-123"),
+            ClockEvent(LocalDateTime.parse("2023-01-03T12:00"), EventType.CLOCK_IN, "p1", "blah", "epp-123"),
+            ClockEvent(LocalDateTime.parse("2023-01-03T13:00"), EventType.CLOCK_IN, "p1", "blaha", "epp-123"),
+            ClockEvent(LocalDateTime.parse("2023-01-03T14:00"), EventType.CLOCK_IN, "p3", "blubber", "epp-123"),
+            ClockEvent(LocalDateTime.parse("2023-01-03T15:00"), EventType.CLOCK_OUT, "n/a", "", "epp-123"),
         )
 
         val expectedProjectTimes = listOf(

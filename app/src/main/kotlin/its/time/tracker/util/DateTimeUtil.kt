@@ -162,10 +162,26 @@ class DateTimeUtil {
         fun isWorkingDay(date: LocalDate): Boolean {
             val dayOfWeek = date.dayOfWeek
             return !Constants.WEEKDAYS_OFF.contains(dayOfWeek)
-                && !Constants.PUBLIC_HOLIDAYS.contains(date)
-                && !Constants.DAYS_OFF.contains(date)
-                && !isWithinDateRanges(Constants.SICK_LEAVE, date)
-                && !isWithinDateRanges(Constants.VACATION, date)
+                && !isPublicHoliday(date)
+                && !isDayOff(date)
+                && !isSickLeaveDay(date)
+                && !isVacationDay(date)
+        }
+
+        fun isVacationDay(date: LocalDate): Boolean {
+            return isWithinDateRanges(Constants.VACATION, date)
+        }
+
+        fun isSickLeaveDay(date: LocalDate): Boolean {
+            return isWithinDateRanges(Constants.SICK_LEAVE, date)
+        }
+
+        fun isPublicHoliday(date: LocalDate): Boolean {
+            return Constants.PUBLIC_HOLIDAYS.contains(date)
+        }
+
+        fun isDayOff(date: LocalDate): Boolean {
+            return Constants.DAYS_OFF.contains(date)
         }
 
         private fun isWithinDateRanges(ranges: List<Pair<LocalDate, LocalDate>>, date: LocalDate): Boolean =

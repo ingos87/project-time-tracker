@@ -16,7 +16,6 @@ import java.util.*
 class CostAssessmentService {
 
     companion object {
-
         fun combineByBookingId(list: MutableList<CostAssessmentPosition>)
                 : List<CostAssessmentPosition>{
             return list.groupBy{it.project}
@@ -48,7 +47,7 @@ class CostAssessmentService {
                 summaryData.addDay(day, workDaySummary, bookingPositionsList)
             }
         }
-        if (summaryData.data.isEmpty()) {
+        if (!forecast && summaryData.data.isEmpty()) {
             println("[NO SUMMARY for ${uniqueDays.first()} - ${uniqueDays.last()} because there are no clock-in events]")
             return emptyMap<LocalDate, List<CostAssessmentPosition>>().toSortedMap()
         }

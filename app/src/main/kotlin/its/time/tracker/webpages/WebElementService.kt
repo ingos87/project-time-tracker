@@ -80,6 +80,16 @@ class WebElementService {
         printDebug("successfully inserted text into input id($elementId): $string")
     }
 
+    fun setTextualContentOrSkipIfDisabled(elementId: String, string: String) {
+        val webElem = findElementById(elementId)
+        if (webElem != null) {
+            setTextualContent(elementId, string)
+        }
+        else {
+            printDebug("skipped input id($elementId) due to disabled status")
+        }
+    }
+
     fun findElementByIdComponents(prefix: String, suffix: String, startingIdx: Int, maxIdx: Int): Pair<WebElement?, Int> {
         // TODO fix time issues if first found index is too large
         (startingIdx..maxIdx).forEach {

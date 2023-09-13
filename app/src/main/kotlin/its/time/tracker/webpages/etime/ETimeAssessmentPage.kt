@@ -157,7 +157,8 @@ class ETimeAssessmentPage(private val webElementService: WebElementService) {
     }
 
     fun insertHours(elementId: String, hoursString: String) {
-        webElementService.setTextualContent(elementId, hoursString)
+        // some projects might become disabled over time
+        webElementService.setTextualContentOrSkipIfDisabled(elementId, hoursString)
     }
 }
 

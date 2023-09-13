@@ -10,6 +10,12 @@ data class CostAssessmentSetup (
 ) {
 
     companion object {
+
+        const val DEFAULT_DEV_PROJECT = "Project Placeholder"
+        const val DEFAULT_MAINT_PROJECT = "Wartung"
+        const val DEFAULT_INT_PROJECT = "Line Activity"
+        const val DEFAULT_ABSC_PROJECT = "Other absence"
+
         fun getEmptyInstance(): CostAssessmentSetup {
             return CostAssessmentSetup(
                 developmentProjects = emptyList(),
@@ -39,15 +45,15 @@ data class CostAssessmentSetup (
             }
         }
 
-        return Constants.COST_ASSMNT_DEV_KEY
+        return "no-project"
     }
 
     fun getDefaultProjectFor(superiorProject: String): String {
         return when (superiorProject) {
-            Constants.COST_ASSMNT_DEV_KEY -> "Project Placeholder"
-            Constants.COST_ASSMNT_MAINT_KEY -> "Wartung"
-            Constants.COST_ASSMNT_INT_KEY -> "Meeting"
-            Constants.COST_ASSMNT_ABSC_KEY -> "Other absence"
+            Constants.COST_ASSMNT_DEV_KEY -> DEFAULT_DEV_PROJECT
+            Constants.COST_ASSMNT_MAINT_KEY -> DEFAULT_MAINT_PROJECT
+            Constants.COST_ASSMNT_INT_KEY -> DEFAULT_INT_PROJECT
+            Constants.COST_ASSMNT_ABSC_KEY -> DEFAULT_ABSC_PROJECT
             else -> "-error-"
         }
     }

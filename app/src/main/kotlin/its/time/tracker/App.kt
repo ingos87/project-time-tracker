@@ -63,7 +63,8 @@ class Init: CliktCommand(help="initializes App by writing custom properties to a
 class ClockIn: CliktCommand(help="Start working on something") {
     val v: Boolean by option("-v", help = "enable verbose mode").flag()
     val project by option("-p", "--project", help = "time tracking project - see iTime UI").required()
-    val topic by option("-t", "--topic", help = "time tracking topic - usually some Jira Ticket Id")
+    val topic by option("-t", "--topic", help = "time tracking topic - code/meeting/etc")
+    val story by option("-s", "--story", help = "time tracking story - usually some Jira Ticket Id")
     val dateTimeInput by option("-d", "--datetime", help="Start datetime (format: $DATE_TIME_PATTERN) for this topic - will be NOW if left empty; today's date is prepended if only time (format: HHmm) is given")
     val configPath by option("--configpath", help = "Defines a custom config file path. That file has to be created before-hand")
     override fun run() {
@@ -72,8 +73,8 @@ class ClockIn: CliktCommand(help="Start working on something") {
 
             val dateTime = DateTimeUtil.toValidDateTime(dateTimeInput)
             if (dateTime != null) {
-                ClockEventService().addClockIn(project, topic, dateTime as LocalDateTime)
-                echo("clock-in for project '$project', topic '$topic' saved: ${DateTimeUtil.temporalToString(dateTime)}")
+                ClockEventService().addClockIn(project, topic, story, dateTime as LocalDateTime)
+                echo("clock-in for project '$project', topic '$topic', story '$story' saved: ${DateTimeUtil.temporalToString(dateTime)}")
             }
         } catch (e: AbortException) {
             e.printMessage()

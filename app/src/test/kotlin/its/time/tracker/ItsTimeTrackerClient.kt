@@ -56,7 +56,9 @@ fun ensureTestConfig(daysOff: String,
             internalProjects = listOf(
                 CostAssessmentProject("ITS meetings", "its_meet")
             ),
-            absenceProjects = emptyList()
+            absenceProjects = listOf(
+                CostAssessmentProject("Other absence", "absence")
+            )
         )
     )
 
