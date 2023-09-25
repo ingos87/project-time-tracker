@@ -34,6 +34,7 @@ class ConfigService private constructor(private var configFilePath: String) {
             weekdaysOff: String = "",
             daysOff: List<String> = emptyList(),
             sickLeave: List<String> = emptyList(),
+            childSickLeave: List<String> = emptyList(),
             vacation: List<String> = emptyList(),
             chromeProfilePath: String = "",
             standardDailyWorkDuration: String,
@@ -55,6 +56,7 @@ class ConfigService private constructor(private var configFilePath: String) {
                 Constants::WEEKDAYS_OFF.name.lowercase(Locale.GERMANY) to weekdaysOff,
                 Constants::DAYS_OFF.name.lowercase(Locale.GERMANY) to daysOff,
                 Constants::SICK_LEAVE.name.lowercase(Locale.GERMANY) to sickLeave,
+                Constants::CHILD_SICK_LEAVE.name.lowercase(Locale.GERMANY) to childSickLeave,
                 Constants::VACATION.name.lowercase(Locale.GERMANY) to vacation,
                 Constants::CHROME_PROFILE_PATH.name.lowercase(Locale.GERMANY) to chromeProfilePath,
                 Constants::COST_ASSESSMENT_SETUP.name.lowercase(Locale.GERMANY) to mapOf<String, Any>(

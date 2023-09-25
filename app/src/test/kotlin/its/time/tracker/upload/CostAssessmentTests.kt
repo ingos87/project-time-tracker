@@ -26,7 +26,7 @@ class CostAssessmentTests : FunSpec({
         ensureNoConfig()
 
         val output = tapSystemOut {
-            main(arrayOf("cost-assessment", "-w2022-01"))
+            main(arrayOf("cost-assessment", "-d2023-01-02", "-e2023-01-08"))
         }
 
         output shouldStartWith "No config file found in ./app.json\n" +
@@ -37,7 +37,7 @@ class CostAssessmentTests : FunSpec({
         executeClockOutWitArgs(arrayOf("--datetime=2023-01-02 14:30"))
 
         val output = tapSystemOut {
-            executeCostAssessmentWitArgs(arrayOf("-w2023-01"))
+            executeCostAssessmentWitArgs(arrayOf("-d2023-01-02", "-e2023-01-08"))
         }
 
         splitIgnoreBlank(output) shouldBe listOf(
@@ -47,33 +47,34 @@ class CostAssessmentTests : FunSpec({
 
     test("cost assessment for standard week") {
         // MON (public holiday)
-        executeClockInWitArgs(arrayOf("--project=ProjectA", "-tEPP-007",  "--datetime=2023-05-01 12:00"))
-        executeClockOutWitArgs(arrayOf("--datetime=2023-05-01 14:55"))
+        executeClockInWitArgs(arrayOf("--project=ProjectA", "-tcode",   "-sEPP-007",    "--datetime=2023-05-01 12:00"))
+        executeClockOutWitArgs(arrayOf(                                                 "--datetime=2023-05-01 14:55"))
 
         // TUE
-        executeClockInWitArgs(arrayOf("-pProjectA", "-tEPP-007",  "--datetime=2023-05-02 07:00"))
-        executeClockInWitArgs(arrayOf("-pprojB", "-tEPP-009",  "--datetime=2023-05-02 08:00"))
-        executeClockInWitArgs(arrayOf("-pwartung", "-tcoww",     "--datetime=2023-05-02 09:45"))
-        executeClockInWitArgs(arrayOf("-pwartung", "-tEDF-1",    "--datetime=2023-05-02 10:05"))
-        executeClockOutWitArgs(arrayOf("--datetime=2023-05-02 12:00"))
-        executeClockInWitArgs(arrayOf("-pwartung", "-tEDF-1",    "--datetime=2023-05-02 13:00"))
-        executeClockOutWitArgs(arrayOf("--datetime=2023-05-02 13:25"))
+        executeClockInWitArgs(arrayOf("-pProjectA",         "-tcode",   "-sEPP-007",    "--datetime=2023-05-02 07:00"))
+        executeClockInWitArgs(arrayOf("-pprojB",            "-tcode",   "-sEPP-009",    "--datetime=2023-05-02 08:00"))
+        executeClockInWitArgs(arrayOf("-pwartung",          "-tcoww",                   "--datetime=2023-05-02 09:45"))
+        executeClockInWitArgs(arrayOf("-pwartung",          "-tcode",   "-sEDF-1",      "--datetime=2023-05-02 10:05"))
+        executeClockOutWitArgs(arrayOf(                                                 "--datetime=2023-05-02 12:00"))
+        executeClockInWitArgs(arrayOf("-pwartung",          "-tcode",   "-sEDF-1",      "--datetime=2023-05-02 13:00"))
+        executeClockOutWitArgs(arrayOf(                                                 "--datetime=2023-05-02 13:25"))
 
         // WED
-        executeClockInWitArgs(arrayOf("--project=ProjectA", "-tEPP-008",  "--datetime=2023-05-03 08:00"))
-        executeClockOutWitArgs(arrayOf("--datetime=2023-05-03 19:00"))
+        executeClockInWitArgs(arrayOf("--project=ProjectA", "-tmeeting",                "--datetime=2023-05-03 08:00"))
+        executeClockInWitArgs(arrayOf("--project=ProjectA", "-tcode",   "-sEPP-008",    "--datetime=2023-05-03 10:00"))
+        executeClockOutWitArgs(arrayOf(                                                 "--datetime=2023-05-03 19:00"))
 
         // FRI
-        executeClockInWitArgs(arrayOf("--project=ProjectA", "-tEPP-008",  "--datetime=2023-05-05 08:00"))
-        executeClockOutWitArgs(arrayOf("--datetime=2023-05-05 13:03"))
+        executeClockInWitArgs(arrayOf("--project=ProjectA", "-tcode",   "-sEPP-008",    "--datetime=2023-05-05 08:00"))
+        executeClockOutWitArgs(arrayOf(                                                 "--datetime=2023-05-05 13:03"))
 
         // SAT
-        executeClockInWitArgs(arrayOf("-pWartung", "-tEDF-9",    "--datetime=2023-05-06 08:00"))
-        executeClockOutWitArgs(arrayOf("--datetime=2023-05-06 10:10"))
+        executeClockInWitArgs(arrayOf("-pWartung",          "-tcode",   "-sEDF-9",      "--datetime=2023-05-06 08:00"))
+        executeClockOutWitArgs(arrayOf(                                                 "--datetime=2023-05-06 10:10"))
 
 
         val output = tapSystemOut {
-            executeCostAssessmentWitArgs(arrayOf("-w2023-18"))
+            executeCostAssessmentWitArgs(arrayOf("-d2023-05-01", "-e2023-05-07"))
         }
 
         splitIgnoreBlank(output) shouldBe listOf(
@@ -83,9 +84,23 @@ class CostAssessmentTests : FunSpec({
             "│ day of month     │    1 │    2 │    3 │    4 │    5 │    6 │    7 │",
             "├──────────────────┼──────┼──────┼──────┼──────┼──────┼──────┼──────┤",
             "│ Holidays         │  8,00│      │      │      │      │      │      │",
+            "├──────────────────┼──────┼──────┼──────┼──────┼──────┼──────┼──────┤",
             "│ ProjectA         │      │  4,00│ 11,00│      │  5,00│      │      │",
+            "│   code           │      │  4,00│  9,00│      │  5,00│      │      │",
+            "│     EPP-007      │      │  4,00│      │      │      │      │      │",
+            "│     EPP-008      │      │      │  9,00│      │  5,00│      │      │",
+            "│   meeting        │      │      │  2,00│      │      │      │      │",
+            "├──────────────────┼──────┼──────┼──────┼──────┼──────┼──────┼──────┤",
             "│ ProjectB         │      │  2,00│      │      │      │      │      │",
+            "│   code           │      │  2,00│      │      │      │      │      │",
+            "│     EPP-009      │      │  2,00│      │      │      │      │      │",
+            "├──────────────────┼──────┼──────┼──────┼──────┼──────┼──────┼──────┤",
             "│ Wartung          │      │  3,00│      │      │  2,00│      │      │",
+            "│   coww           │      │  0,50│      │      │      │      │      │",
+            "│   code           │      │  2,50│      │      │  2,00│      │      │",
+            "│     EDF-1        │      │  2,50│      │      │      │      │      │",
+            "│     EDF-9        │      │      │      │      │  2,00│      │      │",
+            "├──────────────────┼──────┼──────┼──────┼──────┼──────┼──────┼──────┤",
             "│ Other absence    │      │      │      │  8,00│      │      │      │",
             "└──────────────────┴──────┴──────┴──────┴──────┴──────┴──────┴──────┘",
             "NOOP mode. Uploaded nothing")
@@ -120,7 +135,7 @@ class CostAssessmentTests : FunSpec({
         executeClockOutWitArgs(arrayOf(             "--datetime=2023-04-29 10:10"))
 
         val output = tapSystemOut {
-            executeCostAssessmentWitArgs(arrayOf("-w2023-18", "--forecast"))
+            executeCostAssessmentWitArgs(arrayOf("-d2023-05-01", "-e2023-05-07", "--forecast"))
         }
 
         splitIgnoreBlank(output) shouldBe listOf(

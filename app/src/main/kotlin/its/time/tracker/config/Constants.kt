@@ -56,6 +56,7 @@ class Constants {
         var WEEKDAYS_OFF: List<DayOfWeek> = emptyList()
         var DAYS_OFF: List<LocalDate> = emptyList()
         var SICK_LEAVE: List<Pair<LocalDate, LocalDate>> = emptyList()
+        var CHILD_SICK_LEAVE: List<Pair<LocalDate, LocalDate>> = emptyList()
         var VACATION: List<Pair<LocalDate, LocalDate>> = emptyList()
         var CHROME_PROFILE_PATH: String = ""
         var COST_ASSESSMENT_SETUP: CostAssessmentSetup = CostAssessmentSetup.getEmptyInstance()
@@ -71,6 +72,7 @@ class Constants {
             E_TIME_LANGUAGE = readStringProperty(properties, Companion::E_TIME_LANGUAGE.name.lowercase(Locale.GERMANY))
             DAYS_OFF = parseDayList(properties[Companion::DAYS_OFF.name.lowercase(Locale.GERMANY)] as List<String>)
             SICK_LEAVE = parseDateSpans(properties[Companion::SICK_LEAVE.name.lowercase(Locale.GERMANY)] as List<String>)
+            CHILD_SICK_LEAVE = parseDateSpans(properties[Companion::CHILD_SICK_LEAVE.name.lowercase(Locale.GERMANY)] as List<String>)
             VACATION = parseDateSpans(properties[Companion::VACATION.name.lowercase(Locale.GERMANY)] as List<String>)
             WEEKDAYS_OFF = parseWeekdayList(properties[Companion::WEEKDAYS_OFF.name.lowercase(Locale.GERMANY)] as String)
             CHROME_PROFILE_PATH = readStringProperty(properties, Companion::CHROME_PROFILE_PATH.name.lowercase(Locale.GERMANY))

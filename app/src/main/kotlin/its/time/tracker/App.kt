@@ -17,6 +17,7 @@ import its.time.tracker.upload.CostAssessmentUploader
 import its.time.tracker.util.*
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 
 class TimeTracker: CliktCommand() {
     override fun run() = Unit
@@ -39,6 +40,7 @@ class Init: CliktCommand(help="initializes App by writing custom properties to a
     val weekdaysOff by option("-w", "--weekdaysoff", help="Comma seperated list of weekdays (MONDAY,TUESDAY,..,SATURDAY,SUNDAY) when no work time is to be transferred to external systems").default("SATURDAY,SUNDAY")
     val daysOff by option("-d", "--daysoff", help="Comma seperated list of days (format: $DATE_PATTERN) when no work time is to be transferred to external systems")
     val sickLeave by option("-sl", "--sickleave", help="Comma seperated list of day ranges (format: ${DATE_PATTERN}_$DATE_PATTERN) when no work time is to be transferred to external systems")
+    val childSickLeave by option("-cl", "--childsickleave", help="Comma seperated list of day ranges (format: ${DATE_PATTERN}_$DATE_PATTERN) when no work time is to be transferred to external systems")
     val vacation by option("-v", "--vacation", help="Comma seperated list of day ranges (format: ${DATE_PATTERN}_$DATE_PATTERN) when no work time is to be transferred to external systems")
     val chromeProfilePath by option("-b", "--browserprofilepath", help="Path to Chrome browser profile path (open chrome://version/)")
     override fun run() {
@@ -52,6 +54,7 @@ class Init: CliktCommand(help="initializes App by writing custom properties to a
             weekdaysOff = weekdaysOff,
             daysOff = daysOff?.split(",")?: emptyList(),
             sickLeave = sickLeave?.split(",")?: emptyList(),
+            childSickLeave = childSickLeave?.split(",")?: emptyList(),
             vacation = vacation?.split(",")?: emptyList(),
             chromeProfilePath = chromeProfilePath?:"",
             standardDailyWorkDuration = stdWorkDuration,
@@ -161,7 +164,8 @@ class CostAssessment: CliktCommand(help="export project working times for a spec
     val noop: Boolean by option("--noop", help = "Do not actually upload anything. Just show working times per project per day.").flag()
     val sign: Boolean by option("-s", "--sign", help = "If set, cost assessments are automatically signed. WARNING: This cannot be undone!").flag()
     val forecast: Boolean by option("-f", "--forecast", help = "Calculate and submit cost assessment forecast for final days of billing period. This usually applies to the last 2-3 days of the last full week of every month.").flag()
-    val calendarWeek by option("-w", "--week", help="date (format: $WEEK_PATTERN)").required()
+    val startDate by option("-d", "--startdate", help="date (format: $DATE_PATTERN)").required()
+    val endDate by option("-e", "--enddate", help="date (format: $DATE_PATTERN)").required()
     val configPath by option("--configpath", help = "Defines a custom config file path. That file has to be created before-hand")
     override fun run() {
         if (noop && sign) {
@@ -171,13 +175,19 @@ class CostAssessment: CliktCommand(help="export project working times for a spec
         try {
             ConfigService.createConfigService(configPath).initConstants(v)
 
-            val date = DateTimeUtil.toValidCalendarWeek(calendarWeek)
-            if (date != null) {
-                val service = CostAssessmentService()
-                val uniqueDays = DateTimeUtil.getAllDaysInSameWeekAs(date as LocalDate)
-                val normalizedWorkingTimes = service.getNormalizedCostAssessmentsForDays(uniqueDays, forecast)
+            val sDate = DateTimeUtil.toValidDate(startDate) as LocalDate?
+            val eDate = DateTimeUtil.toValidDate(endDate) as LocalDate?
+            if (sDate != null && eDate != null && sDate <= eDate) {
+                val uniqueDays: HashSet<LocalDate> = HashSet()
+                uniqueDays.add(sDate)
+                while (uniqueDays.max() < eDate) {
+                    uniqueDays.add(uniqueDays.max().plusDays(1))
+                }
 
-                service.showCostAssessments(uniqueDays, normalizedWorkingTimes)
+                val service = CostAssessmentService()
+                val normalizedWorkingTimes = service.getNormalizedCostAssessmentsForDays(uniqueDays.toSortedSet(), forecast)
+
+                service.showCostAssessments(uniqueDays.toSortedSet(), normalizedWorkingTimes)
 
                 if (noop) {
                     println("\nNOOP mode. Uploaded nothing")

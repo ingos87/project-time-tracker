@@ -47,9 +47,10 @@ class CostAssessmentForecastService {
 
             costAssessments.add(
                 CostAssessmentPosition(
-                    project = project,
                     totalWorkingTime = duration,
-                    topics = emptySet()
+                    project = project,
+                    topic = "",
+                    story = ""
                 )
             )
         }

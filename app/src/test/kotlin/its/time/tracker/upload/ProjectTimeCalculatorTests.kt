@@ -22,11 +22,11 @@ class ProjectTimeCalculatorTests : FunSpec({
     test("one element list") {
         val list = listOf(
             ClockEvent(LocalDateTime.parse("2023-01-03T12:00"), EventType.CLOCK_IN, "p1", "blubb", "epp-123"),
-            ClockEvent(LocalDateTime.parse("2023-01-03T14:00"), EventType.CLOCK_OUT, "n/a", "", "epp-123"),
+            ClockEvent(LocalDateTime.parse("2023-01-03T14:00"), EventType.CLOCK_OUT, "n/a", "", ""),
         )
 
         val expectedProjectTimes = listOf(
-            CostAssessmentPosition("p1", Duration.parse("PT2H"), setOf("blubb")),
+            CostAssessmentPosition(Duration.parse("PT2H"), "p1", "blubb", "epp-123"),
         )
 
         ProjectTimeCalculator().calculateProjectTime(list, false) shouldBe expectedProjectTimes
@@ -38,7 +38,7 @@ class ProjectTimeCalculatorTests : FunSpec({
         )
 
         val expectedProjectTimes = listOf(
-            CostAssessmentPosition("p1", Duration.parse("PT9H"), setOf("blubb")),
+            CostAssessmentPosition(Duration.parse("PT9H"), "p1", "blubb", "epp-123"),
         )
 
         ProjectTimeCalculator().calculateProjectTime(list, false) shouldBe expectedProjectTimes
@@ -51,7 +51,7 @@ class ProjectTimeCalculatorTests : FunSpec({
         )
 
         val expectedProjectTimes = listOf(
-            CostAssessmentPosition("p1", Duration.parse("PT12H"), setOf("blubb")),
+            CostAssessmentPosition(Duration.parse("PT12H"), "p1", "blubb", "epp-123"),
         )
 
         ProjectTimeCalculator().calculateProjectTime(list, false) shouldBe expectedProjectTimes
@@ -63,7 +63,7 @@ class ProjectTimeCalculatorTests : FunSpec({
         )
 
         val expectedProjectTimes = listOf(
-            CostAssessmentPosition("p1", Duration.parse("PT1H"), setOf("blubb")),
+            CostAssessmentPosition(Duration.parse("PT1H"), "p1", "blubb", "epp-123"),
         )
 
         ProjectTimeCalculator().calculateProjectTime(list, true) shouldBe expectedProjectTimes
@@ -78,8 +78,8 @@ class ProjectTimeCalculatorTests : FunSpec({
         )
 
         val expectedProjectTimes = listOf(
-            CostAssessmentPosition("p1", Duration.parse("PT2H"), setOf("blubb")),
-            CostAssessmentPosition("p2", Duration.parse("PT3H"), setOf("blah")),
+            CostAssessmentPosition(Duration.parse("PT2H"), "p1", "blubb", "epp-123"),
+            CostAssessmentPosition(Duration.parse("PT3H"), "p2", "blah", "epp-123"),
         )
 
         ProjectTimeCalculator().calculateProjectTime(list, false) shouldBe expectedProjectTimes
@@ -87,20 +87,24 @@ class ProjectTimeCalculatorTests : FunSpec({
 
     test("unify works") {
         val list = listOf(
-            ClockEvent(LocalDateTime.parse("2023-01-03T08:00"), EventType.CLOCK_IN, "p1", "blubb", "epp-123"),
-            ClockEvent(LocalDateTime.parse("2023-01-03T09:00"), EventType.CLOCK_IN, "p2", "bums", "epp-123"),
-            ClockEvent(LocalDateTime.parse("2023-01-03T10:00"), EventType.CLOCK_IN, "p3", "blubber", "epp-123"),
-            ClockEvent(LocalDateTime.parse("2023-01-03T11:00"), EventType.CLOCK_IN, "p2", "blubb", "epp-123"),
-            ClockEvent(LocalDateTime.parse("2023-01-03T12:00"), EventType.CLOCK_IN, "p1", "blah", "epp-123"),
-            ClockEvent(LocalDateTime.parse("2023-01-03T13:00"), EventType.CLOCK_IN, "p1", "blaha", "epp-123"),
-            ClockEvent(LocalDateTime.parse("2023-01-03T14:00"), EventType.CLOCK_IN, "p3", "blubber", "epp-123"),
-            ClockEvent(LocalDateTime.parse("2023-01-03T15:00"), EventType.CLOCK_OUT, "n/a", "", "epp-123"),
+            ClockEvent(LocalDateTime.parse("2023-01-03T08:00"), EventType.CLOCK_IN, "p1", "meeting", ""),
+            ClockEvent(LocalDateTime.parse("2023-01-03T09:00"), EventType.CLOCK_IN, "p2", "meeting", ""),
+            ClockEvent(LocalDateTime.parse("2023-01-03T10:00"), EventType.CLOCK_IN, "p3", "code", "epp-123"),
+            ClockEvent(LocalDateTime.parse("2023-01-03T11:00"), EventType.CLOCK_IN, "p2", "code", "epp-456"),
+            ClockEvent(LocalDateTime.parse("2023-01-03T12:00"), EventType.CLOCK_IN, "p1", "meeting", "epp-7"),
+            ClockEvent(LocalDateTime.parse("2023-01-03T13:00"), EventType.CLOCK_IN, "p1", "code", "epp-7"),
+            ClockEvent(LocalDateTime.parse("2023-01-03T14:00"), EventType.CLOCK_IN, "p3", "code", "epp-123"),
+            ClockEvent(LocalDateTime.parse("2023-01-03T15:00"), EventType.CLOCK_IN, "p1", "meeting", "epp-7"),
+            ClockEvent(LocalDateTime.parse("2023-01-03T16:00"), EventType.CLOCK_OUT, "n/a", "", ""),
         )
 
         val expectedProjectTimes = listOf(
-            CostAssessmentPosition("p1", Duration.parse("PT3H"), setOf("blubb", "blah", "blaha")),
-            CostAssessmentPosition("p2", Duration.parse("PT2H"), setOf("bums", "blubb")),
-            CostAssessmentPosition("p3", Duration.parse("PT2H"), setOf("blubber")),
+            CostAssessmentPosition(Duration.parse("PT1H"), "p1", "meeting", ""),
+            CostAssessmentPosition(Duration.parse("PT1H"), "p2", "meeting", ""),
+            CostAssessmentPosition(Duration.parse("PT2H"), "p3", "code", "epp-123"),
+            CostAssessmentPosition(Duration.parse("PT1H"), "p2", "code", "epp-456"),
+            CostAssessmentPosition(Duration.parse("PT2H"), "p1", "meeting", "epp-7"),
+            CostAssessmentPosition(Duration.parse("PT1H"), "p1", "code", "epp-7"),
         )
 
         ProjectTimeCalculator().calculateProjectTime(list, false) shouldBe expectedProjectTimes

@@ -15,25 +15,6 @@ import java.util.*
 
 class CostAssessmentService {
 
-    companion object {
-        fun combineByBookingId(list: MutableList<CostAssessmentPosition>)
-                : List<CostAssessmentPosition>{
-            return list.groupBy{it.project}
-                .map { (_, group) ->
-                    val minutesSum = group.sumOf { it.totalWorkingTime.toMinutes() }
-                    val allTopics = mutableSetOf<String>()
-                    group.forEach {
-                        allTopics.addAll(it.topics)
-                    }
-                    CostAssessmentPosition(
-                        group.first().project,
-                        Duration.ofMinutes(minutesSum),
-                        allTopics
-                    )
-                }
-        }
-    }
-
     fun getNormalizedCostAssessmentsForDays(uniqueDays: SortedSet<LocalDate>, forecast: Boolean): SortedMap<LocalDate, List<CostAssessmentPosition>> {
         val csvService = CsvService()
         val clockEvents = csvService.loadClockEvents()
@@ -63,14 +44,17 @@ class CostAssessmentService {
         return withAddedAbsentDays
     }
 
-    fun showCostAssessments(uniqueDays: SortedSet<LocalDate>, normalizedWorkingTimes: SortedMap<LocalDate, List<CostAssessmentPosition>>) {
+    fun showCostAssessments(uniqueDays: SortedSet<LocalDate>,
+                            normalizedWorkingTimes: SortedMap<LocalDate, List<CostAssessmentPosition>>) {
         if (normalizedWorkingTimes.isEmpty()) {
             return
         }
 
         val firstColWidth = 18
         println("[SUMMARY for ${uniqueDays.first()} - ${uniqueDays.last()}]")
+
         println(getHorizontalSeparator(uniqueDays, SeparatorPosition.TOP, firstColWidth, false))
+
         println(getContentLine(
             getCellString("weekday", firstColWidth, TextOrientation.LEFT),
             uniqueDays.map { it.dayOfWeek.name.substring(0, 3) },
@@ -79,29 +63,63 @@ class CostAssessmentService {
             getCellString("day of month", firstColWidth, TextOrientation.LEFT),
             uniqueDays.map { it.dayOfMonth.toString() },
             uniqueDays))
-        println(getHorizontalSeparator(uniqueDays, SeparatorPosition.MIDDLE, firstColWidth, false))
 
-        val allBookingPositionNames = normalizedWorkingTimes.values.flatten().map { it.project }.toSet()
-        allBookingPositionNames.forEach { name ->
+        val projectNames = normalizedWorkingTimes.values.flatten().map { it.project }.toSet()
+        projectNames.forEach { projectName ->
+            println(getHorizontalSeparator(uniqueDays, SeparatorPosition.MIDDLE, firstColWidth, false))
+
+            val workingTimesByName = mutableMapOf<LocalDate, List<CostAssessmentPosition>>()
+            normalizedWorkingTimes.forEach { (key, value) ->
+                workingTimesByName[key] = value.filter { it.project == projectName }.toList()
+            }
+
             println(getContentLine(
-                getCellString(name, firstColWidth, TextOrientation.LEFT),
-                getBookingTimesForProject(normalizedWorkingTimes, name, uniqueDays),
+                getCellString(projectName, firstColWidth, TextOrientation.LEFT),
+                getBookingTimesForProject(workingTimesByName, uniqueDays),
                 uniqueDays))
+
+            val topicNames = workingTimesByName.values.flatten().map { it.topic }.filter { it != "" }.toSet()
+            topicNames.forEach { topicName ->
+                val workingTimesByTopic = mutableMapOf<LocalDate, List<CostAssessmentPosition>>()
+                workingTimesByName.forEach { (key, value) ->
+                    workingTimesByTopic[key] = value.filter { it.topic == topicName }.toList()
+                }
+
+                println(getContentLine(
+                    getCellString("  $topicName", firstColWidth, TextOrientation.LEFT),
+                    getBookingTimesForProject(workingTimesByTopic, uniqueDays),
+                    uniqueDays))
+
+                val storyNames = workingTimesByTopic.values.flatten().map { it.story }.filter { it != "" }.toSet()
+                storyNames.forEach { storyName ->
+                    val workingTimesByStory = mutableMapOf<LocalDate, List<CostAssessmentPosition>>()
+                    workingTimesByTopic.forEach { (key, value) ->
+                        workingTimesByStory[key] = value.filter { it.story == storyName }.toList()
+                    }
+
+                    println(getContentLine(
+                        getCellString("    $storyName", firstColWidth, TextOrientation.LEFT),
+                        getBookingTimesForProject(workingTimesByStory, uniqueDays),
+                        uniqueDays))
+
+                }
+            }
         }
 
         println(getHorizontalSeparator(uniqueDays, SeparatorPosition.BOTTOM, firstColWidth, false))
     }
 
     private fun getBookingTimesForProject(
-        normalizedWorkingTimes: SortedMap<LocalDate, List<CostAssessmentPosition>>,
-        name: String,
+        normalizedWorkingTimes: Map<LocalDate, List<CostAssessmentPosition>>,
         uniqueDays: SortedSet<LocalDate>
     ): List<String> {
         val times = mutableListOf<String>()
         uniqueDays.forEach { date ->
-            val projectDuration = normalizedWorkingTimes[date]?.find { it -> it.project == name }?.totalWorkingTime
-            times.add(if (projectDuration == null || projectDuration == Duration.ZERO) "     "
-                        else DateTimeUtil.durationToDecimal(projectDuration).padStart(5, ' '))
+            val totalDuration = normalizedWorkingTimes[date]?.fold(Duration.ZERO) { total, position ->
+                total.plus(position.totalWorkingTime)
+            }
+            times.add(if (totalDuration == null || totalDuration == Duration.ZERO) "     "
+                        else DateTimeUtil.durationToDecimal(totalDuration).padStart(5, ' '))
         }
 
         return times

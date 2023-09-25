@@ -17,9 +17,9 @@ class CostAssessmentRoundingTests : FunSpec({
     test("no rounding necessary") {
         val input = HashMap<LocalDate, List<CostAssessmentPosition>>()
         val list1 = listOf(
-            CostAssessmentPosition("topic_1", Duration.parse("PT1H"), emptySet()),
-            CostAssessmentPosition("topic_2", Duration.parse("PT1H30M"), emptySet()),
-            CostAssessmentPosition("topic_3", Duration.parse("PT6H"), emptySet()),
+            CostAssessmentPosition(Duration.parse("PT1H"), "topic_1", "", ""),
+            CostAssessmentPosition(Duration.parse("PT1H30M"), "topic_2", "", ""),
+            CostAssessmentPosition(Duration.parse("PT6H"), "topic_3", "", ""),
         )
         input[LocalDate.parse("2023-01-03")] = list1
 
@@ -29,18 +29,18 @@ class CostAssessmentRoundingTests : FunSpec({
     test("rounding works within one day") {
         val input = HashMap<LocalDate, List<CostAssessmentPosition>>()
         val list1 = listOf(
-            CostAssessmentPosition("topic_1", Duration.parse("PT1H"), emptySet()),
-            CostAssessmentPosition("topic_2", Duration.parse("PT1H33M"), emptySet()),
-            CostAssessmentPosition("topic_3", Duration.parse("PT6H14M"), emptySet()),
+            CostAssessmentPosition(Duration.parse("PT1H"), "topic_1", "", ""),
+            CostAssessmentPosition(Duration.parse("PT1H33M"), "topic_2", "", ""),
+            CostAssessmentPosition(Duration.parse("PT6H14M"), "topic_3", "", ""),
         )
         input[LocalDate.parse("2023-01-03")] = list1
 
 
         val expectedOutput = HashMap<LocalDate, List<CostAssessmentPosition>>()
         val listOut1 = listOf(
-            CostAssessmentPosition("topic_1", Duration.parse("PT1H"), emptySet()),
-            CostAssessmentPosition("topic_2", Duration.parse("PT1H30M"), emptySet()),
-            CostAssessmentPosition("topic_3", Duration.parse("PT6H"), emptySet()),
+            CostAssessmentPosition(Duration.parse("PT1H"), "topic_1", "", ""),
+            CostAssessmentPosition(Duration.parse("PT1H30M"), "topic_2", "", ""),
+            CostAssessmentPosition(Duration.parse("PT6H"), "topic_3", "", ""),
         )
         expectedOutput[LocalDate.parse("2023-01-03")] = listOut1
 

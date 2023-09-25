@@ -176,6 +176,10 @@ class DateTimeUtil {
             return isWithinDateRanges(Constants.SICK_LEAVE, date)
         }
 
+        fun isChildSickLeaveDay(date: LocalDate): Boolean {
+            return isWithinDateRanges(Constants.CHILD_SICK_LEAVE, date)
+        }
+
         fun isPublicHoliday(date: LocalDate): Boolean {
             return Constants.PUBLIC_HOLIDAYS.contains(date)
         }

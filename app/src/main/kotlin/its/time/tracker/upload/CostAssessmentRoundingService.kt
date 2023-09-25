@@ -36,13 +36,14 @@ class CostAssessmentRoundingService {
                 if (roundingResult.first > Duration.ZERO) {
                     roundedBookingListItems.add(
                         CostAssessmentPosition(
-                            it.project,
                             roundingResult.first,
-                            it.topics
+                            it.project,
+                            it.topic,
+                            it.story
                         )
                     )
                 }
-                roundingRemainders[it.project] = roundingRemainders.getOrDefault(it.project, Duration.ZERO) + roundingResult.second
+                roundingRemainders[it.getProjectKey()] = roundingRemainders.getOrDefault(it.getProjectKey(), Duration.ZERO) + roundingResult.second
             }
             roundedCostAssessments[date] = roundedBookingListItems
         }
@@ -54,15 +55,16 @@ class CostAssessmentRoundingService {
         costAssessments: MutableMap<LocalDate, List<CostAssessmentPosition>>,
         remainders: List<Pair<String, Duration>>
     ) {
-        remainders.forEach { (projectTitle, remainder) ->
-            val key = getDateWithPresentProjectTitle(costAssessments, projectTitle) ?: costAssessments.keys.last()
+        remainders.forEach { (projectKey, remainder) ->
+            val key = getDateWithPresentProjectKey(costAssessments, projectKey) ?: costAssessments.keys.last()
             val bookingItemsList = costAssessments[key]
             costAssessments[key] = bookingItemsList!!.map {
-                if (it.project == projectTitle) {
+                if (it.project == projectKey) {
                     CostAssessmentPosition(
-                        it.project,
                         it.totalWorkingTime + remainder,
-                        it.topics
+                        it.project,
+                        it.topic,
+                        it.story
                     )
                 } else {
                     it
@@ -76,12 +78,12 @@ class CostAssessmentRoundingService {
             .map { (k, v) -> k to DateTimeUtil.roundToHalfHourWithRemainder(v).first }
             .filter { (_, v) -> v != Duration.ZERO }
 
-    private fun getDateWithPresentProjectTitle(
+    private fun getDateWithPresentProjectKey(
         costAssessments: MutableMap<LocalDate, List<CostAssessmentPosition>>,
-        projectTitle: String
+        projectKey: String
     ): LocalDate? {
         costAssessments.forEach { (date, list) ->
-            val bookingItem = list.find { it.project == projectTitle }
+            val bookingItem = list.find { (it.getProjectKey()) == projectKey }
             if (bookingItem != null) {
                 return date
             }

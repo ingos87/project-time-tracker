@@ -64,7 +64,7 @@ class SummaryService {
         costAssessmentList.forEach {
             // total width - white space - bookingPosLength - ": " - time - "  " - 1parenthesis
             val availableSpaceForTopicList = tableWidth-1-bookingPosLength-2-5-2-1
-            val topicList = ("(${it.topics.joinToString(",")}".take(availableSpaceForTopicList)+")").padEnd(availableSpaceForTopicList+1)
+            val topicList = ("(${it.topic}".take(availableSpaceForTopicList)+")").padEnd(availableSpaceForTopicList+1)
             println("│ " + "${it.project.take(bookingPosLength)}:".padEnd(bookingPosLength+2) + durationToString(it.totalWorkingTime) + "  " + topicList + "│")
         }
         println("└" + "─".repeat(tableWidth) + "┘")

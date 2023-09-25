@@ -43,16 +43,16 @@ class CostAssessmentForecastTests : FunSpec({
 
         val input = mapOf<LocalDate, List<CostAssessmentPosition>>(
             LocalDate.parse("2023-02-20") to listOf(
-                CostAssessmentPosition("Wartung", Duration.parse("PT2H"), emptySet()),
-                CostAssessmentPosition("ProjectA", Duration.parse("PT7H"), emptySet()),
+                CostAssessmentPosition(Duration.parse("PT2H"), "Wartung", "", ""),
+                CostAssessmentPosition(Duration.parse("PT7H"), "ProjectA", "", ""),
             ),
             LocalDate.parse("2023-02-21") to listOf(
-                CostAssessmentPosition("Wartung", Duration.parse("PT1H25M"), emptySet()),
-                CostAssessmentPosition("ProjectB", Duration.parse("PT7H35M"), emptySet()),
+                CostAssessmentPosition(Duration.parse("PT1H25M"), "Wartung", "", ""),
+                CostAssessmentPosition(Duration.parse("PT7H35M"), "ProjectB", "", ""),
             ),
             LocalDate.parse("2023-02-22") to listOf(
-                CostAssessmentPosition("ITS meetings", Duration.parse("PT3H30M"), emptySet()),
-                CostAssessmentPosition("ProjectA", Duration.parse("PT5H32M"), emptySet()),
+                CostAssessmentPosition(Duration.parse("PT3H30M"), "ITS meetings", "", ""),
+                CostAssessmentPosition(Duration.parse("PT5H32M"), "ProjectA", "", ""),
             ),
         )
 
@@ -63,8 +63,8 @@ class CostAssessmentForecastTests : FunSpec({
         output.keys.last() shouldBe LocalDate.parse("2023-02-24")
 
         output[LocalDate.parse("2023-02-23")] shouldBe listOf(
-            CostAssessmentPosition("ProjectA", Duration.parse("PT5H30M"), emptySet()),
-            CostAssessmentPosition("Wartung", Duration.parse("PT1H30M"), emptySet()),
+            CostAssessmentPosition(Duration.parse("PT5H30M"), "ProjectA", "", ""),
+            CostAssessmentPosition(Duration.parse("PT1H30M"), "Wartung", "", ""),
             // TODO assert ITS meetings
         )
         output[LocalDate.parse("2023-02-23")] shouldBe output[LocalDate.parse("2023-02-24")]

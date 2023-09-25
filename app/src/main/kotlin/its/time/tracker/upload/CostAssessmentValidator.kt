@@ -1,9 +1,7 @@
 package its.time.tracker.upload
 
 import its.time.tracker.domain.CostAssessmentPosition
-import its.time.tracker.service.CostAssessmentService.Companion.combineByBookingId
 import its.time.tracker.util.DateTimeUtil
-import java.time.Duration
 import java.time.LocalDate
 import java.util.*
 
@@ -19,7 +17,7 @@ class CostAssessmentValidator {
                 val bookingItemsSet = mutableListOf<CostAssessmentPosition>()
                 bookingItemsSet.addAll(value)
                 bookingItemsSet.addAll(carryOverBookingItems)
-                resultingSummaries[date] = combineByBookingId(bookingItemsSet)
+                resultingSummaries[date] = ProjectTimeCalculator.unifyPositions(bookingItemsSet)
 
                 carryOverBookingItems.clear()
             }
@@ -33,7 +31,7 @@ class CostAssessmentValidator {
             val bookingItemsSet = mutableListOf<CostAssessmentPosition>()
             bookingItemsSet.addAll(resultingSummaries[lastKey]!!)
             bookingItemsSet.addAll(carryOverBookingItems)
-            resultingSummaries[lastKey] = combineByBookingId(bookingItemsSet)
+            resultingSummaries[lastKey] = ProjectTimeCalculator.unifyPositions(bookingItemsSet)
         }
 
         return resultingSummaries.toSortedMap()

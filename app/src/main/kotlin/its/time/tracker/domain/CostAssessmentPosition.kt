@@ -3,7 +3,10 @@ package its.time.tracker.domain
 import java.time.Duration
 
 data class CostAssessmentPosition(
-    val project: String,
     val totalWorkingTime: Duration,
-    val topics: Set<String>,
-)
+    val project: String,
+    val topic: String,
+    val story: String,
+) {
+    fun getProjectKey() = "$project-$topic-$story"
+}

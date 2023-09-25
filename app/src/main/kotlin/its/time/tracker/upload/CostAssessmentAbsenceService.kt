@@ -27,9 +27,10 @@ class CostAssessmentAbsenceService {
 
                 resultingMap[date] = listOf(
                     CostAssessmentPosition(
-                        project = getAbsenceProject(date),
                         totalWorkingTime = Constants.STANDARD_WORK_DURATION_PER_DAY,
-                        topics = emptySet()
+                        project = getAbsenceProject(date),
+                        topic = "",
+                        story = ""
                     )
                 )
             }
@@ -45,7 +46,7 @@ class CostAssessmentAbsenceService {
         else if (DateTimeUtil.isVacationDay(date)) {
             return VACATION
         }
-        else if (DateTimeUtil.isSickLeaveDay(date)) {
+        else if (DateTimeUtil.isSickLeaveDay(date) || DateTimeUtil.isChildSickLeaveDay(date)) {
             return SICK_LEAVE
         }
 
