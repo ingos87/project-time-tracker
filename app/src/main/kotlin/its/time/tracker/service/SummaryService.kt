@@ -4,7 +4,7 @@ import its.time.tracker.domain.EventType
 import its.time.tracker.domain.WorkDaySummaryCollection
 import its.time.tracker.domain.WorkDaySummary
 import its.time.tracker.service.ConsoleTableHelper.Companion.getCellString
-import its.time.tracker.service.ConsoleTableHelper.Companion.getContentLine
+import its.time.tracker.service.ConsoleTableHelper.Companion.getContentLine_old
 import its.time.tracker.service.ConsoleTableHelper.Companion.getHorizontalSeparator
 import its.time.tracker.upload.ProjectTimeCalculator
 import its.time.tracker.util.ClockEventsFilter
@@ -100,43 +100,50 @@ class SummaryService {
         println("[SUMMARY for $yearMonthString]")
 
         println(getHorizontalSeparator(uniqueDays, SeparatorPosition.TOP, firstColWidth, false))
-        println(getContentLine(
+        println(getContentLine_old(
             getCellString("weekday", firstColWidth, TextOrientation.LEFT),
             uniqueDays.map { it.dayOfWeek.name.substring(0, 3) },
-            uniqueDays))
-        println(getContentLine(
+            uniqueDays
+        ))
+        println(getContentLine_old(
             getCellString("day of month", firstColWidth, TextOrientation.LEFT),
             uniqueDays.map { it.dayOfMonth.toString() },
-            uniqueDays))
-        println(getContentLine(
+            uniqueDays
+        ))
+        println(getContentLine_old(
             getCellString("week of year", firstColWidth, TextOrientation.LEFT),
             uniqueDays.map { "" + Integer.parseInt(DateTimeUtil.getWeekOfYearFromDate(it)) },
-            uniqueDays))
+            uniqueDays
+        ))
         println(getHorizontalSeparator(uniqueDays, SeparatorPosition.MIDDLE, firstColWidth, false))
 
-        println(getContentLine(
+        println(getContentLine_old(
             getCellString("clock-in", firstColWidth, TextOrientation.LEFT),
             summaryData.getAllClockIns(),
-            uniqueDays))
-        println(getContentLine(
+            uniqueDays
+        ))
+        println(getContentLine_old(
             getCellString("clock-out", firstColWidth, TextOrientation.LEFT),
             summaryData.getAllClockOuts(),
-            uniqueDays))
+            uniqueDays
+        ))
 
         println(getHorizontalSeparator(uniqueDays, SeparatorPosition.MIDDLE, firstColWidth, true))
         val allBookingPositionNames = summaryData.getAllBookingPositionNames()
         allBookingPositionNames.forEach { name ->
-            println(getContentLine(
+            println(getContentLine_old(
                 getCellString(name, firstColWidth, TextOrientation.LEFT),
                 summaryData.getAllBookingDurationsForKeyAsString(name),
-                uniqueDays))
+                uniqueDays
+            ))
         }
 
         println(getHorizontalSeparator(uniqueDays, SeparatorPosition.MIDDLE, firstColWidth, false))
-        println(getContentLine(
+        println(getContentLine_old(
             getCellString("total", firstColWidth, TextOrientation.LEFT),
             summaryData.getAllTotalWorkingTimes(),
-            uniqueDays))
+            uniqueDays
+        ))
 
         println(getHorizontalSeparator(uniqueDays, SeparatorPosition.BOTTOM, firstColWidth, false))
     }

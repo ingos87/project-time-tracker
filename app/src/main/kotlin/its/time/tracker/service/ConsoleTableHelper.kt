@@ -59,7 +59,31 @@ class ConsoleTableHelper {
             return separatorLine.toString()
         }
 
-        fun getContentLine(title: String, values: List<String>, uniqueDays: SortedSet<LocalDate>): String {
+        fun getContentLine(content: TableLineContent, uniqueDays: SortedSet<LocalDate>): String {
+            val lineBuilder = StringBuilder()
+            lineBuilder.append("│${content.heading?:""}")
+
+            for (i in content.values.indices) {
+                if (needsDoubleLineDueToDaysDiff(uniqueDays, i)) {
+                    lineBuilder.append("║")
+                }
+                else {
+                    lineBuilder.append("│")
+                }
+                lineBuilder.append(getCellString(content.values[i], CELL_WIDTH, TextOrientation.CENTER))
+            }
+
+            lineBuilder.append("│")
+
+            if (content.summaryValue != null) {
+                lineBuilder.append(getCellString(content.summaryValue, CELL_WIDTH, TextOrientation.CENTER))
+            }
+
+            return lineBuilder.toString()
+        }
+
+
+        fun getContentLine_old(title: String, values: List<String>, uniqueDays: SortedSet<LocalDate>): String {
             val lineBuilder = StringBuilder()
             lineBuilder.append("│$title")
 
@@ -79,7 +103,7 @@ class ConsoleTableHelper {
         }
 
         fun needsDoubleLineDueToDaysDiff(uniqueDays: SortedSet<LocalDate>, currentIdx: Int): Boolean {
-            if (currentIdx > 0) {
+            if (currentIdx > 0 && currentIdx < uniqueDays.size) {
                 val prevDate = uniqueDays.elementAt(currentIdx-1)
                 val date = uniqueDays.elementAt(currentIdx)
                 return ChronoUnit.DAYS.between(prevDate, date) > 1
