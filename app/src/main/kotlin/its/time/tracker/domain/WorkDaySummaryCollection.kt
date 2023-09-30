@@ -30,17 +30,18 @@ data class WorkDaySummaryCollection(
         return data.values.map { it.second.map { item -> item.project } }.flatten().distinct()
     }
 
-    fun getAllTotalWorkingTimes(): List<String> {
-        return data.values.map { DateTimeUtil.durationToString(it.first.workDuration) }
-    }
+    fun getFilteredCostAssessmentPositionsBy(project: String?, topic: String?, story: String?):
+            MutableMap<LocalDate, List<CostAssessmentPosition>> {
+        val result: MutableMap<LocalDate, List<CostAssessmentPosition>> = mutableMapOf()
 
-    fun getAllBookingDurationsForKeyAsString(bookingKey: String): List<String> {
-        var dateDurationsMap: Map<LocalDate, Duration> = HashMap()
         data.forEach{ (key, pair) ->
-            val maybeBookingPositionItem = pair.second.find { item -> item.project == bookingKey }
-            dateDurationsMap = dateDurationsMap.plus(Pair(key, maybeBookingPositionItem?.totalWorkingTime ?: Duration.ZERO))
+            result[key] = pair.second.filter {
+                (project == null || it.project == project)
+                    && (topic == null || it.topic == topic)
+                    && (story == null || it.story == story)
+            }
         }
 
-        return dateDurationsMap.values.map { if(it == Duration.ZERO) "     " else DateTimeUtil.durationToString(it) }
+        return result
     }
 }

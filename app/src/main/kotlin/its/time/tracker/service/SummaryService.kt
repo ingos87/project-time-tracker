@@ -1,18 +1,20 @@
 package its.time.tracker.service
 
+import its.time.tracker.domain.CostAssessmentPosition
 import its.time.tracker.domain.EventType
 import its.time.tracker.domain.WorkDaySummaryCollection
 import its.time.tracker.domain.WorkDaySummary
 import its.time.tracker.service.ConsoleTableHelper.Companion.getCellString
+import its.time.tracker.service.ConsoleTableHelper.Companion.getContentLine
 import its.time.tracker.service.ConsoleTableHelper.Companion.getContentLine_old
 import its.time.tracker.service.ConsoleTableHelper.Companion.getHorizontalSeparator
 import its.time.tracker.upload.ProjectTimeCalculator
 import its.time.tracker.util.ClockEventsFilter
 import its.time.tracker.util.DATE_PATTERN
 import its.time.tracker.util.DateTimeUtil
-import its.time.tracker.util.DateTimeUtil.Companion.durationToString
 import its.time.tracker.util.DateTimeUtil.Companion.temporalToString
 import its.time.tracker.util.TIME_PATTERN
+import java.time.Duration
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.ResolverStyle
@@ -20,6 +22,11 @@ import java.util.*
 
 
 class SummaryService {
+
+    companion object {
+        const val FIRST_COL_WIDTH = 32
+    }
+
     fun showDailySummary(date: LocalDate) {
         val csvService = CsvService()
         val clockEvents = csvService.loadClockEvents()
@@ -35,15 +42,18 @@ class SummaryService {
         val workDaySummary = WorkDaySummary.toWorkDaySummary(daysEvents, showWorkInProgress)!!
         val costAssessmentList = ProjectTimeCalculator().calculateProjectTime(daysEvents, showWorkInProgress)
 
-        val tableWidth = 72
+        val tableWidth = 100
         if (showWorkInProgress) {
+            val currentTopicTriple = daysEvents.last().project + " -> " + daysEvents.last().topic + " -> " + daysEvents.last().story
             println("[today's work in progress]")
             println("┌" + "─".repeat(tableWidth) + "┐")
             println("│ " + "clock-in:".padEnd(20) + temporalToString(workDaySummary.clockIn.toLocalTime(), TIME_PATTERN).padEnd(tableWidth-21) + "│")
             println("├" + "─".repeat(tableWidth) + "┤")
-            println("│ " + "current work time:".padEnd(20) + durationToString(workDaySummary.workDuration).padEnd(tableWidth-21) + "│")
-            println("│ " + "current break time:".padEnd(20) + durationToString(workDaySummary.breakDuration).padEnd(tableWidth-21) + "│")
-            println("│ " + "current work topic:".padEnd(20) + (daysEvents.last().topic.take(21) + " (since ${temporalToString(daysEvents.last().dateTime.toLocalTime(), TIME_PATTERN)})").padEnd(tableWidth-21) + "│")
+            println("│ " + "today's work time:".padEnd(20) + DateTimeUtil.durationToString(workDaySummary.workDuration)
+                .padEnd(tableWidth-21) + "│")
+            println("│ " + "today's break time:".padEnd(20) + DateTimeUtil.durationToString(workDaySummary.breakDuration)
+                .padEnd(tableWidth-21) + "│")
+            println("│ " + "current work topic:".padEnd(20) + (currentTopicTriple + " (since ${temporalToString(daysEvents.last().dateTime.toLocalTime(), TIME_PATTERN)})").padEnd(tableWidth-21) + "│")
         }
         else {
             println("[SUMMARY for $date]")
@@ -55,17 +65,17 @@ class SummaryService {
             }
             println("│ " + "clock-out:".padEnd(18) + (temporalToString(workDaySummary.clockOut.toLocalTime(), TIME_PATTERN) + clockOutSupplement).padEnd(tableWidth-19) + "│")
             println("├" + "─".repeat(tableWidth) + "┤")
-            println("│ " + "total work time:".padEnd(18) + durationToString(workDaySummary.workDuration).padEnd(tableWidth-19) + "│")
-            println("│ " + "total break time:".padEnd(18) + durationToString(workDaySummary.breakDuration).padEnd(tableWidth-19) + "│")
+            println("│ " + "total work time:".padEnd(18) + DateTimeUtil.durationToString(workDaySummary.workDuration)
+                .padEnd(tableWidth-19) + "│")
+            println("│ " + "total break time:".padEnd(18) + DateTimeUtil.durationToString(workDaySummary.breakDuration)
+                .padEnd(tableWidth-19) + "│")
         }
 
         println("├" + "═".repeat(tableWidth) + "┤")
-        val bookingPosLength = 16 //BookingPositionResolver.getMaxBookingPosNameLength().coerceAtLeast(16)
+        val bookingPosLength = tableWidth-9
         costAssessmentList.forEach {
-            // total width - white space - bookingPosLength - ": " - time - "  " - 1parenthesis
-            val availableSpaceForTopicList = tableWidth-1-bookingPosLength-2-5-2-1
-            val topicList = ("(${it.topic}".take(availableSpaceForTopicList)+")").padEnd(availableSpaceForTopicList+1)
-            println("│ " + "${it.project.take(bookingPosLength)}:".padEnd(bookingPosLength+2) + durationToString(it.totalWorkingTime) + "  " + topicList + "│")
+            val topicTriple = it.project + " -> " +it.topic + " -> " +it.story
+            println("│ " + "${topicTriple.take(bookingPosLength)}:".padEnd(bookingPosLength+3) + DateTimeUtil.durationToString(it.totalWorkingTime) + "│")
         }
         println("└" + "─".repeat(tableWidth) + "┘")
 
@@ -95,56 +105,106 @@ class SummaryService {
             summaryData.addDay(day, workDaySummary!!, costAssessmentList)
         }
 
-        val firstColWidth = 18 //BookingPositionResolver.getMaxBookingPosNameLength()+2
-
         println("[SUMMARY for $yearMonthString]")
 
-        println(getHorizontalSeparator(uniqueDays, SeparatorPosition.TOP, firstColWidth, false))
+        println(getHorizontalSeparator(uniqueDays, SeparatorPosition.TOP, FIRST_COL_WIDTH, false))
         println(getContentLine_old(
-            getCellString("weekday", firstColWidth, TextOrientation.LEFT),
-            uniqueDays.map { it.dayOfWeek.name.substring(0, 3) },
+            getCellString("weekday", FIRST_COL_WIDTH, TextOrientation.LEFT),
+            uniqueDays.map { it.dayOfWeek.name.take(3)},
             uniqueDays
         ))
         println(getContentLine_old(
-            getCellString("day of month", firstColWidth, TextOrientation.LEFT),
+            getCellString("day of month", FIRST_COL_WIDTH, TextOrientation.LEFT),
             uniqueDays.map { it.dayOfMonth.toString() },
             uniqueDays
         ))
         println(getContentLine_old(
-            getCellString("week of year", firstColWidth, TextOrientation.LEFT),
+            getCellString("week of year", FIRST_COL_WIDTH, TextOrientation.LEFT),
             uniqueDays.map { "" + Integer.parseInt(DateTimeUtil.getWeekOfYearFromDate(it)) },
             uniqueDays
         ))
-        println(getHorizontalSeparator(uniqueDays, SeparatorPosition.MIDDLE, firstColWidth, false))
+        println(getHorizontalSeparator(uniqueDays, SeparatorPosition.MIDDLE, FIRST_COL_WIDTH, false))
 
         println(getContentLine_old(
-            getCellString("clock-in", firstColWidth, TextOrientation.LEFT),
+            getCellString("clock-in", FIRST_COL_WIDTH, TextOrientation.LEFT),
             summaryData.getAllClockIns(),
             uniqueDays
         ))
         println(getContentLine_old(
-            getCellString("clock-out", firstColWidth, TextOrientation.LEFT),
+            getCellString("clock-out", FIRST_COL_WIDTH, TextOrientation.LEFT),
             summaryData.getAllClockOuts(),
             uniqueDays
         ))
 
-        println(getHorizontalSeparator(uniqueDays, SeparatorPosition.MIDDLE, firstColWidth, true))
-        val allBookingPositionNames = summaryData.getAllBookingPositionNames()
-        allBookingPositionNames.forEach { name ->
-            println(getContentLine_old(
-                getCellString(name, firstColWidth, TextOrientation.LEFT),
-                summaryData.getAllBookingDurationsForKeyAsString(name),
-                uniqueDays
-            ))
+        val projectNames = summaryData.getAllBookingPositionNames()
+        projectNames.forEach { projectName ->
+            println(getHorizontalSeparator(uniqueDays, SeparatorPosition.MIDDLE,
+                CostAssessmentService.FIRST_COL_WIDTH, false))
+
+            val filteredByProject = summaryData.getFilteredCostAssessmentPositionsBy(projectName, null, null)
+            println(
+                getContentLine(
+                    getTableLineContent(projectName, filteredByProject, uniqueDays),
+                    uniqueDays
+                )
+            )
+
+            val topicNames = filteredByProject.values.flatten().map { it.topic }.filter { it != "" }.toSet()
+            topicNames.forEach { topicName ->
+                val filteredByProjectTopic = summaryData.getFilteredCostAssessmentPositionsBy(projectName, topicName, null)
+                println(getContentLine(
+                        getTableLineContent("  $topicName", filteredByProjectTopic, uniqueDays),
+                        uniqueDays
+                    )
+                )
+
+                val storyNames = filteredByProjectTopic.values.flatten().map { it.story }.filter { it != "" }.toSet()
+                storyNames.forEach { storyName ->
+                    val filteredByProjectTopicStory = summaryData.getFilteredCostAssessmentPositionsBy(projectName, topicName, storyName)
+                    println(
+                        getContentLine(
+                            getTableLineContent("    $storyName", filteredByProjectTopicStory, uniqueDays),
+                            uniqueDays
+                        )
+                    )
+                }
+            }
         }
 
-        println(getHorizontalSeparator(uniqueDays, SeparatorPosition.MIDDLE, firstColWidth, false))
-        println(getContentLine_old(
-            getCellString("total", firstColWidth, TextOrientation.LEFT),
-            summaryData.getAllTotalWorkingTimes(),
-            uniqueDays
-        ))
+        println(getHorizontalSeparator(uniqueDays, SeparatorPosition.BOTTOM, FIRST_COL_WIDTH, false))
 
-        println(getHorizontalSeparator(uniqueDays, SeparatorPosition.BOTTOM, firstColWidth, false))
+        println(getContentLine(
+            getTableLineContent("total",
+                summaryData.getFilteredCostAssessmentPositionsBy(null, null, null), uniqueDays),
+                uniqueDays
+            )
+        )
     }
+
+    private fun getTableLineContent(
+        title: String,
+        normalizedWorkingTimes: Map<LocalDate, List<CostAssessmentPosition>>,
+        uniqueDays: SortedSet<LocalDate>
+    ): TableLineContent {
+        val times = mutableListOf<String>()
+        uniqueDays.forEach { date ->
+            val totalDuration = normalizedWorkingTimes[date]?.fold(Duration.ZERO) { total, position ->
+                total.plus(position.totalWorkingTime)
+            }
+            times.add(durationToString(totalDuration))
+        }
+
+        val overallDuration = normalizedWorkingTimes.values.flatten().fold(Duration.ZERO) { total, position ->
+            total.plus(position.totalWorkingTime)
+        }
+
+        return TableLineContent(
+            getCellString(title, CostAssessmentService.FIRST_COL_WIDTH, TextOrientation.LEFT),
+            times,
+            durationToString(overallDuration)
+        )
+    }
+
+    private fun durationToString(duration: Duration?) = if (duration == null || duration == Duration.ZERO) "     "
+        else DateTimeUtil.durationToString(duration).padStart(5, ' ')
 }

@@ -9,6 +9,7 @@ import its.time.tracker.service.ConsoleTableHelper.Companion.getHorizontalSepara
 import its.time.tracker.upload.*
 import its.time.tracker.util.ClockEventsFilter
 import its.time.tracker.util.DateTimeUtil
+import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
 import java.util.*
@@ -16,7 +17,7 @@ import java.util.*
 class CostAssessmentService {
     
     companion object {
-        const val FIRST_COL_WIDTH = 18
+        const val FIRST_COL_WIDTH = 32
     }
 
     fun getNormalizedCostAssessmentsForDays(uniqueDays: SortedSet<LocalDate>, forecast: Boolean): SortedMap<LocalDate, List<CostAssessmentPosition>> {
@@ -55,27 +56,28 @@ class CostAssessmentService {
         }
 
         println("[SUMMARY for ${uniqueDays.first()} - ${uniqueDays.last()}]")
+        val filteredUniqueDays = uniqueDays.filter { it.dayOfWeek.ordinal < 5 }.toSortedSet() // exclude weekend days
 
-        println(getHorizontalSeparator(uniqueDays, SeparatorPosition.TOP, FIRST_COL_WIDTH, false))
+        println(getHorizontalSeparator(filteredUniqueDays, SeparatorPosition.TOP, FIRST_COL_WIDTH, false))
 
         println(getContentLine(
             TableLineContent(
                 getCellString("weekday", FIRST_COL_WIDTH, TextOrientation.LEFT),
-                uniqueDays.map { it.dayOfWeek.name.substring(0, 3) }, 
+                filteredUniqueDays.map { it.dayOfWeek.name.substring(0, 3) },
                 null),
-            uniqueDays
+            filteredUniqueDays
         ))
         println(getContentLine(
             TableLineContent(
                 getCellString("day of month", FIRST_COL_WIDTH, TextOrientation.LEFT),
-                uniqueDays.map { it.dayOfMonth.toString() }, 
+                filteredUniqueDays.map { it.dayOfMonth.toString() },
                 null),
-            uniqueDays
+            filteredUniqueDays
         ))
 
         val projectNames = normalizedWorkingTimes.values.flatten().map { it.project }.toSet()
         projectNames.forEach { projectName ->
-            println(getHorizontalSeparator(uniqueDays, SeparatorPosition.MIDDLE, FIRST_COL_WIDTH, false))
+            println(getHorizontalSeparator(filteredUniqueDays, SeparatorPosition.MIDDLE, FIRST_COL_WIDTH, false))
 
             val workingTimesByName = mutableMapOf<LocalDate, List<CostAssessmentPosition>>()
             normalizedWorkingTimes.forEach { (key, value) ->
@@ -83,7 +85,7 @@ class CostAssessmentService {
             }
 
             println(getContentLine(
-                getTableLineContent(projectName, workingTimesByName, uniqueDays), uniqueDays
+                getTableLineContent(projectName, workingTimesByName, filteredUniqueDays), filteredUniqueDays
             ))
 
             val topicNames = workingTimesByName.values.flatten().map { it.topic }.filter { it != "" }.toSet()
@@ -94,7 +96,7 @@ class CostAssessmentService {
                 }
 
                 println(getContentLine(
-                    getTableLineContent("  $topicName", workingTimesByTopic, uniqueDays), uniqueDays
+                    getTableLineContent("  $topicName", workingTimesByTopic, filteredUniqueDays), filteredUniqueDays
                 ))
 
                 val storyNames = workingTimesByTopic.values.flatten().map { it.story }.filter { it != "" }.toSet()
@@ -105,16 +107,16 @@ class CostAssessmentService {
                     }
 
                     println(getContentLine(
-                        getTableLineContent("    $storyName", workingTimesByStory, uniqueDays), uniqueDays
+                        getTableLineContent("    $storyName", workingTimesByStory, filteredUniqueDays), filteredUniqueDays
                     ))
                 }
             }
         }
 
-        println(getHorizontalSeparator(uniqueDays, SeparatorPosition.BOTTOM, FIRST_COL_WIDTH, false))
+        println(getHorizontalSeparator(filteredUniqueDays, SeparatorPosition.BOTTOM, FIRST_COL_WIDTH, false))
 
         println(getContentLine(
-            getTableLineContent("total", normalizedWorkingTimes, uniqueDays), uniqueDays
+            getTableLineContent("total", normalizedWorkingTimes, filteredUniqueDays), filteredUniqueDays
         ))
 
     }
