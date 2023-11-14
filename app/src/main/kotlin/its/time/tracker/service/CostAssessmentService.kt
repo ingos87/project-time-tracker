@@ -9,7 +9,6 @@ import its.time.tracker.service.ConsoleTableHelper.Companion.getHorizontalSepara
 import its.time.tracker.upload.*
 import its.time.tracker.util.ClockEventsFilter
 import its.time.tracker.util.DateTimeUtil
-import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
 import java.util.*
@@ -65,14 +64,16 @@ class CostAssessmentService {
                 getCellString("weekday", FIRST_COL_WIDTH, TextOrientation.LEFT),
                 filteredUniqueDays.map { it.dayOfWeek.name.substring(0, 3) },
                 null),
-            filteredUniqueDays
+            filteredUniqueDays,
+            0
         ))
         println(getContentLine(
             TableLineContent(
                 getCellString("day of month", FIRST_COL_WIDTH, TextOrientation.LEFT),
                 filteredUniqueDays.map { it.dayOfMonth.toString() },
                 null),
-            filteredUniqueDays
+            filteredUniqueDays,
+            0
         ))
 
         val projectNames = normalizedWorkingTimes.values.flatten().map { it.project }.toSet()
@@ -85,7 +86,7 @@ class CostAssessmentService {
             }
 
             println(getContentLine(
-                getTableLineContent(projectName, workingTimesByName, filteredUniqueDays), filteredUniqueDays
+                getTableLineContent(projectName, workingTimesByName, filteredUniqueDays), filteredUniqueDays, 0
             ))
 
             val topicNames = workingTimesByName.values.flatten().map { it.topic }.filter { it != "" }.toSet()
@@ -96,7 +97,7 @@ class CostAssessmentService {
                 }
 
                 println(getContentLine(
-                    getTableLineContent("  $topicName", workingTimesByTopic, filteredUniqueDays), filteredUniqueDays
+                    getTableLineContent("  $topicName", workingTimesByTopic, filteredUniqueDays), filteredUniqueDays, 1
                 ))
 
                 val storyNames = workingTimesByTopic.values.flatten().map { it.story }.filter { it != "" }.toSet()
@@ -107,7 +108,9 @@ class CostAssessmentService {
                     }
 
                     println(getContentLine(
-                        getTableLineContent("    $storyName", workingTimesByStory, filteredUniqueDays), filteredUniqueDays
+                        getTableLineContent("    $storyName", workingTimesByStory, filteredUniqueDays),
+                        filteredUniqueDays,
+                        2
                     ))
                 }
             }
@@ -116,7 +119,7 @@ class CostAssessmentService {
         println(getHorizontalSeparator(filteredUniqueDays, SeparatorPosition.BOTTOM, FIRST_COL_WIDTH, false))
 
         println(getContentLine(
-            getTableLineContent("total", normalizedWorkingTimes, filteredUniqueDays), filteredUniqueDays
+            getTableLineContent("total", normalizedWorkingTimes, filteredUniqueDays), filteredUniqueDays, 0
         ))
 
     }

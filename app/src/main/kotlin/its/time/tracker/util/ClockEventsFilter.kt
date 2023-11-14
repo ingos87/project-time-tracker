@@ -14,12 +14,17 @@ class ClockEventsFilter {
 
             return filterInternal(input, relevantIndices)
         }
-
-        fun getEventsBelongingToMonth(input: List<ClockEvent>, date: LocalDate): List<ClockEvent> {
+        fun getEventsBelongingToDateRange(input: List<ClockEvent>,
+                                          firstDate: LocalDate,
+                                          lastDate: LocalDate): List<ClockEvent> {
             val relevantIndices = input
                 .mapIndexed { index, clockEvent -> index to clockEvent }.toMap()
-                .filter { entry -> entry.value.dateTime.year == date.year
-                        && entry.value.dateTime.month == date.month }
+                .filter { entry ->
+                    entry.value.dateTime.toLocalDate().isEqual(firstDate) ||
+                    entry.value.dateTime.toLocalDate().isEqual(lastDate) || (
+                    entry.value.dateTime.toLocalDate().isAfter(firstDate) &&
+                    entry.value.dateTime.toLocalDate().isBefore(lastDate))
+                  }
                 .map { entry -> entry.key }.toMutableList()
 
             return filterInternal(input, relevantIndices)

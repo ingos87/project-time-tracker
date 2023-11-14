@@ -125,17 +125,13 @@ class DailySummary: CliktCommand(help="show work time an project summary of a sp
 
 class MonthlySummary: CliktCommand(help="show work time an project summary of a specific month") {
     val v: Boolean by option("-v", help = "enable verbose mode").flag()
-    val dateInput by option("-m", "--month", help="date (format: $MONTH_PATTERN) - will be current month if left empty")
     val configPath by option("--configpath", help = "Defines a custom config file path. That file has to be created before-hand")
     override fun run() {
         try {
             ConfigService.createConfigService(configPath).initConstants(v)
+            val service = SummaryService()
+            service.showMonthlySummary(LocalDate.now().minusDays(32) as LocalDate, LocalDate.now() as LocalDate)
 
-            val date = DateTimeUtil.toValidMonth(dateInput)
-            if (date != null) {
-                val service = SummaryService()
-                service.showMonthlySummary(date as LocalDate)
-            }
         } catch (e: AbortException) {
             e.printMessage()
         }

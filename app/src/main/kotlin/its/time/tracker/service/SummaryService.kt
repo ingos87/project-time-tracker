@@ -6,7 +6,6 @@ import its.time.tracker.domain.WorkDaySummaryCollection
 import its.time.tracker.domain.WorkDaySummary
 import its.time.tracker.service.ConsoleTableHelper.Companion.getCellString
 import its.time.tracker.service.ConsoleTableHelper.Companion.getContentLine
-import its.time.tracker.service.ConsoleTableHelper.Companion.getContentLine_old
 import its.time.tracker.service.ConsoleTableHelper.Companion.getHorizontalSeparator
 import its.time.tracker.upload.ProjectTimeCalculator
 import its.time.tracker.util.ClockEventsFilter
@@ -81,21 +80,20 @@ class SummaryService {
 
     }
 
-    fun showMonthlySummary(date: LocalDate) {
+    fun showMonthlySummary(startDate: LocalDate, endDate: LocalDate) {
         val dateFormatter = DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.GERMANY)
             .withResolverStyle(ResolverStyle.STRICT)
-        val yearMonthString = "${date.year}-${date.month.name.take(3)}"
 
         val csvService = CsvService()
         val clockEvents = csvService.loadClockEvents()
 
-        val monthsEvents = ClockEventsFilter.getEventsBelongingToMonth(clockEvents, date)
-        if (monthsEvents.find { it.eventType == EventType.CLOCK_IN } == null) {
-            println("[NO SUMMARY for $yearMonthString because there are no clock-in events]")
+        val dateRangeEvents = ClockEventsFilter.getEventsBelongingToDateRange(clockEvents, startDate, endDate)
+        if (dateRangeEvents.find { it.eventType == EventType.CLOCK_IN } == null) {
+            println("[NO SUMMARY for $startDate - $endDate because there are no clock-in events]")
             return
         }
 
-        val uniqueDays = monthsEvents.map { DateTimeUtil.toValidDate(dateFormatter.format(it.dateTime)) as LocalDate }.toSortedSet()
+        val uniqueDays = dateRangeEvents.map { DateTimeUtil.toValidDate(dateFormatter.format(it.dateTime)) as LocalDate }.toSortedSet()
 
         val summaryData = WorkDaySummaryCollection()
         uniqueDays.forEach { day ->
@@ -105,35 +103,32 @@ class SummaryService {
             summaryData.addDay(day, workDaySummary!!, costAssessmentList)
         }
 
-        println("[SUMMARY for $yearMonthString]")
+        println("[SUMMARY for $startDate - $endDate]")
 
         println(getHorizontalSeparator(uniqueDays, SeparatorPosition.TOP, FIRST_COL_WIDTH, false))
-        println(getContentLine_old(
-            getCellString("weekday", FIRST_COL_WIDTH, TextOrientation.LEFT),
-            uniqueDays.map { it.dayOfWeek.name.take(3)},
-            uniqueDays
+        println(getContentLine(
+            TableLineContent(" weekday".padEnd(FIRST_COL_WIDTH), uniqueDays.map { it.dayOfWeek.name.take(3)}, null),
+            uniqueDays, 0
         ))
-        println(getContentLine_old(
-            getCellString("day of month", FIRST_COL_WIDTH, TextOrientation.LEFT),
-            uniqueDays.map { it.dayOfMonth.toString() },
-            uniqueDays
+        println(getContentLine(
+            TableLineContent(" day of month".padEnd(FIRST_COL_WIDTH), uniqueDays.map { it.dayOfMonth.toString() }, null),
+            uniqueDays, 0
         ))
-        println(getContentLine_old(
-            getCellString("week of year", FIRST_COL_WIDTH, TextOrientation.LEFT),
-            uniqueDays.map { "" + Integer.parseInt(DateTimeUtil.getWeekOfYearFromDate(it)) },
-            uniqueDays
+        println(getContentLine(
+            TableLineContent(" week of year".padEnd(FIRST_COL_WIDTH), uniqueDays.map { "" + Integer.parseInt(DateTimeUtil.getWeekOfYearFromDate(it)) }, null),
+            uniqueDays, 0
         ))
+
         println(getHorizontalSeparator(uniqueDays, SeparatorPosition.MIDDLE, FIRST_COL_WIDTH, false))
 
-        println(getContentLine_old(
-            getCellString("clock-in", FIRST_COL_WIDTH, TextOrientation.LEFT),
-            summaryData.getAllClockIns(),
-            uniqueDays
+
+        println(getContentLine(
+            TableLineContent(" clock-in".padEnd(FIRST_COL_WIDTH), summaryData.getAllClockIns(), null),
+            uniqueDays, 0
         ))
-        println(getContentLine_old(
-            getCellString("clock-out", FIRST_COL_WIDTH, TextOrientation.LEFT),
-            summaryData.getAllClockOuts(),
-            uniqueDays
+        println(getContentLine(
+            TableLineContent(" clock-out".padEnd(FIRST_COL_WIDTH), summaryData.getAllClockOuts(), null),
+            uniqueDays, 0
         ))
 
         val projectNames = summaryData.getAllBookingPositionNames()
@@ -145,7 +140,8 @@ class SummaryService {
             println(
                 getContentLine(
                     getTableLineContent(projectName, filteredByProject, uniqueDays),
-                    uniqueDays
+                    uniqueDays,
+                    0
                 )
             )
 
@@ -153,9 +149,10 @@ class SummaryService {
             topicNames.forEach { topicName ->
                 val filteredByProjectTopic = summaryData.getFilteredCostAssessmentPositionsBy(projectName, topicName, null)
                 println(getContentLine(
-                        getTableLineContent("  $topicName", filteredByProjectTopic, uniqueDays),
-                        uniqueDays
-                    )
+                    getTableLineContent("  $topicName", filteredByProjectTopic, uniqueDays),
+                    uniqueDays,
+                    0
+                )
                 )
 
                 val storyNames = filteredByProjectTopic.values.flatten().map { it.story }.filter { it != "" }.toSet()
@@ -164,7 +161,8 @@ class SummaryService {
                     println(
                         getContentLine(
                             getTableLineContent("    $storyName", filteredByProjectTopicStory, uniqueDays),
-                            uniqueDays
+                            uniqueDays,
+                            0
                         )
                     )
                 }
@@ -176,8 +174,9 @@ class SummaryService {
         println(getContentLine(
             getTableLineContent("total",
                 summaryData.getFilteredCostAssessmentPositionsBy(null, null, null), uniqueDays),
-                uniqueDays
-            )
+            uniqueDays,
+            0
+        )
         )
     }
 

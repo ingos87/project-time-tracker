@@ -59,7 +59,7 @@ class ConsoleTableHelper {
             return separatorLine.toString()
         }
 
-        fun getContentLine(content: TableLineContent, uniqueDays: SortedSet<LocalDate>): String {
+        fun getContentLine(content: TableLineContent, uniqueDays: SortedSet<LocalDate>, summaryIndent: Int): String {
             val lineBuilder = StringBuilder()
             lineBuilder.append("│${content.heading?:""}")
 
@@ -76,33 +76,13 @@ class ConsoleTableHelper {
             lineBuilder.append("│")
 
             if (content.summaryValue != null) {
-                lineBuilder.append(getCellString(content.summaryValue, CELL_WIDTH, TextOrientation.CENTER))
+                lineBuilder.append(getCellString(content.summaryValue + "       ".repeat(2-summaryIndent), CELL_WIDTH*4, TextOrientation.RIGHT))
             }
 
             return lineBuilder.toString()
         }
 
-
-        fun getContentLine_old(title: String, values: List<String>, uniqueDays: SortedSet<LocalDate>): String {
-            val lineBuilder = StringBuilder()
-            lineBuilder.append("│$title")
-
-            for (i in values.indices) {
-                if (needsDoubleLineDueToDaysDiff(uniqueDays, i)) {
-                    lineBuilder.append("║")
-                }
-                else {
-                    lineBuilder.append("│")
-                }
-                lineBuilder.append(getCellString(values[i], CELL_WIDTH, TextOrientation.CENTER))
-            }
-
-            lineBuilder.append("│")
-
-            return lineBuilder.toString()
-        }
-
-        fun needsDoubleLineDueToDaysDiff(uniqueDays: SortedSet<LocalDate>, currentIdx: Int): Boolean {
+        private fun needsDoubleLineDueToDaysDiff(uniqueDays: SortedSet<LocalDate>, currentIdx: Int): Boolean {
             if (currentIdx > 0 && currentIdx < uniqueDays.size) {
                 val prevDate = uniqueDays.elementAt(currentIdx-1)
                 val date = uniqueDays.elementAt(currentIdx)
