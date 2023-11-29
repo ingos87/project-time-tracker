@@ -2,9 +2,7 @@ import org.gradle.kotlin.dsl.*
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    // Apply the org.jetbrains.kotlin.jvm Plugin to add support for Kotlin.
-    id("org.jetbrains.kotlin.jvm") version "1.7.10"
-
+    kotlin("jvm") version "1.9.20"
     // Apply the application plugin to add support for building a CLI application in Java.
     application
 }
@@ -27,22 +25,27 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClass.set("its.time.tracker.AppKt")
+    mainClass.set("project.time.tracker.AppKt")
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "17"
+    kotlinOptions {
+        freeCompilerArgs += "-Xjsr305=strict"
+        jvmTarget = "18"
+    }
 }
 
-tasks.named<Test>("test") {
-    // Use JUnit Platform for unit tests.
+tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    testLogging {
+        events("passed")
+    }
 }
 
 val jar by tasks.getting(Jar::class) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
-        attributes["Main-Class"] = "its.time.tracker.AppKt"
+        attributes["Main-Class"] = "project.time.tracker.AppKt"
     }
     from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) }) {
         exclude("META-INF/*.RSA", "META-INF/*.SF", "META-INF/*.DSA")

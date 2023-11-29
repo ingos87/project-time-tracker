@@ -7,5 +7,5 @@
  * in the user manual at https://docs.gradle.org/7.6/userguide/multi_project_builds.html
  */
 
-rootProject.name = "its-time-tracker"
+rootProject.name = "project-time-tracker"
 include("app")
