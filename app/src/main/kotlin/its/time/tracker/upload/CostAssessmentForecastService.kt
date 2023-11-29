@@ -111,13 +111,11 @@ class CostAssessmentForecastService {
         val avgDevMinutes = (costAssessmentsCategories.getOrDefault(Constants.COST_ASSMNT_DEV_KEY, Duration.ZERO).toMinutes().toDouble() / totalDuration.toMinutes().toDouble() * Constants.STANDARD_WORK_DURATION_PER_DAY.toMinutes().toDouble()).toLong()
         val avgMaintMinutes = (costAssessmentsCategories.getOrDefault(Constants.COST_ASSMNT_MAINT_KEY, Duration.ZERO).toMinutes().toDouble() / totalDuration.toMinutes().toDouble() * Constants.STANDARD_WORK_DURATION_PER_DAY.toMinutes().toDouble()).toLong()
         val avgIntMinutes = (costAssessmentsCategories.getOrDefault(Constants.COST_ASSMNT_INT_KEY, Duration.ZERO).toMinutes().toDouble() / totalDuration.toMinutes().toDouble() * Constants.STANDARD_WORK_DURATION_PER_DAY.toMinutes().toDouble()).toLong()
-        //val avgAbscMinutes = (costAssessmentsCategories.getOrDefault(Constants.COST_ASSMNT_ABSC_KEY, Duration.ZERO).toMinutes().toDouble() / totalDuration.toMinutes().toDouble() * Constants.STANDARD_WORK_DURATION_PER_DAY.toMinutes().toDouble()).toLong()
 
         return mapOf(
             Constants.COST_ASSMNT_DEV_KEY to Duration.ofMinutes(avgDevMinutes),
             Constants.COST_ASSMNT_MAINT_KEY to Duration.ofMinutes(avgMaintMinutes),
             Constants.COST_ASSMNT_INT_KEY to Duration.ofMinutes(avgIntMinutes),
-            //Constants.COST_ASSMNT_ABSC_KEY to Duration.ofMinutes(avgAbscMinutes),
         ).filter { (_, v) -> v > Duration.ZERO }
             .map { (k, v) -> k to Duration.ofMinutes(min(Constants.STANDARD_WORK_DURATION_PER_DAY.toMinutes(), v.toMinutes())) }.toMap()
             .map { (k, v) -> k to DateTimeUtil.roundToHalfHourWithRemainder(v).first }.toMap()
