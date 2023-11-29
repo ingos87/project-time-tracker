@@ -30,8 +30,8 @@ class InitTests : FunSpec({
             executeInitWitArgs(arrayOf(
                 "--configpath=$CFG_PATH",
                 "--csvpath=/tmp/project-time-tracker/unittesttimes.csv",
-                "--myselfhr=https://blubb.de",
-                "--etime=https://blah.de",
+                "--timekeepingappurl=https://blubb.de",
+                "--costassessmentappurl=https://blah.de",
                 "--weekdaysoff=MONDAY,SATURDAY,SUNDAY",
                 "--daysoff=2023-05-01,2024-12-12"))
         }
