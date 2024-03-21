@@ -17,6 +17,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.ResolverStyle
+import java.time.temporal.TemporalUnit
 import java.util.*
 
 
@@ -206,4 +207,57 @@ class SummaryService {
 
     private fun durationToString(duration: Duration?) = if (duration == null || duration == Duration.ZERO) "     "
         else DateTimeUtil.durationToString(duration).padStart(5, ' ')
+
+    fun showAnnualSummary(year: Int) {
+        val dateFormatter = DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.GERMANY)
+            .withResolverStyle(ResolverStyle.STRICT)
+
+        val csvService = CsvService()
+        val clockEvents = csvService.loadClockEvents()
+
+        val startDate = LocalDate.of(year, 1, 1)
+        val endDate = LocalDate.of(year, 12, 31)
+        val dateRangeEvents = ClockEventsFilter.getEventsBelongingToDateRange(clockEvents, startDate, endDate)
+        if (dateRangeEvents.find { it.eventType == EventType.CLOCK_IN } == null) {
+            println("[NO SUMMARY for $year because there are no clock-in events]")
+            return
+        }
+
+        val uniqueDays = dateRangeEvents.map { DateTimeUtil.toValidDate(dateFormatter.format(it.dateTime)) as LocalDate }.toSortedSet()
+
+        val summaryData = WorkDaySummaryCollection()
+        uniqueDays.forEach { day ->
+            val daysEvents = ClockEventsFilter.getEventsBelongingToSameDay(clockEvents, day)
+            val workDaySummary = WorkDaySummary.toWorkDaySummary(daysEvents)
+            val costAssessmentList = ProjectTimeCalculator().calculateProjectTime(daysEvents)
+            summaryData.addDay(day, workDaySummary!!, costAssessmentList)
+        }
+
+        println("[SUMMARY for $year]")
+
+
+        val projectNames = summaryData.getAllBookingPositionNames()
+        projectNames.forEach { projectName ->
+
+            val filteredByProject = summaryData.getFilteredCostAssessmentPositionsBy(projectName, null, null)
+            val topicNames = filteredByProject.values.flatten().map { it.topic }.filter { it != "" }.toSet()
+            topicNames.forEach { topicName ->
+                val filteredByProjectTopic = summaryData.getFilteredCostAssessmentPositionsBy(projectName, topicName, null)
+
+                var summedDuration = Duration.ZERO
+                filteredByProjectTopic.forEach { (_, costAssessment) ->
+                    summedDuration += Duration.ofMinutes(costAssessment.map { it.totalWorkingTime }
+                        .sumOf { it.toMinutes() })
+                }
+
+                val durationString = durationToString(summedDuration)
+
+                val lineBuilder = StringBuilder()
+                val heading = "$projectName-$topicName"
+                lineBuilder.append("│${getCellString(heading, 50, TextOrientation.LEFT)}")
+                lineBuilder.append(getCellString(durationString, 8, TextOrientation.CENTER))
+                println(lineBuilder.toString())
+            }
+        }
+    }
 }

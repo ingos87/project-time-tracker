@@ -140,6 +140,23 @@ class MonthlySummary: CliktCommand(help="show work time an project summary of a 
     }
 }
 
+class AnnualSummary: CliktCommand(help="show work time an project summary of a specific year") {
+    val v: Boolean by option("-v", help = "enable verbose mode").flag()
+    val year by option("-y", "--year", help="date (format: YYYY)")
+    val configPath by option("--configpath", help = "OPTIONAL: Defines a custom config file path. That file has to be created before-hand")
+    override fun run() {
+        try {
+            ConfigService.createConfigService(configPath).initConstants(v)
+            val service = SummaryService()
+            if (year != null) {
+                service.showAnnualSummary(Integer.parseInt(year))
+            }
+        } catch (e: AbortException) {
+            e.printMessage()
+        }
+    }
+}
+
 class Timekeeping: CliktCommand(help="export work time for the previous 30 days or a specific calendar week to myHrSelfService") {
     val v: Boolean by option("-v", help = "enable verbose mode").flag()
     val noop: Boolean by option("--noop", help = "OPTIONAL: Do not actually upload anything. Just show compliant clock-ins and clock-outs.").flag()
@@ -208,7 +225,8 @@ fun main(args: Array<String>) = project.time.tracker.TimeTracker()
         project.time.tracker.ClockOut(),
         project.time.tracker.DailySummary(),
         project.time.tracker.MonthlySummary(),
+        project.time.tracker.AnnualSummary(),
         project.time.tracker.Timekeeping(),
-        project.time.tracker.CostAssessment()
+        project.time.tracker.CostAssessment(),
     )
     .main(args)
